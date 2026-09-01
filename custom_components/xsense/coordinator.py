@@ -25,6 +25,9 @@ from .python_xsense import (
 from .python_xsense.async_xsense import is_camera_entity
 from .python_xsense.event_parser import (
     camera_ai_history_event_key as _camera_ai_history_event_key,
+    camera_event_record_event_key as _camera_event_record_event_key,
+    camera_event_record_station_data as _camera_event_record_station_data,
+    camera_event_records as _camera_event_records,
     is_presence_topic as _is_presence_topic,
     is_self_test_topic as _is_self_test_topic,
     mqtt_identifier_candidates as _mqtt_identifier_candidates,
@@ -70,6 +73,8 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._last_camera_update_attempt: datetime | None = None
         self._camera_station_cache: dict[str, Any] = {}
         self._camera_ai_history_seen: set[str] = set()
+        self._camera_event_history_seen: set[str] = set()
+        self._camera_event_history_initialized = False
         self._camera_ai_service_houses: dict[str, set[str]] = {}
         self._camera_ai_history_unsub = None
         self._camera_ai_history_lock = asyncio.Lock()
@@ -495,7 +500,7 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         else:
             updated = await self._update_camera_ai_service_history(server_ids)
 
-        return updated
+        return await self._update_camera_event_history(cameras) or updated
 
     async def _update_camera_ai_service_history(self, server_ids: list[str]) -> bool:
         """Poll APK AI service history for camera events."""
@@ -548,6 +553,62 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "X-Sense camera AI history poll: services=%s seen=%s applied=%s baselined=%s skipped=%s first_poll=%s",
             len(server_ids),
             len(self._camera_ai_history_seen),
+            applied,
+            baselined,
+            skipped,
+            first_poll,
+        )
+        return applied > 0
+
+    async def _update_camera_event_history(self, cameras: list[Any]) -> bool:
+        """Poll only the APK event-filtered camera library for motion events."""
+        now = int(datetime.now(timezone.utc).timestamp())
+        try:
+            history = await self.xsense.get_camera_event_record_history_for_cameras(
+                cameras,
+                now - 86400,
+                now,
+            )
+        except APIFailure as ex:
+            LOGGER.debug("Could not update X-Sense camera event history: %s", ex)
+            return False
+
+        first_poll = not getattr(self, "_camera_event_history_initialized", False)
+        self._camera_event_history_initialized = True
+        event_history_seen = getattr(self, "_camera_event_history_seen", None)
+        if event_history_seen is None:
+            self._camera_event_history_seen = event_history_seen = set()
+        applied = 0
+        baselined = 0
+        skipped = 0
+        seen_now: set[str] = set()
+        for record in reversed(_camera_event_records(history)):
+            event_key = _camera_event_record_event_key(record)
+            station_data = _camera_event_record_station_data(record)
+            station = (
+                _camera_station_for_event_data(self, station_data, record)
+                if station_data
+                else None
+            )
+            if station is None:
+                continue
+            seen_now.add(event_key)
+            if first_poll:
+                baselined += 1
+                continue
+            if event_key in event_history_seen:
+                skipped += 1
+                continue
+            self.xsense.parse_get_state(station, station_data)
+            applied += 1
+
+        event_history_seen.update(seen_now)
+        LOGGER.debug(
+            "X-Sense camera event-filtered history poll: cameras=%s records=%s "
+            "seen=%s applied=%s baselined=%s skipped=%s first_poll=%s",
+            len(cameras),
+            len(_camera_event_records(history)),
+            len(event_history_seen),
             applied,
             baselined,
             skipped,

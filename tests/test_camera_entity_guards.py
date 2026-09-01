@@ -1534,7 +1534,7 @@ def test_motion_event_entity_replaces_direct_recording_url_with_panel_link(monke
     )
 
 
-def test_motion_event_entity_caches_recording_before_trigger(monkeypatch, caplog):
+def test_motion_event_entity_triggers_before_recording_cache(monkeypatch, caplog):
     from custom_components.xsense import recordings_media as media_source
 
     camera_entity = entity(
@@ -1601,27 +1601,39 @@ def test_motion_event_entity_caches_recording_before_trigger(monkeypatch, caplog
 
     event_entity._handle_coordinator_update()
 
-    assert order == [("write", None)]
-    assert len(scheduled) == 1
-    asyncio.run(scheduled[0])
     assert order == [
-        ("write", None),
-        ("cache", "trace-id-1"),
         (
             "trigger",
             "motion",
             "/xsense-recordings#entry_id=entry-id&serial=CAMERA-SN"
             "&start=1782049304&end=1782049334",
-            "/media/local/xsense_recordings/videos/CAMERA-SN_1782049304_1782049334.mp4",
-            "cached_media",
-            False,
-            True,
+            None,
+            "sd_playback",
+            None,
+            None,
         ),
+        ("write", None),
+    ]
+    assert len(scheduled) == 1
+    asyncio.run(scheduled[0])
+    assert order == [
+        (
+            "trigger",
+            "motion",
+            "/xsense-recordings#entry_id=entry-id&serial=CAMERA-SN"
+            "&start=1782049304&end=1782049334",
+            None,
+            "sd_playback",
+            None,
+            None,
+        ),
+        ("write", None),
+        ("cache", "trace-id-1"),
         ("write", None),
     ]
     log_text = caplog.text
     assert "X-Sense event recording cache started" in log_text
-    assert "X-Sense event recording cache finished; firing ready trigger" in log_text
+    assert "X-Sense event recording cache finished" in log_text
     assert "'queue_elapsed_ms': 50" in log_text
     assert "'cache_elapsed_ms': 250" in log_text
     assert "'total_elapsed_ms': 300" in log_text
@@ -1696,7 +1708,7 @@ def test_trigger_camera_event_fires_entity_and_rich_bus_event(caplog):
     assert "CAMERA-SN" not in caplog.text
 
 
-def test_motion_event_entity_updates_state_only_when_recording_cache_returns_no_media(
+def test_motion_event_entity_still_triggers_when_recording_cache_returns_no_media(
     monkeypatch,
     caplog,
 ):
@@ -1756,8 +1768,10 @@ def test_motion_event_entity_updates_state_only_when_recording_cache_returns_no_
     caplog.set_level(logging.DEBUG, logger="custom_components.xsense")
     asyncio.run(scheduled[0])
 
-    assert triggered == [("write", None), ("write", None)]
-    assert "ready event not fired" in caplog.text
+    assert triggered[0][0] == "trigger"
+    assert triggered[0][1]["time"] == "20260621134144"
+    assert triggered[1:] == [("write", None), ("write", None)]
+    assert "did not produce media" in caplog.text
 
 
 def test_motion_event_cache_replaces_absolute_recordings_panel_url(monkeypatch):
@@ -1805,13 +1819,13 @@ def test_motion_event_cache_replaces_absolute_recordings_panel_url(monkeypatch):
     )
     asyncio.run(scheduled[0])
 
-    assert len(triggered) == 1
-    assert triggered[0]["recording_url"] == (
+    assert triggered == []
+    assert event_data["recording_url"] == (
         "/xsense-recordings#entry_id=entry-id&serial=CAMERA-SN"
         "&start=1782049304&end=1782049334"
     )
     assert (
-        triggered[0]["recording_media_url"]
+        event_data["recording_media_url"]
         == "/media/local/xsense_recordings/videos/clip.mp4"
     )
 
@@ -1859,13 +1873,13 @@ def test_motion_event_cache_replaces_raw_recording_url_with_panel_link(
     )
     asyncio.run(scheduled[0])
 
-    assert len(triggered) == 1
-    assert triggered[0]["recording_url"] == (
+    assert triggered == []
+    assert event_data["recording_url"] == (
         "/xsense-recordings#entry_id=entry-id&serial=CAMERA-SN"
         "&start=1782049304&end=1782049334"
     )
     assert (
-        triggered[0]["recording_media_url"]
+        event_data["recording_media_url"]
         == "/media/local/xsense_recordings/videos/clip.mp4"
     )
 

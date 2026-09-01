@@ -206,8 +206,8 @@ class XSenseEventEntity(XSenseEntity, EventEntity):
         self._last_ai_detection_fingerprint = fingerprint
         objects = event_data["objects"]
         event_type = objects[0] if len(objects) == 1 else AI_DETECTION_EVENT_TYPE
-        if not self._trigger_event_after_recording_cache(event_type, entity, event_data):
-            _trigger_camera_event(self, event_type, event_data)
+        _trigger_camera_event(self, event_type, event_data)
+        self._trigger_event_after_recording_cache(event_type, entity, event_data)
         self._write_state_if_added()
 
     def _write_state_if_added(self) -> None:
@@ -283,12 +283,10 @@ class XSenseMotionEventEntity(XSenseEntity, EventEntity):
             return
 
         self._last_motion_fingerprint = fingerprint
-        if not self._trigger_event_after_recording_cache(
-            MOTION_EVENT_TYPE,
-            entity,
-            event_data,
-        ):
-            _trigger_camera_event(self, MOTION_EVENT_TYPE, event_data)
+        _trigger_camera_event(self, MOTION_EVENT_TYPE, event_data)
+        self._trigger_event_after_recording_cache(
+            MOTION_EVENT_TYPE, entity, event_data
+        )
         self._write_state_if_added()
 
     def _add_camera_event_context(
@@ -579,7 +577,7 @@ def _trigger_event_after_recording_cache(
             event_data["recording_cache_elapsed_ms"] = cache_elapsed_ms
             event_data["recording_total_elapsed_ms"] = total_elapsed_ms
             LOGGER.debug(
-                "X-Sense event recording cache did not produce media; ready event not fired: %s",
+                "X-Sense event recording cache did not produce media: %s",
                 {
                     "camera": _masked_serial(getattr(entity, "sn", "")),
                     "event_type": event_type,
@@ -603,7 +601,7 @@ def _trigger_event_after_recording_cache(
             "proxied_media" if proxied else "cached_media"
         )
         LOGGER.debug(
-            "X-Sense event recording cache finished; firing ready trigger: %s",
+            "X-Sense event recording cache finished: %s",
             {
                 "camera": _masked_serial(getattr(entity, "sn", "")),
                 "cached": not proxied,
@@ -616,7 +614,6 @@ def _trigger_event_after_recording_cache(
                 "recording_media_url_kind": _url_kind(cached_url),
             },
         )
-        _trigger_camera_event(event_entity, event_type, event_data)
         _write_event_state(event_entity)
 
     config_entries = getattr(hass, "config_entries", None)

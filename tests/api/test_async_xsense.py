@@ -5425,6 +5425,64 @@ async def test_camera_event_record_history_uses_apk_event_filter_path():
 
 
 @pytest.mark.asyncio
+async def test_camera_event_record_history_for_cameras_never_uses_general_library():
+    client = async_xsense.AsyncXSense()
+    house = SimpleNamespace(house_id="house-1", mqtt_region="eu-west-1")
+    client.houses = {"house-1": house}
+    identity_updates = []
+    camera = SimpleNamespace(
+        sn="camera-label",
+        entity_id="camera-access-id",
+        data={"addxSerialNumber": "camera-list-id"},
+        house=house,
+        set_data=lambda data: identity_updates.append(data),
+    )
+    calls = []
+
+    async def get_event_history(serials, start_timestamp, end_timestamp, **kwargs):
+        calls.append((serials, kwargs["house"]))
+        if serials == ["camera-access-id"]:
+            return {
+                "list": [
+                    {
+                        "serialNumber": "camera-access-id",
+                        "timestamp": 1781484300,
+                        "videoEvent": "motion",
+                    }
+                ]
+            }
+        return {"list": []}
+
+    async def general_library(*args, **kwargs):
+        raise AssertionError("general playback library must never drive motion")
+
+    client.get_camera_event_record_history = get_event_history
+    client.get_camera_library_history = general_library
+
+    result = await client.get_camera_event_record_history_for_cameras(
+        [camera], 1781484300, 1781487900
+    )
+
+    assert calls == [
+        (["camera-list-id"], house),
+        (["camera-access-id"], house),
+    ]
+    assert result["list"] == [
+        {
+            "serialNumber": "camera-access-id",
+            "timestamp": 1781484300,
+            "videoEvent": "motion",
+        }
+    ]
+    assert identity_updates == [
+        {
+            "addxAccessSerialNumber": "camera-access-id",
+            "addxSerialNumber": "camera-access-id",
+        }
+    ]
+
+
+@pytest.mark.asyncio
 async def test_camera_single_library_lookup_uses_apk_trace_payloads():
     client = async_xsense.AsyncXSense()
     calls = []

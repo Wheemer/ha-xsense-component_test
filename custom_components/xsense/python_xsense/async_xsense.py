@@ -719,6 +719,86 @@ class AsyncXSense(XSenseBase):
         )
         return data if isinstance(data, dict) else {}
 
+    async def get_camera_event_record_history_for_cameras(
+        self,
+        cameras: list[Entity],
+        start_timestamp: int,
+        end_timestamp: int,
+        *,
+        start: int = 0,
+        limit: int = 20,
+    ) -> dict:
+        """Return APK event-filtered records in each camera's ADDX Home context."""
+        records: list[dict[str, Any]] = []
+        first_error: APIFailure | None = None
+        successful_requests = 0
+        seen_cameras: set[str] = set()
+        for camera in cameras:
+            serials = _camera_addx_serial_candidates(camera)
+            if not serials:
+                continue
+            camera_key = _normalized_camera_serial(serials[0]) or serials[0]
+            if camera_key in seen_cameras:
+                continue
+            seen_cameras.add(camera_key)
+            house = self._camera_addx_house(camera)
+            accepted_serial = None
+            camera_request_succeeded = False
+            for serial_index, serial in enumerate(serials):
+                try:
+                    history = await self.get_camera_event_record_history(
+                        [serial],
+                        start_timestamp,
+                        end_timestamp,
+                        house=house,
+                        start=start,
+                        limit=limit,
+                    )
+                except APIFailure as err:
+                    if first_error is None:
+                        first_error = err
+                    LOGGER.debug(
+                        "X-Sense camera event-filtered history unavailable: %s",
+                        {
+                            "identity_index": serial_index,
+                            "identity_count": len(serials),
+                            "error_type": type(err).__name__,
+                        },
+                    )
+                    continue
+                camera_request_succeeded = True
+                data = (
+                    history.get("data")
+                    if isinstance(history.get("data"), dict)
+                    else history
+                )
+                group_records = data.get("list") if isinstance(data, dict) else None
+                if not isinstance(group_records, list) or not group_records:
+                    continue
+                matching_records = [
+                    record
+                    for record in group_records
+                    if isinstance(record, dict)
+                    and _camera_history_record_matches_serial(record, serial)
+                ]
+                if not matching_records:
+                    continue
+                accepted_serial = serial
+                records.extend(matching_records)
+                break
+            if accepted_serial is not None:
+                camera.set_data(
+                    {
+                        "addxAccessSerialNumber": accepted_serial,
+                        "addxSerialNumber": accepted_serial,
+                    }
+                )
+            if camera_request_succeeded:
+                successful_requests += 1
+        if successful_requests == 0 and first_error is not None:
+            raise first_error
+        return {"list": records, "total": len(records)}
+
     async def get_camera_library_by_trace_id(self, trace_id: str) -> dict:
         """Return one APK camera library record by trace id."""
         if not trace_id:

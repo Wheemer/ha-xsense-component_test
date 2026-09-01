@@ -1887,6 +1887,11 @@ async def test_camera_ai_history_poll_routes_apk_alarm_items():
         ):
             raise AssertionError("recording history must not drive live motion")
 
+        async def get_camera_event_record_history_for_cameras(
+            self, *args, **kwargs
+        ):
+            return {"list": []}
+
         def parse_get_state(self, station_arg, data):
             parsed.append((station_arg, data))
             station_arg.set_data(data)
@@ -1928,12 +1933,103 @@ async def test_camera_ai_history_does_not_poll_recording_library():
         async def get_camera_library_history_for_cameras(self, *args, **kwargs):
             raise AssertionError("playback library must not drive live motion")
 
+        async def get_camera_event_record_history_for_cameras(
+            self, *args, **kwargs
+        ):
+            return {"list": []}
+
     coordinator = XSenseDataUpdateCoordinator.__new__(XSenseDataUpdateCoordinator)
     coordinator.xsense = Client()
     coordinator._camera_ai_history_seen = set()
     coordinator._camera_ai_history_lock = asyncio.Lock()
 
     assert not await XSenseDataUpdateCoordinator._update_camera_ai_history(coordinator)
+
+
+async def test_camera_motion_history_uses_only_apk_event_filtered_endpoint():
+    from custom_components.xsense.coordinator import XSenseDataUpdateCoordinator
+
+    class Camera:
+        sn = "camera-sn"
+        entity_id = "camera-id"
+        type = "SSC0A"
+        data = {}
+
+        def set_data(self, data):
+            self.data.update(data)
+
+        def get_device_by_sn(self, _identifier):
+            return None
+
+    camera = Camera()
+
+    class House:
+        stations = {"camera-id": camera}
+
+        def get_station_by_sn(self, identifier):
+            return camera if identifier == camera.sn else None
+
+    parsed = []
+
+    class Client:
+        houses = {"house-id": House()}
+
+        def __init__(self):
+            self.event_calls = 0
+
+        async def get_ai_service_list(self):
+            return []
+
+        async def get_camera_library_history_for_cameras(self, *args, **kwargs):
+            raise AssertionError("general playback library must never drive motion")
+
+        async def get_camera_event_record_history_for_cameras(
+            self, cameras, start_timestamp, end_timestamp
+        ):
+            assert cameras == [camera]
+            assert end_timestamp - start_timestamp == 86400
+            self.event_calls += 1
+            records = [
+                {
+                    "serialNumber": "camera-sn",
+                    "timestamp": 1782049304,
+                    "traceId": "first-event",
+                    "videoEvent": "motion",
+                }
+            ]
+            if self.event_calls > 1:
+                records.insert(
+                    0,
+                    {
+                        "serialNumber": "camera-sn",
+                        "timestamp": 1782049364,
+                        "traceId": "new-event",
+                        "videoEvent": "motion",
+                        "videoUrl": "https://example.invalid/new-event.m3u8",
+                    },
+                )
+            return {"list": records}
+
+        def parse_get_state(self, station, data):
+            parsed.append((station, data))
+            station.set_data(data)
+
+    coordinator = XSenseDataUpdateCoordinator.__new__(XSenseDataUpdateCoordinator)
+    coordinator.xsense = Client()
+    coordinator._camera_ai_history_seen = set()
+    coordinator._camera_ai_history_lock = asyncio.Lock()
+
+    assert not await XSenseDataUpdateCoordinator._update_camera_ai_history(coordinator)
+    assert parsed == []
+    assert await XSenseDataUpdateCoordinator._update_camera_ai_history(coordinator)
+    assert not await XSenseDataUpdateCoordinator._update_camera_ai_history(coordinator)
+
+    assert len(parsed) == 1
+    assert parsed[0][0] is camera
+    assert parsed[0][1]["eventTime"] == "20260621134244"
+    assert parsed[0][1]["playback"]["video_url"] == (
+        "https://example.invalid/new-event.m3u8"
+    )
 
 
 async def test_camera_ai_history_timer_notifies_only_when_history_changes():
