@@ -304,9 +304,7 @@ class XSenseWebRTCSignalSession:
             )
             self._schedule_signal_reconnect(close_code)
 
-    def _schedule_signal_reconnect(
-        self, close_code: int | None, *, delay: float = _SIGNAL_RECONNECT_DELAY
-    ) -> None:
+    def _schedule_signal_reconnect(self, close_code: int | None) -> None:
         if self._closed or self._answer.done():
             return
         if close_code in _SIGNAL_TERMINAL_CLOSE_CODES:
@@ -317,15 +315,13 @@ class XSenseWebRTCSignalSession:
             "X-Sense WebRTC signal relay scheduling reconnect: %s",
             self._debug_context(
                 signal_close_code=close_code,
-                reconnect_delay_s=delay,
+                reconnect_delay_s=_SIGNAL_RECONNECT_DELAY,
             ),
         )
-        self._reconnect_task = asyncio.create_task(self._reconnect_signal(delay))
+        self._reconnect_task = asyncio.create_task(self._reconnect_signal())
 
-    async def _reconnect_signal(
-        self, delay: float = _SIGNAL_RECONNECT_DELAY
-    ) -> None:
-        await asyncio.sleep(delay)
+    async def _reconnect_signal(self) -> None:
+        await asyncio.sleep(_SIGNAL_RECONNECT_DELAY)
         if self._closed or self._answer.done():
             return
         self._reset_offer_attempt("signal_reconnect")
@@ -399,9 +395,6 @@ class XSenseWebRTCSignalSession:
                             **_peer_event_debug(payload, self._ticket.serial_number),
                         ),
                     )
-                    # The camera abandoned this offer. Reconnect now instead of
-                    # waiting for the signal server's later idle timeout.
-                    self._schedule_signal_reconnect(None, delay=0)
             else:
                 LOGGER.debug(
                     "X-Sense WebRTC signal relay ignored peer out for other client: %s",
