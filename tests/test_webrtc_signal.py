@@ -38,6 +38,9 @@ class FakeWebSocket:
     async def send_str(self, message):
         self.messages.append(json.loads(message))
 
+    async def close(self):
+        self.closed = True
+
 
 def test_signal_module_does_not_require_local_aiortc_import():
     assert "aiortc" not in sys.modules
@@ -254,6 +257,33 @@ async def test_webrtc_signal_reconnect_waits_for_fresh_peer_in(monkeypatch):
     ]
 
 
+async def test_webrtc_signal_peer_out_reconnects_without_idle_timeout(monkeypatch):
+    session = webrtc_signal.XSenseWebRTCSignalSession(
+        session=object(),
+        ticket=ticket(),
+        offer_sdp="v=0\r\n",
+        resolution="1920x1080",
+        camera_online=True,
+    )
+    session._ws = FakeWebSocket()
+    session._camera_peer_ready = True
+    session._offer_sent = True
+    reconnect_delays = []
+
+    def schedule_reconnect(close_code, *, delay=webrtc_signal._SIGNAL_RECONNECT_DELAY):
+        reconnect_delays.append((close_code, delay))
+
+    monkeypatch.setattr(session, "_schedule_signal_reconnect", schedule_reconnect)
+
+    await session._handle_signal_event(
+        "PEER_OUT", {"id": "SSC0ATEST", "role": "master"}
+    )
+
+    assert not session._camera_peer_ready
+    assert not session._offer_sent
+    assert reconnect_delays == [(None, 0)]
+
+
 async def test_webrtc_signal_offline_camera_waits_for_peer_in(monkeypatch):
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(),
@@ -285,7 +315,7 @@ async def test_webrtc_signal_offline_camera_waits_for_peer_in(monkeypatch):
     assert answer == "v=0\r\nanswer"
 
 
-async def test_webrtc_signal_online_offer_is_guarded_before_websocket_send():
+async def test_webrtc_signal_marks_offer_sent_after_websocket_send():
     send_started = asyncio.Event()
     release_send = asyncio.Event()
 
@@ -307,11 +337,12 @@ async def test_webrtc_signal_online_offer_is_guarded_before_websocket_send():
 
     first_offer = asyncio.create_task(session._send_offer())
     await send_started.wait()
-    await session._send_offer()
+    assert not session._offer_sent
     release_send.set()
     await first_offer
 
     assert session._offer_attempt_count == 1
+    assert session._offer_sent
     assert [message["messageType"] for message in websocket.messages] == ["SDP_OFFER"]
 
 
