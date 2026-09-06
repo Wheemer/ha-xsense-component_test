@@ -8,6 +8,8 @@ from datetime import datetime, timedelta, timezone
 import json
 from typing import Any
 
+import aiohttp
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import HomeAssistant, callback
@@ -309,6 +311,28 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._camera_station_cache = {}
 
     async def _async_update_data(self) -> dict[str, Any]:
+        try:
+            return await self._async_update_data_once()
+        except (aiohttp.ClientError, TimeoutError, OSError) as ex:
+            LOGGER.debug(
+                "Transient X-Sense transport failure; retrying coordinator refresh once: %s",
+                ex,
+            )
+            await asyncio.sleep(1)
+            try:
+                return await self._async_update_data_once()
+            except (aiohttp.ClientError, TimeoutError, OSError) as retry_ex:
+                raise UpdateFailed(
+                    f"X-Sense cloud connection failed after one retry: {retry_ex}"
+                ) from retry_ex
+
+    async def _async_update_data_once(self) -> dict[str, Any]:
+        """Refresh X-Sense data once.
+
+        Home Assistant's shared aiohttp connector and Paho already perform
+        address-family fallback. This additional retry prevents a single
+        transient DNS or connect failure from making every entity unavailable.
+        """
         if self.xsense is None:
             await self._connect()
         startup_refresh = not self._startup_refresh_complete
