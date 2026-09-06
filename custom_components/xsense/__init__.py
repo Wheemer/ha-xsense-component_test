@@ -757,6 +757,15 @@ def _clear_visible_device_metadata(device_registry, device) -> None:
     )
 
 
+def _device_by_identifier(device_registry, identifier, entry_id):
+    """Return one registry device by its config-entry-scoped identifier."""
+    get_device = getattr(device_registry, "async_get_device_by_identifier", None)
+    if get_device is not None:
+        return get_device(identifier, config_entry_id=entry_id)
+
+    return device_registry.async_get_device(identifiers={identifier})
+
+
 def _remove_obsolete_device_metadata(
     hass: HomeAssistant, data, entry: ConfigEntry
 ) -> None:
@@ -772,8 +781,10 @@ def _remove_obsolete_device_metadata(
         *data.get("stations", {}).values(),
         *data.get("devices", {}).values(),
     ):
-        device = device_registry.async_get_device(
-            identifiers={(DOMAIN, entity.entity_id)}
+        device = _device_by_identifier(
+            device_registry,
+            (DOMAIN, entity.entity_id),
+            entry.entry_id,
         )
         if device is None or device.id in checked_device_ids:
             continue
