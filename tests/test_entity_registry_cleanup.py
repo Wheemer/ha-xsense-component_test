@@ -480,8 +480,9 @@ def test_obsolete_device_metadata_cleanup_skips_clean_registry_entries(monkeypat
     calls = []
 
     class FakeDeviceRegistry:
-        def async_get_device(self, *, identifiers):
-            assert identifiers == {("xsense", "station_1")}
+        def async_get_device_by_identifier(self, identifier, *, config_entry_id):
+            assert identifier == ("xsense", "station_1")
+            assert config_entry_id == "entry-id"
             return device
 
         def async_update_device(self, device_id, **kwargs):
@@ -523,8 +524,9 @@ def test_obsolete_device_metadata_cleanup_handles_child_devices(monkeypatch):
     calls = []
 
     class FakeDeviceRegistry:
-        def async_get_device(self, *, identifiers):
-            return devices_by_identifier[next(iter(identifiers))]
+        def async_get_device_by_identifier(self, identifier, *, config_entry_id):
+            assert config_entry_id == "entry-id"
+            return devices_by_identifier[identifier]
 
         def async_update_device(self, device_id, **kwargs):
             calls.append((device_id, kwargs))
@@ -569,7 +571,8 @@ def test_obsolete_device_metadata_cleanup_scans_config_entry_devices(monkeypatch
     calls = []
 
     class FakeDeviceRegistry:
-        def async_get_device(self, *, identifiers):
+        def async_get_device_by_identifier(self, identifier, *, config_entry_id):
+            assert config_entry_id == "entry-id"
             return None
 
         def async_update_device(self, device_id, **kwargs):
@@ -596,6 +599,49 @@ def test_obsolete_device_metadata_cleanup_scans_config_entry_devices(monkeypatch
             {"new_connections": set(), "serial_number": None},
         )
     ]
+
+
+def test_obsolete_device_metadata_cleanup_keeps_legacy_lookup_fallback(monkeypatch):
+    device = SimpleNamespace(
+        id="device-id",
+        serial_number=None,
+        connections=set(),
+    )
+    lookups = []
+
+    class FakeLegacyDeviceRegistry:
+        def async_get_device(self, *, identifiers):
+            lookups.append(identifiers)
+            return device
+
+        def async_update_device(self, device_id, **kwargs):
+            raise AssertionError("Clean device metadata must not be updated")
+
+    import custom_components.xsense as xsense
+
+    monkeypatch.setattr(
+        xsense.dr,
+        "async_get",
+        lambda hass: FakeLegacyDeviceRegistry(),
+    )
+    monkeypatch.setattr(
+        xsense.dr,
+        "async_entries_for_config_entry",
+        lambda registry, entry_id: [],
+    )
+
+    _remove_obsolete_device_metadata(
+        SimpleNamespace(),
+        {
+            "stations": {
+                "station_1": SimpleNamespace(entity_id="station_1")
+            },
+            "devices": {},
+        },
+        SimpleNamespace(entry_id="entry-id"),
+    )
+
+    assert lookups == [{("xsense", "station_1")}]
 
 
 def test_obsolete_sensor_entry_detection_is_scoped_to_xsense_sensors():

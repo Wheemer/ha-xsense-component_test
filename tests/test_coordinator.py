@@ -3,6 +3,7 @@ import inspect
 import json
 import logging
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -340,6 +341,87 @@ async def test_startup_refresh_defers_mqtt_and_camera_history_work():
         ("assure_subscriptions",),
         ("request_device_updates",),
     ]
+
+
+@pytest.mark.asyncio
+async def test_coordinator_retries_one_transient_transport_failure(monkeypatch):
+    from custom_components.xsense import coordinator as coordinator_module
+    from custom_components.xsense.coordinator import XSenseDataUpdateCoordinator
+
+    instance = XSenseDataUpdateCoordinator.__new__(XSenseDataUpdateCoordinator)
+    instance.xsense = SimpleNamespace(houses={})
+    instance._startup_refresh_complete = True
+    calls = 0
+
+    async def get_devices(**_kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise OSError(101, "Network is unreachable")
+        return {"stations": {}, "devices": {}}
+
+    sleep = AsyncMock()
+    monkeypatch.setattr(coordinator_module.asyncio, "sleep", sleep)
+    instance.get_devices = get_devices
+
+    assert await XSenseDataUpdateCoordinator._async_update_data(instance) == {
+        "stations": {},
+        "devices": {},
+    }
+    assert calls == 2
+    sleep.assert_awaited_once_with(1)
+
+
+@pytest.mark.asyncio
+async def test_coordinator_marks_unavailable_after_transport_retry_fails(monkeypatch):
+    from custom_components.xsense import coordinator as coordinator_module
+    from custom_components.xsense.coordinator import XSenseDataUpdateCoordinator
+    from homeassistant.helpers.update_coordinator import UpdateFailed
+
+    instance = XSenseDataUpdateCoordinator.__new__(XSenseDataUpdateCoordinator)
+    instance.xsense = SimpleNamespace(houses={})
+    instance._startup_refresh_complete = True
+    calls = 0
+
+    async def get_devices(**_kwargs):
+        nonlocal calls
+        calls += 1
+        raise TimeoutError("DNS lookup timed out")
+
+    monkeypatch.setattr(coordinator_module.asyncio, "sleep", AsyncMock())
+    instance.get_devices = get_devices
+
+    with pytest.raises(UpdateFailed, match="after one retry"):
+        await XSenseDataUpdateCoordinator._async_update_data(instance)
+
+    assert calls == 2
+
+
+@pytest.mark.asyncio
+async def test_coordinator_does_not_retry_non_transport_update_failure(monkeypatch):
+    from custom_components.xsense import coordinator as coordinator_module
+    from custom_components.xsense.coordinator import XSenseDataUpdateCoordinator
+    from homeassistant.helpers.update_coordinator import UpdateFailed
+
+    instance = XSenseDataUpdateCoordinator.__new__(XSenseDataUpdateCoordinator)
+    instance.xsense = SimpleNamespace(houses={})
+    instance._startup_refresh_complete = True
+    calls = 0
+
+    async def get_devices(**_kwargs):
+        nonlocal calls
+        calls += 1
+        raise UpdateFailed("API rejected request")
+
+    sleep = AsyncMock()
+    monkeypatch.setattr(coordinator_module.asyncio, "sleep", sleep)
+    instance.get_devices = get_devices
+
+    with pytest.raises(UpdateFailed, match="API rejected request"):
+        await XSenseDataUpdateCoordinator._async_update_data(instance)
+
+    assert calls == 1
+    sleep.assert_not_awaited()
 
 
 @pytest.mark.asyncio
