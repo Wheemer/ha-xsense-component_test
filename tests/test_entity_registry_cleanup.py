@@ -267,6 +267,136 @@ def test_device_info_software_version_accepts_string_prefix_and_ignores_empty_va
     assert "sw_version" not in ProbeEntity(SimpleNamespace(), missing).device_info
 
 
+def test_child_device_info_uses_current_via_device_id(monkeypatch):
+    from custom_components.xsense import entity as entity_module
+
+    class ProbeEntity(entity_module.XSenseEntity):
+        entity_description = SimpleNamespace(key="probe")
+
+    hass = object()
+    entry = SimpleNamespace(entry_id="entry_1")
+    coordinator = SimpleNamespace(hass=hass, entry=entry)
+    station = SimpleNamespace(
+        entity_id="station_1",
+        data={"sw": "v1.2.3"},
+        sn="station-serial",
+        type="SBS50",
+        name="Base Station",
+    )
+    child = SimpleNamespace(
+        entity_id="device_1",
+        data={},
+        sn="device-serial",
+        type="SWS51",
+        name="Leak Sensor",
+        station=station,
+    )
+    registry = SimpleNamespace()
+    monkeypatch.setattr(entity_module.dr, "async_get", lambda value: registry)
+    monkeypatch.setattr(
+        entity_module.dr,
+        "async_get_device_id_by_identifier",
+        lambda value, identifier, *, config_entry_id: "parent-device-id",
+        raising=False,
+    )
+
+    device_info = ProbeEntity(coordinator, child, station.entity_id).device_info
+
+    assert device_info["via_device_id"] == "parent-device-id"
+    assert "via_device" not in device_info
+
+
+def test_child_device_info_registers_parent_before_current_lookup(monkeypatch):
+    from custom_components.xsense import entity as entity_module
+
+    class ProbeEntity(entity_module.XSenseEntity):
+        entity_description = SimpleNamespace(key="probe")
+
+    hass = object()
+    entry = SimpleNamespace(entry_id="entry_1")
+    coordinator = SimpleNamespace(hass=hass, entry=entry)
+    station = SimpleNamespace(
+        entity_id="station_1",
+        data={"sw": 123},
+        sn="station-serial",
+        type=50,
+        name=12345,
+    )
+    child = SimpleNamespace(
+        entity_id="device_1",
+        data={},
+        sn="device-serial",
+        type="SWS51",
+        name="Leak Sensor",
+        station=station,
+    )
+    calls = []
+    registry = SimpleNamespace(
+        async_get_or_create=lambda **kwargs: (
+            calls.append(kwargs) or SimpleNamespace(id="new-parent-device-id")
+        )
+    )
+
+    def _missing_parent(value, identifier, *, config_entry_id):
+        raise ValueError
+
+    monkeypatch.setattr(entity_module.dr, "async_get", lambda value: registry)
+    monkeypatch.setattr(
+        entity_module.dr,
+        "async_get_device_id_by_identifier",
+        _missing_parent,
+        raising=False,
+    )
+
+    device_info = ProbeEntity(coordinator, child, station.entity_id).device_info
+
+    assert device_info["via_device_id"] == "new-parent-device-id"
+    assert calls == [
+        {
+            "config_entry_id": "entry_1",
+            "identifiers": {("xsense", "station_1")},
+            "manufacturer": "X-Sense",
+            "model": "50",
+            "name": "12345",
+            "sw_version": "123",
+        }
+    ]
+
+
+def test_child_device_info_keeps_legacy_parent_identifier_on_older_ha(monkeypatch):
+    from custom_components.xsense import entity as entity_module
+
+    class ProbeEntity(entity_module.XSenseEntity):
+        entity_description = SimpleNamespace(key="probe")
+
+    coordinator = SimpleNamespace()
+    station = SimpleNamespace(
+        entity_id="station_1",
+        data={},
+        sn="station-serial",
+        type="SBS50",
+        name="Base Station",
+    )
+    child = SimpleNamespace(
+        entity_id="device_1",
+        data={},
+        sn="device-serial",
+        type="SWS51",
+        name="Leak Sensor",
+        station=station,
+    )
+    monkeypatch.delattr(
+        entity_module.dr,
+        "async_get_device_id_by_identifier",
+        raising=False,
+    )
+
+    device_info = ProbeEntity(coordinator, child, station.entity_id).device_info
+
+    assert device_info["via_device"] == ("xsense", "station_1")
+    assert "via_device_id" not in device_info
+
+
 def test_alarm_panel_device_info_does_not_expose_serial_number():
     from custom_components.xsense.alarm_control_panel import XSenseAlarmControlPanel
 
