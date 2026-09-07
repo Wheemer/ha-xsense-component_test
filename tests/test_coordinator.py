@@ -850,7 +850,7 @@ def test_mqtt_skp0a_safenotice_fires_keypad_code_event(caplog):
 
 
 @pytest.mark.parametrize("requested_mode", ["Home", "Away"])
-def test_mqtt_safenotice_exposes_force_arm_prompt_for_pending_request(
+def test_mqtt_safenotice_does_not_impersonate_mode_result(
     requested_mode,
 ):
     from custom_components.xsense.alarm_control_panel import pending_force_arm_mode
@@ -907,8 +907,8 @@ def test_mqtt_safenotice_exposes_force_arm_prompt_for_pending_request(
         ).encode(),
     )
 
-    assert pending_force_arm_mode(station) == requested_mode
-    assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
+    assert pending_force_arm_mode(station) is None
+    assert station.alarm_data.get("forceReason") is None
 
 
 def test_mqtt_skp0a_safenotice_skips_keypad_notice_without_code(caplog):

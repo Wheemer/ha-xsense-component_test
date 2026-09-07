@@ -207,7 +207,7 @@ class XSenseAlarmControlPanel(
         if station is None:
             return None
 
-        mode = pending_force_arm_mode(station)
+        mode = self._pending_force_arm_mode
         if mode is None:
             return None
 
@@ -240,44 +240,49 @@ class XSenseAlarmControlPanel(
         self._bound_station = station
         reported_mode = getattr(station, "alarm_mode", None)
         if self._active_normal_arm_mode is not None:
-            # Discovery can replace Station objects while an APK-style arm
-            # request is waiting for its MQTT result. Keep the request in this
-            # long-lived entity, just as the APK keeps it in its presenter.
             station.set_alarm_data(
                 {"requestedSafeMode": self._active_normal_arm_mode}
             )
-
         previous_pending_mode = self._pending_force_arm_mode
-        pending_mode = pending_force_arm_mode(station)
-        if pending_mode is not None:
+        pending_mode = previous_pending_mode
+        alarm_data = getattr(station, "alarm_data", {}) or {}
+        force_reason = alarm_data.get("forceReason")
+        if self._active_normal_arm_mode is not None:
+            requested_mode = self._active_normal_arm_mode
+            if reported_mode == requested_mode:
+                # The APK's mode listener completes the request before its
+                # force-reason listener can open a bypass confirmation.
+                self._async_clear_arm_request(station)
+                pending_mode = None
+            elif force_reason:
+                pending_mode = requested_mode
+                station.set_alarm_data(
+                    {
+                        "requestedSafeMode": requested_mode,
+                        "safeModeAim": None,
+                    }
+                )
+                self._active_normal_arm_mode = None
+                self._async_cancel_arm_request_timeout()
+        elif previous_pending_mode is not None and self._pending_force_arm_data:
+            # Keep the already-open confirmation available if discovery swaps
+            # the Station object. No new prompt is inferred from refresh data.
+            if station_replaced or not force_reason:
+                station.set_alarm_data(self._pending_force_arm_data)
+            pending_mode = previous_pending_mode
+        else:
+            pending_mode = None
+            if force_reason:
+                # The APK ignores mode results when no request listener is active.
+                station.set_alarm_data({"forceReason": None, "exitDelay": None})
+
+        if pending_mode is not None and previous_pending_mode is None:
             alarm_data = getattr(station, "alarm_data", {}) or {}
             self._pending_force_arm_data = {
                 "forceReason": alarm_data.get("forceReason"),
-                "safeModeAim": pending_mode,
                 "requestedSafeMode": pending_mode,
                 "exitDelay": alarm_data.get("exitDelay"),
             }
-            self._active_normal_arm_mode = None
-            self._async_cancel_arm_request_timeout()
-        elif (
-            station_replaced
-            and previous_pending_mode is not None
-            and self._pending_force_arm_data
-        ):
-            # Once the APK receives a blocked result, its bypass dialog lives
-            # independently of later station refreshes. Rehydrate the HA-side
-            # prompt until the user confirms it or starts a new mode request.
-            station.set_alarm_data(self._pending_force_arm_data)
-            pending_mode = previous_pending_mode
-        elif (
-            self._active_normal_arm_mode is not None
-            and reported_mode == self._active_normal_arm_mode
-        ):
-            self._async_clear_arm_request(station)
-            pending_mode = None
-        alarm_data = getattr(station, "alarm_data", {}) or {}
-        if pending_mode is not None or not alarm_data.get("requestedSafeMode"):
-            self._async_cancel_arm_request_timeout()
         if pending_mode != previous_pending_mode:
             self._pending_force_arm_mode = pending_mode
             if pending_mode is None:
@@ -373,7 +378,7 @@ class XSenseAlarmControlPanel(
         if station is None:
             raise xsense_error("station_unavailable")
 
-        pending_mode = pending_force_arm_mode(station)
+        pending_mode = self._pending_force_arm_mode
         if pending_mode != mode:
             raise xsense_error("force_arm_not_pending", mode=mode)
 
@@ -457,8 +462,7 @@ class XSenseAlarmControlPanel(
         station = self._station
         if station is None:
             return
-        alarm_data = getattr(station, "alarm_data", {}) or {}
-        if self._active_normal_arm_mode is None or alarm_data.get("forceReason"):
+        if self._active_normal_arm_mode is None:
             return
         LOGGER.debug("Station %s arm request timed out", station.sn)
         self._async_clear_arm_request(station)
