@@ -1,16 +1,18 @@
 import asyncio
 import base64
-from collections import defaultdict
-from datetime import timedelta
+import errno
 import hashlib
 import importlib
 import json
 import logging
 import sys
 import types
+from collections import defaultdict
+from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
+import aiohttp
 import pytest
 
 
@@ -2882,6 +2884,110 @@ class FakeGetSession:
     def get(self, url, headers=None):
         self.calls.append({"url": url, "headers": headers})
         return self._responses.pop(0)
+
+
+class FailingRequestContext:
+    def __init__(self, error):
+        self.error = error
+
+    async def __aenter__(self):
+        raise self.error
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return False
+
+
+def connector_error(error_number: int) -> aiohttp.ClientConnectorError:
+    key = SimpleNamespace(host="eu-central-1.x-sense-iot.com", port=443, ssl=True)
+    return aiohttp.ClientConnectorError(
+        key,
+        OSError(error_number, "Network is unreachable"),
+    )
+
+
+@pytest.mark.asyncio
+async def test_shadow_read_falls_back_to_ipv4_when_route_is_unreachable():
+    client = async_xsense.AsyncXSense()
+    client._aws_token_expiring = lambda: False
+    primary = FakeGetSession([FailingRequestContext(connector_error(errno.ENETUNREACH))])
+    ipv4 = FakeGetSession([FakeGetResponse(200, {}, {"ok": True})])
+
+    async def get_session():
+        return primary
+
+    async def get_ipv4_session():
+        return ipv4
+
+    client._get_session = get_session
+    client._get_ipv4_session = get_ipv4_session
+    client._thing_request = lambda station, page: (
+        "https://eu-central-1.x-sense-iot.com/shadow",
+        {},
+    )
+
+    assert await client.get_thing(FakeXSenseStation("SBS50"), "mainpage") == {
+        "ok": True
+    }
+    assert len(primary.calls) == 1
+    assert len(ipv4.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_shadow_write_falls_back_to_ipv4_when_route_is_unreachable():
+    client = async_xsense.AsyncXSense()
+    primary = FakePostSession()
+    primary.post = Mock(
+        return_value=FailingRequestContext(connector_error(errno.EHOSTUNREACH))
+    )
+    ipv4 = FakePostSession()
+
+    async def get_session():
+        return primary
+
+    async def get_ipv4_session():
+        return ipv4
+
+    client._get_session = get_session
+    client._get_ipv4_session = get_ipv4_session
+
+    async with client._shadow_request(
+        "post", "https://eu-central-1.x-sense-iot.com/shadow", data="{}"
+    ) as response:
+        assert await response.json() == {"ok": True}
+
+    primary.post.assert_called_once()
+    assert len(ipv4.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_shadow_request_does_not_force_ipv4_for_other_connect_errors():
+    client = async_xsense.AsyncXSense()
+    primary = FakeGetSession([FailingRequestContext(connector_error(errno.ECONNREFUSED))])
+    get_ipv4_session = AsyncMock()
+
+    async def get_session():
+        return primary
+
+    client._get_session = get_session
+    client._get_ipv4_session = get_ipv4_session
+
+    with pytest.raises(aiohttp.ClientConnectorError):
+        async with client._shadow_request("get", "https://example.invalid"):
+            pass
+
+    get_ipv4_session.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_close_closes_private_ipv4_fallback_session():
+    client = async_xsense.AsyncXSense(session=SimpleNamespace(closed=False))
+    ipv4_session = SimpleNamespace(closed=False, close=AsyncMock())
+    client._ipv4_session = ipv4_session
+
+    await client.close()
+
+    ipv4_session.close.assert_awaited_once()
+    assert client._ipv4_session is None
 
 
 def test_aws_signer_applies_global_time_offset():
