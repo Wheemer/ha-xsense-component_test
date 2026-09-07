@@ -1042,12 +1042,18 @@ async def test_blocked_arm_prompt_survives_station_object_refresh(
 
     panel._handle_coordinator_update()
 
-    assert pending_force_arm_mode(refreshed) == requested_mode
-    assert refreshed.alarm_data["requestedSafeMode"] == requested_mode
-    assert panel._cancel_arm_request_timeout is None
-    assert cancelled == [True]
-    assert len(created) == 1
-    assert f"mode={requested_mode}" in created[0][0]
+    if reported_mode == "requested":
+        assert pending_force_arm_mode(refreshed) is None
+        assert panel._pending_force_arm_mode is None
+        assert cancelled == [True]
+        assert created == []
+    else:
+        assert pending_force_arm_mode(refreshed) == requested_mode
+        assert refreshed.alarm_data["requestedSafeMode"] == requested_mode
+        assert panel._cancel_arm_request_timeout is None
+        assert cancelled == [True]
+        assert len(created) == 1
+        assert f"mode={requested_mode}" in created[0][0]
 
 
 async def test_visible_force_arm_prompt_survives_station_object_refresh(monkeypatch):
@@ -1269,6 +1275,8 @@ async def test_alarm_panel_force_arm_requires_matching_pending_mode(monkeypatch)
     coordinator = Coordinator(station)
     coordinator.xsense = Api()
     panel = XSenseAlarmControlPanel(coordinator, station)
+    panel._pending_force_arm_mode = "Away"
+    panel._pending_force_arm_data = dict(station.alarm_data)
     panel.hass = object()
     panel.async_write_ha_state = lambda: None
     dismissed = []
@@ -1458,7 +1466,7 @@ async def test_light_group_power_action_uses_apk_group_shadow():
     assert coordinator.update_listener_calls == 1
 
 
-def test_force_arm_prompt_prefers_locally_requested_home_over_stale_away_target():
+def test_mode_result_keeps_request_target_out_of_adapter_payload_state():
     station = _xs01_wx_from_real_shadow()
     station.type = "SBS50"
     station.set_alarm_data({"requestedSafeMode": "Home"})
@@ -1474,7 +1482,7 @@ def test_force_arm_prompt_prefers_locally_requested_home_over_stale_away_target(
     )
 
     assert pending_force_arm_mode(station) == "Home"
-    assert station.alarm_data["safeModeAim"] == "Home"
+    assert "safeModeAim" not in station.alarm_data
 
 
 def test_force_arm_result_is_retained_but_not_exposed_without_local_request():
@@ -1496,7 +1504,7 @@ def test_force_arm_result_is_retained_but_not_exposed_without_local_request():
     assert station.alarm_data.get("requestedSafeMode") is None
 
 
-def test_force_arm_prompt_uses_matching_notice_during_local_request():
+def test_keypad_notice_does_not_create_force_arm_prompt():
     station = _xs01_wx_from_real_shadow()
     station.type = "SBS50"
     station.set_alarm_data({"requestedSafeMode": "Away"})
@@ -1519,12 +1527,11 @@ def test_force_arm_prompt_uses_matching_notice_during_local_request():
         },
     )
 
-    assert pending_force_arm_mode(station) == "Away"
-    assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
-    assert station.alarm_data["exitDelay"] == "0"
+    assert pending_force_arm_mode(station) is None
+    assert station.alarm_data.get("forceReason") is None
 
 
-def test_force_arm_prompt_uses_unscoped_notice_during_local_request():
+def test_unscoped_notice_does_not_create_force_arm_prompt():
     station = _xs01_wx_from_real_shadow()
     station.type = "SBS50"
     station.set_alarm_data({"requestedSafeMode": "Home"})
@@ -1546,9 +1553,8 @@ def test_force_arm_prompt_uses_unscoped_notice_during_local_request():
         },
     )
 
-    assert pending_force_arm_mode(station) == "Home"
-    assert station.alarm_data["safeModeAim"] == "Home"
-    assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
+    assert pending_force_arm_mode(station) is None
+    assert station.alarm_data.get("forceReason") is None
 
 
 def test_force_arm_prompt_ignores_notice_for_different_local_request():
@@ -1637,30 +1643,39 @@ def test_force_arm_prompt_does_not_return_after_request_is_cleared():
     )
 
     assert pending_force_arm_mode(station) is None
-    assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
+    assert station.alarm_data["forceReason"] is None
     assert station.alarm_data.get("requestedSafeMode") is None
 
 
-def test_live_force_reason_wins_before_normal_arm_success_like_apk_listeners():
+def test_successful_mode_result_wins_before_force_reason_like_apk_listeners(monkeypatch):
     station = _xs01_wx_from_real_shadow()
     station.type = "SBS50"
-    station.set_alarm_data({"requestedSafeMode": "Home"})
-    api = XSenseBase.__new__(XSenseBase)
+    coordinator = Coordinator(station)
+    panel = XSenseAlarmControlPanel(coordinator, station)
+    panel.hass = object()
+    panel.async_write_ha_state = lambda: None
+    panel._active_normal_arm_mode = "Home"
+    panel._cancel_arm_request_timeout = lambda: None
+    monkeypatch.setattr(
+        "custom_components.xsense.alarm_control_panel.persistent_notification.async_dismiss",
+        lambda hass, notification_id: None,
+    )
 
-    api.parse_get_state(
+    XSenseBase.__new__(XSenseBase).parse_get_state(
         station,
         {
             "safeMode": "Home",
             "forceReason": [{"deviceSN": "door-sn"}],
         },
     )
+    panel._handle_coordinator_update()
 
-    assert pending_force_arm_mode(station) == "Home"
-    assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
-    assert station.alarm_data["requestedSafeMode"] == "Home"
+    assert panel._active_normal_arm_mode is None
+    assert panel._pending_force_arm_mode is None
+    assert pending_force_arm_mode(station) is None
 
 
-def test_empty_force_arm_reason_does_not_dismiss_active_prompt():
+def test_empty_force_arm_reason_does_not_dismiss_visible_prompt(monkeypatch):
     station = _xs01_wx_from_real_shadow()
     station.type = "SBS50"
     station.set_alarm_data(
@@ -1670,12 +1685,21 @@ def test_empty_force_arm_reason_does_not_dismiss_active_prompt():
             "requestedSafeMode": "Home",
         }
     )
-    api = XSenseBase.__new__(XSenseBase)
+    coordinator = Coordinator(station)
+    panel = XSenseAlarmControlPanel(coordinator, station)
+    panel.hass = object()
+    panel.async_write_ha_state = lambda: None
+    panel._pending_force_arm_mode = "Home"
+    panel._pending_force_arm_data = dict(station.alarm_data)
+    monkeypatch.setattr(
+        "custom_components.xsense.alarm_control_panel.persistent_notification.async_dismiss",
+        lambda hass, notification_id: None,
+    )
 
-    api.parse_get_state(station, {"forceReason": []})
+    XSenseBase.__new__(XSenseBase).parse_get_state(station, {"forceReason": []})
+    panel._handle_coordinator_update()
 
     assert pending_force_arm_mode(station) == "Home"
-    assert station.alarm_data["requestedSafeMode"] == "Home"
     assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
 
 
@@ -1688,6 +1712,7 @@ def test_force_arm_prompt_creates_and_clears_persistent_notification(monkeypatch
     panel.entity_id = "alarm_control_panel.base_station_alarm"
     panel.hass = object()
     panel.async_write_ha_state = lambda: None
+    panel._active_normal_arm_mode = "Away"
     created = []
     dismissed = []
     monkeypatch.setattr(
@@ -1706,13 +1731,7 @@ def test_force_arm_prompt_creates_and_clears_persistent_notification(monkeypatch
         lambda hass, notification_id: dismissed.append((hass, notification_id)),
     )
 
-    station.set_alarm_data(
-        {
-            "forceReason": [{"deviceSN": "door-sn"}],
-            "safeModeAim": "Away",
-            "requestedSafeMode": "Away",
-        }
-    )
+    station.set_alarm_data({"forceReason": [{"deviceSN": "door-sn"}]})
     panel._handle_coordinator_update()
 
     assert created == [
@@ -1733,7 +1752,6 @@ def test_force_arm_prompt_creates_and_clears_persistent_notification(monkeypatch
 
     assert len(created) == 1
 
-    station.set_alarm_data({"forceReason": None, "safeModeAim": None})
-    panel._handle_coordinator_update()
+    panel._async_clear_arm_request(station)
 
     assert dismissed == [(panel.hass, f"xsense_force_arm_{station.entity_id}")]
