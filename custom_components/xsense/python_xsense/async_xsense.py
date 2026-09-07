@@ -1,6 +1,9 @@
 import asyncio
+import errno
 import json
 import logging
+import socket
+from contextlib import AsyncExitStack, asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict
 
@@ -10,7 +13,7 @@ from .aws_signer import AWSSigner
 from .base import XSenseBase, shadow_update_body
 from .entity import Entity
 from .entity_map import EntityType
-from .exceptions import SessionExpired, APIFailure, XSenseError
+from .exceptions import APIFailure, SessionExpired, XSenseError
 from .house import House
 from .mapping import bool_state
 from .station import Station
@@ -474,6 +477,7 @@ class AsyncXSense(XSenseBase):
         super().__init__()
         self.session = session
         self._owns_session = session is None
+        self._ipv4_session: aiohttp.ClientSession | None = None
         self.language = _ipc_language(language)
         self._sbs50_child_info_loaded: set[tuple[str, str]] = set()
 
@@ -483,7 +487,45 @@ class AsyncXSense(XSenseBase):
             self._owns_session = True
         return self.session
 
+    async def _get_ipv4_session(self) -> aiohttp.ClientSession:
+        """Return a private IPv4 session for unreachable dual-stack routes."""
+        if self._ipv4_session is None or self._ipv4_session.closed:
+            self._ipv4_session = aiohttp.ClientSession(
+                connector=aiohttp.TCPConnector(family=socket.AF_INET)
+            )
+        return self._ipv4_session
+
+    @asynccontextmanager
+    async def _shadow_request(self, method: str, url: str, **kwargs):
+        """Open an AWS IoT shadow request with a narrow IPv4 fallback."""
+        async with AsyncExitStack() as stack:
+            session = await self._get_session()
+            try:
+                response = await stack.enter_async_context(
+                    getattr(session, method)(url, **kwargs)
+                )
+            except aiohttp.ClientConnectorError as ex:
+                os_error = getattr(ex, "os_error", None)
+                if getattr(os_error, "errno", None) not in {
+                    errno.ENETUNREACH,
+                    errno.EHOSTUNREACH,
+                }:
+                    raise
+                LOGGER.debug(
+                    "X-Sense AWS IoT shadow route unavailable; retrying over IPv4: %s",
+                    ex,
+                )
+                ipv4_session = await self._get_ipv4_session()
+                response = await stack.enter_async_context(
+                    getattr(ipv4_session, method)(url, **kwargs)
+                )
+
+            yield response
+
     async def close(self):
+        if self._ipv4_session is not None and not self._ipv4_session.closed:
+            await self._ipv4_session.close()
+        self._ipv4_session = None
         if self._owns_session and self.session and not self.session.closed:
             await self.session.close()
 
@@ -1304,8 +1346,7 @@ class AsyncXSense(XSenseBase):
 
         url, headers = self._house_request(house, page)
 
-        session = await self._get_session()
-        async with session.get(url, headers=headers) as response:
+        async with self._shadow_request("get", url, headers=headers) as response:
             self._lastres = response
             if response.status in (401, 403) and _retry:
                 self._apply_clock_skew_from_response(response)
@@ -1319,8 +1360,7 @@ class AsyncXSense(XSenseBase):
 
         url, headers = self._thing_request(station, page)
 
-        session = await self._get_session()
-        async with session.get(url, headers=headers) as response:
+        async with self._shadow_request("get", url, headers=headers) as response:
             self._lastres = response
             if response.status in (401, 403) and _retry:
                 self._apply_clock_skew_from_response(response)
@@ -1337,8 +1377,9 @@ class AsyncXSense(XSenseBase):
         body = shadow_update_body(data)
         url, headers = self._thing_request(station, page, body)
 
-        session = await self._get_session()
-        async with session.post(url, data=body, headers=headers) as response:
+        async with self._shadow_request(
+            "post", url, data=body, headers=headers
+        ) as response:
             self._lastres = response
             if (
                 response.status in (401, 403)
