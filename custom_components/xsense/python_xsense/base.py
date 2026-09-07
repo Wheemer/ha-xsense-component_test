@@ -381,7 +381,7 @@ class XSenseBase:
 
         _normalize_apk_alarm_status(station_data)
         has_alarm_status = 'alarmStatus' in station_data or 'a' in station_data
-        _apply_sbs50_force_arm_prompt(station, station_data)
+        _apply_sbs50_mode_result(station, station_data)
         if station_data:
             station.set_data(station_data)
         if 'safeMode' in station_data:
@@ -562,96 +562,19 @@ def _child_state_identifiers(child_key, child_state) -> tuple[str, ...]:
     return tuple(result)
 
 
-def _apply_sbs50_force_arm_prompt(station: Station, station_data: Dict) -> None:
-    """Track the APK bypass confirmation prompt for SBS50 arm requests."""
-    current_alarm_data = getattr(station, "alarm_data", {}) or {}
-    reported_mode = station_data.get("safeMode")
-    requested_mode = current_alarm_data.get("requestedSafeMode")
-    prompt = _sbs50_force_arm_prompt(
-        station_data,
-        requested_mode=requested_mode,
-    )
-    if prompt is not None:
-        station.set_alarm_data(prompt)
+def _apply_sbs50_mode_result(station: Station, station_data: Dict) -> None:
+    """Retain the SBS50 mode result for the active alarm-panel request."""
+    if "forceReason" not in station_data:
+        if "safeMode" in station_data:
+            station.set_alarm_data({"forceReason": None, "exitDelay": None})
         return
 
-    request_completed = reported_mode in ("Home", "Away") and (
-        reported_mode == requested_mode
-    )
-    if request_completed:
-        station.set_alarm_data(
-            {
-                "forceReason": None,
-                "safeModeAim": None,
-                "requestedSafeMode": None,
-                "exitDelay": None,
-            }
-        )
-        return
-
-    force_reason_reported = "forceReason" in station_data
-    if force_reason_reported:
-        # The SBS50 can acknowledge the normal arm request with an empty
-        # forceReason before publishing the blocked result, and later routine
-        # state updates can report it empty again. The APK ignores empty reasons
-        # throughout the active request instead of dismissing its bypass dialog.
-        if requested_mode in ("Home", "Away"):
-            return
-        station.set_alarm_data(
-            {
-                "forceReason": None,
-                "safeModeAim": None,
-                "requestedSafeMode": None,
-                "exitDelay": None,
-            }
-        )
-
-
-def _sbs50_force_arm_prompt(
-    station_data: Dict, *, requested_mode: str | None = None
-) -> Dict | None:
-    active_request = requested_mode if requested_mode in ("Home", "Away") else None
-
-    if "forceReason" in station_data:
-        force_reason = station_data.get("forceReason")
-        if force_reason:
-            return {
-                "forceReason": force_reason,
-                "safeModeAim": active_request
-                or station_data.get("safeModeAim")
-                or station_data.get("safeMode"),
-                "requestedSafeMode": active_request,
-                "exitDelay": station_data.get("exitDelay"),
-            }
-
-    notices = station_data.get("notices")
-    if not isinstance(notices, list):
-        return None
-
-    for notice in notices:
-        if not isinstance(notice, dict):
-            continue
-        event_param = notice.get("eventParam")
-        if not isinstance(event_param, dict):
-            continue
-        safe_mode_aim = event_param.get("safeModeAim")
-        if active_request is not None and safe_mode_aim not in (
-            None,
-            "",
-            active_request,
-        ):
-            continue
-        force_reason = event_param.get("forceReason")
-        if not force_reason:
-            continue
-        return {
-            "forceReason": force_reason,
-            "safeModeAim": active_request or safe_mode_aim,
-            "requestedSafeMode": active_request,
-            "exitDelay": event_param.get("exitDelay"),
+    station.set_alarm_data(
+        {
+            "forceReason": station_data.get("forceReason") or None,
+            "exitDelay": station_data.get("exitDelay"),
         }
-
-    return None
+    )
 
 
 def _apply_group_light_state(station: Station, station_data: Dict, children) -> bool:
