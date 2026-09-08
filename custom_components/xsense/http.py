@@ -51,6 +51,7 @@ from .recordings_media import (
     _path_ready,
     _recording_media_root,
     _recording_media_root_from_value,
+    _recording_maintenance_lock,
     _recording_cache_suppressed,
     _recording_media_sync_enabled,
     _recording_cache_retained,
@@ -527,6 +528,7 @@ class XSenseRecordingsPanelPlaybackView(http.HomeAssistantView):
                 raise web.HTTPNotFound(
                     reason="X-Sense recording is not ready"
                 ) from exc
+            _revoke_token_if_disconnected(self.hass, request, token)
             LOGGER.debug(
                 "X-Sense recordings panel playback proxy ready: %s",
                 {
@@ -545,6 +547,7 @@ class XSenseRecordingsPanelPlaybackView(http.HomeAssistantView):
                 headers["X-XSense-HLS-Playback-Mode"] = str(
                     profile["playback_mode"]
                 )
+            headers["X-XSense-Playback-Token"] = token
             headers["Content-Location"] = _hls_proxy_resource_path(
                 token, "root.m3u8"
             )
@@ -587,33 +590,23 @@ class XSenseRecordingsPanelPlaybackView(http.HomeAssistantView):
             )
             raise web.HTTPNotFound(reason="X-Sense recording is not ready") from exc
         output_path = _clip_cache_path(clip)
-        if await source._async_hls_ready(clip):
-            await async_touch_recording_cache(self.hass, clip)
-            playlist_path = _hls_playlist_cache_path(clip)
-            token = _create_hls_segment_token(self.hass, playlist_path.parent)
-            playlist = await source._async_file_job(
-                _hls_playlist_for_response,
-                playlist_path,
-                f"/api/{DOMAIN}/recordings/hls/{token}",
-            )
-            LOGGER.debug(
-                "X-Sense recordings panel playback served cached HLS: %s",
-                {
-                    **context,
-                    "elapsed_ms": int((monotonic() - started_at) * 1000),
-                    "content_type": HLS_MIME_TYPE,
-                    **_hls_playback_fields_for_clip(clip),
-                },
-            )
-            headers = {
-                "Cache-Control": "private, max-age=300",
-                **_hls_playback_response_headers(clip),
-            }
-            return web.Response(
-                text=playlist,
-                content_type=HLS_MIME_TYPE,
-                headers=headers,
-            )
+        root = _recording_media_root_from_value(clip.get("media_root"))
+        for attempt in range(2):
+            async with _recording_maintenance_lock(self.hass, root):
+                response = await self._async_retained_hls_response(
+                    request, source, clip, entry_id, context, started_at
+                )
+                if response is not None:
+                    return response
+                if await source._async_mp4_ready(output_path):
+                    break
+            if attempt == 0:
+                # A prune may have won after preparation; never download under
+                # the root lock because downloads can trigger their own prune.
+                try:
+                    url = await source._async_cached_playback_url(clip)
+                except Exception as exc:  # noqa: BLE001
+                    raise web.HTTPNotFound(reason="X-Sense recording is not ready") from exc
         if await source._async_mp4_ready(output_path):
             await async_touch_recording_cache(self.hass, clip)
             output_bytes = await source._async_file_size(output_path)
@@ -643,6 +636,46 @@ class XSenseRecordingsPanelPlaybackView(http.HomeAssistantView):
             },
         )
         raise web.HTTPNotFound(reason="X-Sense recording is not ready")
+
+    async def _async_retained_hls_response(
+        self, request, source, clip, entry_id, context, started_at
+    ) -> web.Response | None:
+        """Revalidate and publish retained HLS while the maintenance lock is held."""
+        if await source._async_hls_ready(clip):
+            await async_touch_recording_cache(self.hass, clip)
+            playlist_path = _hls_playlist_cache_path(clip)
+            token = _create_hls_segment_token(self.hass, playlist_path.parent, entry_id)
+            try:
+                playlist = await source._async_file_job(
+                    _hls_playlist_for_response,
+                    playlist_path,
+                    f"/api/{DOMAIN}/recordings/hls/{token}",
+                )
+                _revoke_token_if_disconnected(self.hass, request, token)
+            except BaseException:
+                self.hass.data.get(DOMAIN, {}).get("_recording_hls_tokens", {}).pop(token, None)
+                raise
+            LOGGER.debug(
+                "X-Sense recordings panel playback served cached HLS: %s",
+                {
+                    **context,
+                    "elapsed_ms": int((monotonic() - started_at) * 1000),
+                    "content_type": HLS_MIME_TYPE,
+                    **_hls_playback_fields_for_clip(clip),
+                },
+            )
+            headers = {
+                "Cache-Control": "private, max-age=300",
+                "X-XSense-Playback-Token": token,
+                "Content-Location": f"/api/{DOMAIN}/recordings/hls/{token}/index.m3u8",
+                **_hls_playback_response_headers(clip),
+            }
+            return web.Response(
+                text=playlist,
+                content_type=HLS_MIME_TYPE,
+                headers=headers,
+            )
+        return None
 
     async def _clip(
         self,
@@ -840,8 +873,6 @@ class XSenseRecordingsCacheManagementView(http.HomeAssistantView):
             end = str(request.query.get("end") or "")
             if not serial or not start or not end:
                 raise web.HTTPBadRequest(reason="Missing recording playback identifier")
-            if _recording_cache_retained(self.hass, entry_id):
-                return web.json_response({"ok": True, "retained": True})
             try:
                 start_value = int(start)
                 end_value = int(end)
@@ -855,6 +886,7 @@ class XSenseRecordingsCacheManagementView(http.HomeAssistantView):
                 serial=serial,
                 start=start_value,
                 end=end_value,
+                token=request.query.get("token"),
             )
         elif scope == "camera":
             if not serial:
@@ -983,7 +1015,18 @@ def _directory_size(path: Path) -> int:
     return total
 
 
-def _create_hls_segment_token(hass: HomeAssistant, root: Path) -> str:
+def _revoke_token_if_disconnected(hass: HomeAssistant, request: web.Request, token: str) -> None:
+    """Do not retain a prepared session whose requesting viewer has gone away."""
+    if hasattr(request, "transport") and (
+        request.transport is None or request.transport.is_closing()
+    ):
+        hass.data.get(DOMAIN, {}).get("_recording_hls_tokens", {}).pop(token, None)
+        raise web.HTTPGone(reason="Recording viewer disconnected")
+
+
+def _create_hls_segment_token(
+    hass: HomeAssistant, root: Path, entry_id: str | None = None
+) -> str:
     """Create a short-lived token for cached HLS segment playback."""
     tokens = hass.data.setdefault(DOMAIN, {}).setdefault("_recording_hls_tokens", {})
     now = monotonic()
@@ -993,6 +1036,8 @@ def _create_hls_segment_token(hass: HomeAssistant, root: Path) -> str:
     token = secrets.token_urlsafe(24)
     tokens[token] = {
         "root": root.resolve(),
+        "entry_id": entry_id,
+        "cache_key": root.name,
         "expires": now + HLS_SEGMENT_TOKEN_TTL,
     }
     return token
@@ -1041,7 +1086,7 @@ async def _async_create_hls_proxy_session(
             playlist_text,
             final_url,
         )
-    except Exception:
+    except BaseException:
         tokens.pop(token, None)
         raise
     proxy["resources"]["root.m3u8"] = {

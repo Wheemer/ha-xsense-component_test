@@ -221,9 +221,12 @@ ____________________________________________________________
 <!-- xsense-recording-storage-modes -->
 تظهر تسجيلات بطاقة SD للكاميرا في X-Sense Recordings. التشغيل فقط هو وضع التخزين الافتراضي: يحتفظ Home Assistant بعناوين URL الخاصة بـ X-Sense الموقعة، ويعيد كتابة قائمة التشغيل HLS، ومقاطع الوكلاء فقط عندما يطلبها المشغل، دون الاحتفاظ بالمقاطع الكاملة. احتفظ بالتسجيلات المحلية بتخزين المقاطع الكاملة تحت /media/xsense_recordings وتمكين الاحتفاظ القابل للتكوين والحد الأقصى للحجم والحذف اليدوي ومزامنة الخلفية الاختيارية. لا يؤدي التنظيف المحلي أبدًا إلى حذف التسجيلات من بطاقات X-Sense SD أو التخزين السحابي.
 
+<!-- xsense-cache-entry-ownership -->
+تُتتبّع ملكية التسجيلات المحلية لكل إدخال تكامل على حدة. يحافظ مسح تسجيلات إدخال واحد على التسجيلات التي يحتفظ بها إدخال آخر. تبقى أدوات التحكم الحالية بذاكرة التخزين المؤقت دون تغيير.
+
 [![استيراد blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-تتوفر حركة الكاميرا كمستشعر ثنائي مكتشف/خالي، وكذلك كحدث Motion لمرة واحدة لكل اكتشاف جديد. AI Detection حدث لمرة واحدة. للأتمتة اليدوية استخدم `event.received`؛ استخدم `event_type` فقط لتصفية أنواع مثل `person` أو `pet` أو `vehicle` أو `package` أو `other` أو `ai_detection`.
+تتوفر حركة الكاميرا كمستشعر ثنائي مكتشف/خالي، وكذلك كحدث Motion لمرة واحدة لكل اكتشاف جديد. AI Detection حدث لمرة واحدة. يتطلب `event.received` تحديد `options.event_type`: استخدم `motion` للحركة أو نوع ذكاء اصطناعي مدعوم مثل `person`. يستخدم المخطط `xsense_camera_event` مع التصفية حسب الكيان المحدد.
 
 مثال أتمتة:
 

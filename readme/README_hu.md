@@ -65,9 +65,12 @@ Ha egy Motion esemény X-Sense lejátszási metaadatokat tartalmaz, az integrác
 <!-- xsense-recording-storage-modes -->
 A fényképezőgép SD-kártyájára készült felvételek a X-Sense Recordings-ben jelennek meg. Csak a lejátszás az alapértelmezett tárolási mód: A Home Assistant az aláírt X-Sense URL-eket privátként tartja, átírja a HLS lejátszási listát, és csak akkor proxyzik a szegmenseket, ha a lejátszó kéri, a teljes klipek megtartása nélkül. A helyi felvételek megtartása a teljes klipeket a /media/xsense_recordings alatt tárolja, és lehetővé teszi a konfigurálható megőrzést, a maximális méretet, a kézi törlést és az opcionális háttérszinkronizálást. A helyi tisztítás soha nem törli a felvételeket a X-Sense SD-kártyáról vagy a felhőtárhelyről.
 
+<!-- xsense-cache-entry-ownership -->
+A helyi felvételek tulajdonosa integrációs bejegyzésenként van nyilvántartva. Egy bejegyzés gyorsítótárának törlése megőrzi a másik bejegyzés által megtartott felvételeket. A meglévő gyorsítótár-kezelő vezérlők változatlanok maradnak.
+
 [![Blueprint importálása](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-A kamera mozgása Elérzékelve/Szabad bináris érzékelőként és minden új észleléshez egyszeri Motion eseményként is elérhető. Az AI Detection egyszeri esemény. Kézi automatizációkhoz használd az `event.received` triggert; `event_type` csak típusok szűréséhez kell, például `person`, `pet`, `vehicle`, `package`, `other` vagy `ai_detection`.
+A kamera mozgása Elérzékelve/Szabad bináris érzékelőként és minden új észleléshez egyszeri Motion eseményként is elérhető. Az AI Detection egyszeri esemény. Az `event.received` esetén az `options.event_type` kötelező: mozgáshoz `motion`, vagy támogatott AI-típus, például `person`. A blueprint az `xsense_camera_event` eseményt használja, a kiválasztott entitásra szűrve.
 
 Példa automatizáció:
 

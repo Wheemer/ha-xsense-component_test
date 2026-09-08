@@ -125,9 +125,12 @@ Quando un evento Motion include metadati di riproduzione X-Sense, l'integrazione
 <!-- xsense-recording-storage-modes -->
 Le registrazioni sulla scheda SD della fotocamera vengono visualizzate in X-Sense Recordings. La sola riproduzione è la modalità di archiviazione predefinita: Home Assistant mantiene privati ​​gli URL X-Sense firmati, riscrive la playlist HLS e invia i segmenti tramite proxy solo quando il lettore li richiede, senza conservare clip complete. Mantieni le registrazioni locali memorizza clip completi in /media/xsense_recordings e consente la conservazione configurabile, una dimensione massima, l'eliminazione manuale e la sincronizzazione in background opzionale. La pulizia locale non elimina mai le registrazioni dalle schede SD X-Sense o dall'archivio cloud.
 
+<!-- xsense-cache-entry-ownership -->
+La proprietà delle registrazioni locali è tracciata per ogni voce dell'integrazione. Svuotare la cache di una voce preserva le registrazioni conservate da un'altra voce. I controlli della cache esistenti rimangono invariati.
+
 [![Importa blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Il movimento della videocamera è disponibile sia come sensore binario Rilevato/Libero sia come evento Motion singolo per ogni nuova rilevazione. AI Detection è un evento singolo. Per automazioni manuali usa il trigger `event.received` di Home Assistant con l’entità videocamera `Motion` o `AI Detection`; `event_type` serve solo per filtrare una AI Detection con abbonamento su tipi come `person`, `pet`, `vehicle`, `package`, `other` o `ai_detection`.
+Il movimento della videocamera è disponibile sia come sensore binario Rilevato/Libero sia come evento Motion singolo per ogni nuova rilevazione. AI Detection è un evento singolo. Con `event.received`, `options.event_type` è obbligatorio: `motion` per il movimento o un tipo IA supportato come `person`. Il blueprint usa `xsense_camera_event`, filtrato per l’entità selezionata.
 
 Esempio di automazione:
 

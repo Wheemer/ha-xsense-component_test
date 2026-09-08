@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import asyncio
+from copy import copy, deepcopy
 from dataclasses import dataclass
 from time import monotonic
 from typing import TYPE_CHECKING, Any
@@ -10,6 +12,7 @@ from urllib.parse import urlparse
 
 from .python_xsense.async_xsense import (
     camera_addx_serial,
+    cameras_share_identity,
     is_camera_entity,
 )
 from .python_xsense.device import Device
@@ -144,8 +147,13 @@ class XSenseEventEntity(XSenseEntity, EventEntity):
     def _current_entity(self) -> Entity | None:
         """Return the current coordinator entity for this event entity."""
         if self._device_entity:
-            return self._current_entity_from(coordinator_devices(self.coordinator))
-        return super()._current_entity()
+            current = self._current_entity_from(coordinator_devices(self.coordinator))
+        else:
+            current = super()._current_entity()
+        incoming = getattr(self.coordinator, "_camera_event_entity", None)
+        if current is not None and incoming is not None and cameras_share_identity(current, incoming):
+            return incoming
+        return current
 
     def _add_camera_event_context(
         self, entity: Entity, event_data: dict[str, Any] | None
@@ -194,6 +202,11 @@ class XSenseEventEntity(XSenseEntity, EventEntity):
         self._add_camera_event_context(entity, event_data)
         self._add_recording_playback_url(entity, event_data)
         fingerprint = ai_detection_fingerprint(event_data)
+        incoming_time = str((event_data or {}).get("time") or "")
+        if incoming_time < getattr(self, "_latest_event_time", ""):
+            self._write_state_if_added()
+            return
+        self._latest_event_time = incoming_time
         if fingerprint is None:
             if not self._ai_detection_initialized:
                 self._ai_detection_initialized = True
@@ -251,8 +264,13 @@ class XSenseMotionEventEntity(XSenseEntity, EventEntity):
     def _current_entity(self) -> Entity | None:
         """Return the current coordinator entity for this event entity."""
         if self._device_entity:
-            return self._current_entity_from(coordinator_devices(self.coordinator))
-        return super()._current_entity()
+            current = self._current_entity_from(coordinator_devices(self.coordinator))
+        else:
+            current = super()._current_entity()
+        incoming = getattr(self.coordinator, "_camera_event_entity", None)
+        if current is not None and incoming is not None and cameras_share_identity(current, incoming):
+            return incoming
+        return current
 
     def _trigger_event_after_recording_cache(
         self,
@@ -273,6 +291,11 @@ class XSenseMotionEventEntity(XSenseEntity, EventEntity):
         self._add_camera_event_context(entity, event_data)
         self._add_motion_playback_url(entity, event_data)
         fingerprint = motion_fingerprint(event_data)
+        incoming_time = str((event_data or {}).get("time") or "")
+        if incoming_time < getattr(self, "_latest_event_time", ""):
+            self._write_state_if_added()
+            return
+        self._latest_event_time = incoming_time
 
         if fingerprint is None:
             if not self._motion_initialized:
@@ -545,6 +568,14 @@ def _trigger_event_after_recording_cache(
     playback = event_data.get("playback")
     if not isinstance(playback, dict):
         return False
+    # Freeze both media and camera metadata before any asynchronous preparation.
+    event_data = deepcopy(event_data)
+    playback = event_data["playback"]
+    captured_entity = copy(entity)
+    if hasattr(entity, "_data"):
+        captured_entity._data = deepcopy(entity.data)
+    elif hasattr(entity, "data"):
+        captured_entity.data = deepcopy(entity.data)
     hass = getattr(event_entity, "hass", None)
     if not hasattr(hass, "async_create_task"):
         return False
@@ -553,6 +584,11 @@ def _trigger_event_after_recording_cache(
         return False
     _add_recording_panel_url(event_data, entry_id=entry_id, entity=entity)
     coordinator = getattr(event_entity, "coordinator", None)
+    locks = getattr(coordinator, "_camera_event_delivery_locks", None)
+    if locks is None:
+        locks = {}
+        coordinator._camera_event_delivery_locks = locks
+    lock = locks.setdefault(camera_addx_serial(entity), asyncio.Lock())
     clear_snapshot = getattr(coordinator, "clear_camera_event_snapshot", None)
     if callable(clear_snapshot):
         clear_snapshot(entity)
@@ -582,7 +618,7 @@ def _trigger_event_after_recording_cache(
             cached_url = await async_cache_recording_playback(
                 hass,
                 entry_id=entry_id,
-                entity=entity,
+                entity=captured_entity,
                 playback=playback,
                 camera_entity_id=str(event_data.get("camera_entity_id") or ""),
             )
@@ -594,6 +630,12 @@ def _trigger_event_after_recording_cache(
         cache_elapsed_ms = int((cache_finished_at - cache_started_at) * 1000)
         total_elapsed_ms = int((cache_finished_at - event_received_at) * 1000)
         if not cached_url:
+            # Failed preparation is not a delivered event. Allow later history
+            # enrichment or a repeated report to retry this same identity.
+            key = "_last_motion_fingerprint" if event_type == MOTION_EVENT_TYPE else "_last_ai_detection_fingerprint"
+            fingerprint = motion_fingerprint(event_data) if event_type == MOTION_EVENT_TYPE else ai_detection_fingerprint(event_data)
+            if getattr(event_entity, key, None) == fingerprint:
+                setattr(event_entity, key, None)
             event_data["recording_cache_pending"] = False
             event_data["recording_cache_ready"] = False
             event_data["recording_cache_elapsed_ms"] = cache_elapsed_ms
@@ -615,13 +657,9 @@ def _trigger_event_after_recording_cache(
             return
         proxied = cached_url.startswith(f"/api/{DOMAIN}/recordings/play/")
         try:
-            prepare_snapshot = getattr(coordinator, "async_camera_event_snapshot", None)
-            if callable(prepare_snapshot):
-                snapshot = await prepare_snapshot(entity)
-            else:
-                from .recordings_media import async_extract_camera_event_snapshot
+            from .recordings_media import async_extract_camera_event_snapshot
 
-                snapshot = await async_extract_camera_event_snapshot(hass, playback)
+            snapshot = await async_extract_camera_event_snapshot(hass, playback)
         except Exception as exc:  # noqa: BLE001
             LOGGER.debug(
                 "X-Sense camera event snapshot preparation failed: %s",
@@ -629,9 +667,14 @@ def _trigger_event_after_recording_cache(
             )
             snapshot = None
         store_snapshot = getattr(coordinator, "store_camera_event_snapshot", None)
-        if snapshot and callable(store_snapshot):
-            store_snapshot(entity, event_data.get("time"), snapshot)
-            if camera_entity_id := event_data.get("camera_entity_id"):
+        current_entity = entity
+        resolve_current = getattr(event_entity, "_current_entity", None)
+        if callable(resolve_current):
+            current_entity = resolve_current() or entity
+        current_time = str(getattr(current_entity, "data", {}).get("eventTime") or "")
+        if snapshot and callable(store_snapshot) and current_time == str(event_data.get("time") or ""):
+            stored = store_snapshot(entity, event_data.get("time"), snapshot)
+            if stored is not False and (camera_entity_id := event_data.get("camera_entity_id")):
                 event_data["snapshot_url"] = f"/api/camera_proxy/{camera_entity_id}"
         event_data["recording_media_url"] = cached_url
         event_data["recording_cache_ready"] = True
@@ -655,8 +698,18 @@ def _trigger_event_after_recording_cache(
                 "recording_media_url_kind": _url_kind(cached_url),
             },
         )
+        ready_time = str(event_data.get("time") or "")
+        if ready_time and ready_time < getattr(event_entity, "_last_ready_event_time", ""):
+            return
+        event_entity._last_ready_event_time = ready_time
         _trigger_camera_event(event_entity, event_type, event_data)
         _write_event_state(event_entity)
+
+    async def _async_ordered_cache_then_trigger() -> None:
+        async with lock:
+            if getattr(coordinator, "_shutting_down", False):
+                return
+            await _async_cache_then_trigger()
 
     config_entries = getattr(hass, "config_entries", None)
     get_entry = getattr(config_entries, "async_get_entry", None)
@@ -665,11 +718,11 @@ def _trigger_event_after_recording_cache(
     task = (
         create_background_task(
             hass,
-            _async_cache_then_trigger(),
+            _async_ordered_cache_then_trigger(),
             "X-Sense event recording cache",
         )
         if callable(create_background_task)
-        else hass.async_create_task(_async_cache_then_trigger())
+        else hass.async_create_task(_async_ordered_cache_then_trigger())
     )
     if task is None or not hasattr(task, "add_done_callback"):
         return True

@@ -209,9 +209,12 @@ ____________________________________________________________
 <!-- xsense-recording-storage-modes -->
 कैमरा SD-कार्ड रिकॉर्डिंग X-Sense Recordings में दिखाई देती हैं। प्लेबैक केवल डिफॉल्ट स्टोरेज मोड है: Home Assistant हस्ताक्षरित X-Sense यूआरएल को निजी रखता है, HLS प्लेलिस्ट को फिर से लिखता है, और जब खिलाड़ी उनसे अनुरोध करता है तो केवल सेगमेंट को प्रॉक्सी करता है, बिना पूरी क्लिप बनाए रखे। स्थानीय रिकॉर्डिंग स्टोर को /media/xsense_recordings के अंतर्गत पूर्ण क्लिप रखें और कॉन्फ़िगर करने योग्य प्रतिधारण, अधिकतम आकार, मैन्युअल विलोपन और वैकल्पिक पृष्ठभूमि सिंक को सक्षम करें। स्थानीय सफाई X-Sense SD कार्ड या क्लाउड स्टोरेज से रिकॉर्डिंग को कभी नहीं हटाती है।
 
+<!-- xsense-cache-entry-ownership -->
+स्थानीय रिकॉर्डिंग का स्वामित्व हर एकीकरण प्रविष्टि के लिए अलग से दर्ज किया जाता है। एक प्रविष्टि का कैश साफ़ करने पर दूसरी प्रविष्टि द्वारा रखी गई रिकॉर्डिंग सुरक्षित रहती हैं। मौजूदा कैश नियंत्रणों में कोई बदलाव नहीं है।
+
 [![Blueprint import करें](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Camera Motion मौजूदा Detected/Clear स्थिति के लिए binary sensor और हर नई detection के लिए एक बार होने वाला Motion event, दोनों रूपों में उपलब्ध है। AI Detection एक बार होने वाला event है। Manual automations के लिए `event.received` इस्तेमाल करें; `event_type` केवल `person`, `pet`, `vehicle`, `package`, `other` या `ai_detection` जैसे types filter करने के लिए चाहिए।
+Camera Motion मौजूदा Detected/Clear स्थिति के लिए binary sensor और हर नई detection के लिए एक बार होने वाला Motion event, दोनों रूपों में उपलब्ध है। AI Detection एक बार होने वाला event है। `event.received` के लिए `options.event_type` ज़रूरी है: गति के लिए `motion` या समर्थित AI प्रकार जैसे `person` चुनें। Blueprint `xsense_camera_event` इस्तेमाल करता है और चुनी गई entity के अनुसार फ़िल्टर करता है।
 
 Automation उदाहरण:
 

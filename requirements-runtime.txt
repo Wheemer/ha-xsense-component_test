@@ -1,2 +1,4 @@
-# Integration-owned requirement. Home Assistant Core supplies boto3 and paho-mqtt.
+# Direct integration dependencies. PyCognito supplies boto3 transitively.
+# Keep Paho compatible with Home Assistant's MQTT integration.
 pycognito==2024.5.1
+paho-mqtt==2.1.0

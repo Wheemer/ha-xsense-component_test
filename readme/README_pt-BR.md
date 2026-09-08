@@ -130,9 +130,12 @@ Quando um evento Motion inclui metadados de reprodução X-Sense, a integração
 <!-- xsense-recording-storage-modes -->
 As gravações do cartão SD da câmera aparecem em X-Sense Recordings. Apenas a reprodução é o modo de armazenamento padrão: Home Assistant mantém URLs X-Sense assinados privados, reescreve a lista de reprodução HLS e faz proxy de segmentos apenas quando o player os solicita, sem reter clipes completos. Manter gravações locais armazena clipes completos em /media/xsense_recordings e permite retenção configurável, tamanho máximo, exclusão manual e sincronização de fundo opcional. A limpeza local nunca exclui gravações de cartões SD X-Sense ou armazenamento em nuvem.
 
+<!-- xsense-cache-entry-ownership -->
+A propriedade das gravações locais é registrada por entrada da integração. Limpar uma entrada preserva as gravações mantidas por outra entrada. Os controles de cache existentes permanecem inalterados.
+
 [![Importar blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-O movimento da câmera está disponível como sensor binário Detectado/Livre e também como um evento Motion único para cada nova detecção. AI Detection continua sendo um evento único. Para automações manuais, use o gatilho `event.received` do Home Assistant com a entidade de câmera `Motion` ou `AI Detection`; `event_type` só é necessário para limitar AI Detection com assinatura a tipos como `person`, `pet`, `vehicle`, `package`, `other` ou `ai_detection`.
+O movimento da câmera está disponível como sensor binário Detectado/Livre e também como um evento Motion único para cada nova detecção. AI Detection continua sendo um evento único. Com `event.received`, `options.event_type` é obrigatório: `motion` para movimento ou um tipo de IA compatível, como `person`. O blueprint usa `xsense_camera_event`, filtrado pela entidade selecionada.
 
 Exemplo de automação:
 

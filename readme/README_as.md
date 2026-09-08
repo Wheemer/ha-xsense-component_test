@@ -210,9 +210,12 @@ ____________________________________________________________
 <!-- xsense-recording-storage-modes -->
 কেমেৰা SD-কাৰ্ড ৰেকৰ্ডিং X-Sense Recordings ত দেখা দিয়ে। কেৱল প্লেবেক অবিকল্পিত সংৰক্ষণ ধৰণ: Home Assistant এ স্বাক্ষৰিত X-Sense URLসমূহ ব্যক্তিগত ৰাখে, HLS প্লেলিষ্ট পুনৰায় লিখে, আৰু প্ৰক্সি কৰে কেৱল যেতিয়া প্লেয়াৰে সিহতক অনুৰোধ কৰে, সম্পূৰ্ণ ক্লিপসমূহ ধৰি ৰাখিব নালাগে। স্থানীয় ৰেকৰ্ডিংসমূহ /media/xsense_recordings ৰ অন্তৰ্গত সম্পূৰ্ণ ক্লিপসমূহ সংৰক্ষণ কৰক আৰু বিন্যাসযোগ্য ধৰি ৰখা, এটা সৰ্বাধিক আকাৰ, হস্তচালিত মচি পেলোৱা, আৰু বৈকল্পিক পটভূমি সিঙ্ক সামৰ্থবান কৰে। স্থানীয় পৰিষ্কাৰ-পৰিচ্ছন্নতাই কেতিয়াও X-Sense SD কাৰ্ড বা ক্লাউড সংৰক্ষণৰ পৰা ৰেকৰ্ডিংসমূহ মচি পেলাব নোৱাৰে।
 
+<!-- xsense-cache-entry-ownership -->
+স্থানীয় ৰেকৰ্ডিঙৰ মালিকানা প্ৰতিটো সংযোজন প্ৰৱিষ্টিৰ বাবে পৃথককৈ ৰখা হয়। এটা প্ৰৱিষ্টিৰ ৰেকৰ্ডিং মচিলে আন এটা প্ৰৱিষ্টিয়ে ৰাখি থোৱা ৰেকৰ্ডিং অক্ষত থাকে। বৰ্তমানৰ কেশ্ব নিয়ন্ত্ৰণসমূহ সলনি নহয়।
+
 [![Blueprint import কৰক](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Camera Motion বৰ্তমানৰ Detected/Clear অৱস্থাৰ বাবে binary sensor আৰু প্ৰতিটো নতুন detection-ৰ বাবে এককালীন Motion event, দুয়োটা ৰূপতে উপলব্ধ। AI Detection এককালীন event। Manual automations ৰ বাবে `event.received` ব্যৱহাৰ কৰক; `event_type` কেৱল `person`, `pet`, `vehicle`, `package`, `other` বা `ai_detection` ধৰণৰ type filter কৰিবলৈ লাগে।
+Camera Motion বৰ্তমানৰ Detected/Clear অৱস্থাৰ বাবে binary sensor আৰু প্ৰতিটো নতুন detection-ৰ বাবে এককালীন Motion event, দুয়োটা ৰূপতে উপলব্ধ। AI Detection এককালীন event। `event.received` ৰ বাবে `options.event_type` বাধ্যতামূলক: গতিৰ বাবে `motion` বা সমৰ্থিত AI ধৰণ যেনে `person` বাছক। Blueprint এ `xsense_camera_event` ব্যৱহাৰ কৰে আৰু নিৰ্বাচিত entity অনুসৰি ফিল্টাৰ কৰে।
 
 Automation উদাহৰণ:
 

@@ -65,9 +65,12 @@ Kun Motion-tapahtuma sisältää X-Sense-toiston metatiedot, integrointi valmist
 <!-- xsense-recording-storage-modes -->
 Kameran SD-korttitallenteet näkyvät X-Sense Recordings:ssä. Ainoastaan ​​toisto on oletustallennustila: Home Assistant pitää allekirjoitetut X-Sense-URL-osoitteet yksityisinä, kirjoittaa HLS-soittolistan uudelleen ja välittää segmenttejä vain, kun soitin pyytää niitä säilyttämättä kokonaisia ​​leikkeitä. Säilytä paikalliset tallenteet tallentaa täydelliset leikkeet /media/xsense_recordings:n alla ja mahdollistaa määritettävän säilytyksen, enimmäiskoon, manuaalisen poistamisen ja valinnaisen taustasynkronoinnin. Paikallinen puhdistus ei koskaan poista tallenteita X-Sense SD-korteilta tai pilvitallennustilasta.
 
+<!-- xsense-cache-entry-ownership -->
+Paikallisten tallenteiden omistajuutta seurataan erikseen kullekin integraatiomääritykselle. Yhden määrityksen tyhjentäminen säilyttää toisen määrityksen säilyttämät tallenteet. Nykyiset välimuistin hallintatoiminnot pysyvät ennallaan.
+
 [![Tuo blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kameran liike on käytettävissä sekä Havaittu/Vapaa-binäärianturina että kertaluonteisena Motion-tapahtumana jokaiselle uudelle havainnolle. AI Detection on kertaluonteinen tapahtuma. Käytä manuaalisissa automaatioissa `event.received`; käytä `event_type` vain suodattamaan tyyppejä kuten `person`, `pet`, `vehicle`, `package`, `other` tai `ai_detection`.
+Kameran liike on käytettävissä sekä Havaittu/Vapaa-binäärianturina että kertaluonteisena Motion-tapahtumana jokaiselle uudelle havainnolle. AI Detection on kertaluonteinen tapahtuma. `event.received` edellyttää `options.event_type`-asetusta: `motion` liikkeelle tai tuettu AI-tyyppi, kuten `person`. Blueprint käyttää `xsense_camera_event`-tapahtumaa ja suodattaa valitun entiteetin mukaan.
 
 Esimerkkiautomaatio:
 

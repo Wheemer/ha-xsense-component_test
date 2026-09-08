@@ -11,6 +11,7 @@ from .python_xsense.async_xsense import is_camera_entity
 from .python_xsense.device import Device
 from .python_xsense.entity import Entity
 from .python_xsense.entity_map import EntityType, entities
+from .python_xsense.mapping import bool_state
 
 from homeassistant import config_entries
 from homeassistant import const as ha_const
@@ -127,7 +128,7 @@ def has_device_status(entity: Entity) -> bool:
 
 def apk_device_status(entity: Entity) -> str:
     """Return the APK current-status value using its exact precedence."""
-    if str(entity.data.get("isLifeEnd", "")).strip() == "1":
+    if bool_state(entity.data.get("isLifeEnd")) is True:
         return "end_of_life"
     if str(entity.data.get("sensorStatus", "")).strip() == "1":
         return "malfunction"

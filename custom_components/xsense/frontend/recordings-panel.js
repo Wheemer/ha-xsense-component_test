@@ -1966,6 +1966,8 @@ class XSenseRecordingsPanel extends HTMLElement {
     this.notice = "";
     this.signedPaths = new Map();
     this.playbackUrls = new Map();
+    this.playbackRequests = new Map();
+    this.playbackTokens = new Map();
     this.playbackTypes = new Map();
     this.playbackProfiles = new Map();
     this.playbackErrors = new Map();
@@ -1973,7 +1975,10 @@ class XSenseRecordingsPanel extends HTMLElement {
     this.hlsInstances = new Map();
     this.hlsLibraryPromise = null;
     this.handleRouteChange = async () => {
+      const previous = this.selectedClip && this.playbackKey(this.selectedClip);
       this.syncRouteFromHash();
+      const current = this.selectedClip && this.playbackKey(this.selectedClip);
+      if (previous !== current) this.disposePlaybackResources();
       if (this.selectedClip) {
         await this.prepareClipPlayback(this.selectedClip);
       }
@@ -2578,7 +2583,6 @@ class XSenseRecordingsPanel extends HTMLElement {
     const previousClip = this.selectedClip;
     if (previousClip && this.playbackKey(previousClip) !== this.playbackKey(clip)) {
       this.disposePlaybackResources();
-      await this.releaseTemporaryPlayback(previousClip);
     }
     this.selectedCameraKey = this.clipKey(clip);
     this.selectedDate = clip.date || this.selectedDate;
@@ -2595,10 +2599,8 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   async closeViewer() {
-    const clip = this.selectedClip;
     this.disposePlaybackResources();
     this.selectedClip = null;
-    if (clip) await this.releaseTemporaryPlayback(clip);
     if (window.history.state?.xsenseRecordingViewer) {
       window.history.back();
       return;
@@ -2607,12 +2609,13 @@ class XSenseRecordingsPanel extends HTMLElement {
     this.render();
   }
 
-  async releaseTemporaryPlayback(clip) {
-    if (!clip?.entry_id || !clip?.serial || !clip?.start) return;
+  async releaseTemporaryPlayback(clip, token = "") {
+    if (!clip?.entry_id || !clip?.serial || !clip?.start || !token) return;
     const params = new URLSearchParams({
       serial: clip.serial,
       start: String(clip.start),
       end: String(clip.end || clip.start),
+      token,
     });
     try {
       await this._hass.callApi(
@@ -2680,6 +2683,9 @@ class XSenseRecordingsPanel extends HTMLElement {
       return;
     }
     const startedAt = performance.now();
+    const controller = new AbortController();
+    this.playbackRequests.set(key, controller);
+    const isCurrent = () => this.playbackRequests.get(key) === controller && !controller.signal.aborted;
     this.playbackLoadingKey = key;
     this.playbackErrors.delete(key);
     this.render();
@@ -2688,6 +2694,7 @@ class XSenseRecordingsPanel extends HTMLElement {
         playback_url: playbackPath,
       }));
       const signedPath = await this.signPath(playbackPath);
+      if (!isCurrent()) return;
       this.logPanelEvent("playback_signed_path_ready", this.clipDebugPayload(clip, {
         playback_url: playbackPath,
         elapsed_ms: Math.round(performance.now() - startedAt),
@@ -2699,7 +2706,14 @@ class XSenseRecordingsPanel extends HTMLElement {
       const response = await fetch(signedPath, {
         credentials: "same-origin",
         cache: "no-store",
+        signal: controller.signal,
       });
+      const token = response.headers.get("X-XSense-Playback-Token") || "";
+      if (!isCurrent()) {
+        if (token) void this.releaseTemporaryPlayback(clip, token);
+        return;
+      }
+      if (token) this.playbackTokens.set(key, { clip, token });
       this.logPanelEvent("playback_fetch_response", this.clipDebugPayload(clip, {
         playback_url: playbackPath,
         status: response.status,
@@ -2730,6 +2744,7 @@ class XSenseRecordingsPanel extends HTMLElement {
         return;
       }
       const blob = await response.blob();
+      if (!isCurrent()) return;
       if (!blob.size) {
         throw new Error(this.t("recordingEmpty"));
       }
@@ -2741,6 +2756,8 @@ class XSenseRecordingsPanel extends HTMLElement {
         elapsed_ms: Math.round(performance.now() - startedAt),
       }));
     } catch (err) {
+      if (!isCurrent()) return;
+      this.clearPlaybackUrl(key);
       this.playbackErrors.set(key, err?.message || String(err));
       this.logPanelEvent("playback_error", this.clipDebugPayload(clip, {
         playback_url: playbackPath,
@@ -2748,8 +2765,9 @@ class XSenseRecordingsPanel extends HTMLElement {
         elapsed_ms: Math.round(performance.now() - startedAt),
       }));
     } finally {
-      if (this.playbackLoadingKey === key) {
-        this.playbackLoadingKey = "";
+      if (this.playbackRequests.get(key) === controller) {
+        this.playbackRequests.delete(key);
+        if (this.playbackLoadingKey === key) this.playbackLoadingKey = "";
       }
     }
   }
@@ -2773,6 +2791,9 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   clearPlaybackUrl(key) {
+    const session = this.playbackTokens.get(key);
+    this.playbackTokens.delete(key);
+    if (session) void this.releaseTemporaryPlayback(session.clip, session.token);
     const previousUrl = this.playbackUrls.get(key);
     const previousType = this.playbackTypes.get(key);
     if (previousType === "blob" && previousUrl) {
@@ -2786,6 +2807,13 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   disposePlaybackResources() {
+    for (const controller of this.playbackRequests.values()) controller.abort();
+    this.playbackRequests.clear();
+    this.playbackLoadingKey = "";
+    for (const { clip, token } of this.playbackTokens.values()) {
+      void this.releaseTemporaryPlayback(clip, token);
+    }
+    this.playbackTokens.clear();
     const video = this.shadowRoot.getElementById("viewer-video");
     if (video) {
       video.pause?.();
@@ -2834,6 +2862,7 @@ class XSenseRecordingsPanel extends HTMLElement {
       return;
     }
     const Hls = await this.loadHlsLibrary();
+    if (this.shadowRoot.getElementById("viewer-video") !== video || this.playbackUrls.get(key) !== hlsUrl) return;
     if (!Hls?.isSupported?.()) {
       throw new Error(this.t("hlsPlaybackUnsupported"));
     }
@@ -2851,6 +2880,7 @@ class XSenseRecordingsPanel extends HTMLElement {
       defaultAudioCodec: "mp4a.40.2",
     });
     hls.on(Hls.Events.ERROR, (_event, data) => {
+      if (this.hlsInstances.get(key) !== hls) return;
       this.logPanelEvent("playback_hls_js_error", this.clipDebugPayload(this.selectedClip, {
         playback_url: hlsUrl,
         type: data?.type || "",
@@ -2941,15 +2971,17 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   async signPath(path) {
-    if (this.signedPaths.has(path)) {
-      return this.signedPaths.get(path);
+    const cached = this.signedPaths.get(path);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.path;
     }
+    const expiresAt = Date.now() + 3540 * 1000;
     const result = await this._hass.connection.sendMessagePromise({
       type: "auth/sign_path",
       path,
       expires: 3600,
     });
-    this.signedPaths.set(path, result.path);
+    this.signedPaths.set(path, { path: result.path, expiresAt });
     return result.path;
   }
 

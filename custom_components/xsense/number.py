@@ -635,6 +635,8 @@ class XSenseNumberEntity(XSenseEntity, NumberEntity):
             )
             entity.data[self.entity_description.data_key] = int_value
         elif self.entity_description.shadow_setting:
+            if self.entity_description.data_key in {"detcSens", "sensitivity"}:
+                value = round(value)
             await self.coordinator.xsense.update_shadow_setting(
                 entity, self.entity_description.data_key, value
             )

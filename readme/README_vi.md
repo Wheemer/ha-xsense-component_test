@@ -123,9 +123,12 @@ Khi sự kiện Motion bao gồm siêu dữ liệu phát lại X-Sense, quá tr�
 <!-- xsense-recording-storage-modes -->
 Bản ghi thẻ SD của máy ảnh xuất hiện trong X-Sense Recordings. Chỉ phát lại là chế độ lưu trữ mặc định: Home Assistant giữ các URL X-Sense đã ký ở chế độ riêng tư, viết lại danh sách phát HLS và chỉ phân đoạn proxy khi người chơi yêu cầu mà không giữ lại các clip hoàn chỉnh. Giữ bản ghi cục bộ lưu trữ các clip hoàn chỉnh trong /media/xsense_recordings và cho phép lưu giữ có thể định cấu hình, kích thước tối đa, xóa thủ công và đồng bộ hóa nền tùy chọn. Tính năng dọn dẹp cục bộ không bao giờ xóa các bản ghi khỏi thẻ SD X-Sense hoặc bộ lưu trữ đám mây.
 
+<!-- xsense-cache-entry-ownership -->
+Quyền sở hữu bản ghi cục bộ được theo dõi riêng cho từng mục tích hợp. Xóa bộ nhớ đệm của một mục vẫn giữ lại các bản ghi do mục khác lưu giữ. Các điều khiển bộ nhớ đệm hiện có không thay đổi.
+
 [![Nhập blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Chuyển động của camera có cả cảm biến nhị phân Đã phát hiện/Không phát hiện và sự kiện Motion một lần cho mỗi lần phát hiện mới. AI Detection là sự kiện một lần. Với tự động hóa thủ công hãy dùng `event.received`; chỉ dùng `event_type` để lọc các loại như `person`, `pet`, `vehicle`, `package`, `other` hoặc `ai_detection`.
+Chuyển động của camera có cả cảm biến nhị phân Đã phát hiện/Không phát hiện và sự kiện Motion một lần cho mỗi lần phát hiện mới. AI Detection là sự kiện một lần. Với `event.received`, `options.event_type` là bắt buộc: `motion` cho chuyển động hoặc loại AI được hỗ trợ như `person`. Blueprint dùng `xsense_camera_event` và lọc theo thực thể đã chọn.
 
 Ví dụ tự động hóa:
 

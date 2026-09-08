@@ -184,6 +184,9 @@ class XSenseAlarmControlPanel(
     @property
     def _station(self):
         """Return the current station object from coordinator data."""
+        incoming = getattr(self.coordinator, "_alarm_mode_station", None)
+        if incoming is not None and incoming.entity_id == self._station_id:
+            return incoming
         return coordinator_stations(self.coordinator).get(self._station_id)
 
     @property
@@ -238,7 +241,7 @@ class XSenseAlarmControlPanel(
 
         station_replaced = station is not self._bound_station
         self._bound_station = station
-        reported_mode = getattr(station, "alarm_mode", None)
+        result = getattr(station, "_xsense_mode_result", {})
         if self._active_normal_arm_mode is not None:
             station.set_alarm_data(
                 {"requestedSafeMode": self._active_normal_arm_mode}
@@ -249,15 +252,20 @@ class XSenseAlarmControlPanel(
         force_reason = alarm_data.get("forceReason")
         if self._active_normal_arm_mode is not None:
             requested_mode = self._active_normal_arm_mode
-            if reported_mode == requested_mode:
-                # The APK's mode listener completes the request before its
-                # force-reason listener can open a bypass confirmation.
+            if result.get("kind") == "mode":
+                # APK Y1/Q completes with the actual mode, even a different one.
                 self._async_clear_arm_request(station)
                 pending_mode = None
-            elif force_reason:
+            elif (
+                result.get("kind") == "confirmation"
+                and isinstance(result.get("forceReason"), list)
+                and result["forceReason"]
+            ):
                 pending_mode = requested_mode
                 station.set_alarm_data(
                     {
+                        "forceReason": result["forceReason"],
+                        "exitDelay": result.get("exitDelay"),
                         "requestedSafeMode": requested_mode,
                         "safeModeAim": None,
                     }

@@ -1,0 +1,119 @@
+{
+  "ar": {},
+  "as": {},
+  "cs": {},
+  "da": {
+    "entity.sensor.device_status.state.normal": {
+      "text": "Normal",
+      "reason": "Native word has the same spelling as English"
+    },
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "de": {
+    "entity.sensor.device_status.state.normal": {
+      "text": "Normal",
+      "reason": "Native word has the same spelling as English"
+    },
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "el": {},
+  "es": {
+    "entity.sensor.device_status.state.normal": {
+      "text": "Normal",
+      "reason": "Native word has the same spelling as English"
+    },
+    "entity.sensor.color.name": {
+      "text": "Color",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "et": {},
+  "fa": {},
+  "fi": {},
+  "fr": {},
+  "he": {},
+  "hi": {},
+  "hr": {
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Alarm is also the native noun in this locale"
+    }
+  },
+  "hu": {},
+  "id": {
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Alarm is also the native noun in this locale"
+    }
+  },
+  "it": {},
+  "ja": {},
+  "ko": {},
+  "lt": {},
+  "lv": {},
+  "nl": {
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Alarm is also the native noun in this locale"
+    }
+  },
+  "no": {
+    "entity.sensor.device_status.state.normal": {
+      "text": "Normal",
+      "reason": "Normal is native Norwegian for the normal state"
+    },
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Alarm is also the native noun in this locale"
+    }
+  },
+  "pl": {
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "pt": {},
+  "pt-BR": {},
+  "ro": {
+    "entity.sensor.device_status.state.normal": {
+      "text": "Normal",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "ru": {},
+  "sk": {},
+  "sl": {
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "sv": {
+    "entity.sensor.device_status.state.normal": {
+      "text": "Normal",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "th": {},
+  "tr": {
+    "entity.sensor.device_status.state.normal": {
+      "text": "Normal",
+      "reason": "Native word has the same spelling as English"
+    },
+    "entity.alarm_control_panel.alarm.name": {
+      "text": "Alarm",
+      "reason": "Native word has the same spelling as English"
+    }
+  },
+  "uk": {},
+  "vi": {},
+  "zh-CN": {},
+  "zh-TW": {}
+}
