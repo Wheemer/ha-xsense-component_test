@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import voluptuous as vol
@@ -262,7 +263,15 @@ def _safe_media_path(value: Any) -> str:
 def _recording_media_path_allowed(value: Any) -> bool:
     """Return whether a recording media path stays under Home Assistant media."""
     path = str(value or "").strip()
-    return path == "/media" or path.startswith("/media/")
+    lexical = PurePosixPath(path)
+    if not lexical.is_absolute() or ".." in lexical.parts or "\x00" in path:
+        return False
+    if lexical != PurePosixPath("/media") and PurePosixPath("/media") not in lexical.parents:
+        return False
+    try:
+        return Path(path).resolve().is_relative_to(Path("/media").resolve())
+    except (OSError, RuntimeError, ValueError):
+        return False
 
 
 def _safe_order(value: Any, default: str) -> str:

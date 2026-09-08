@@ -1,0 +1,250 @@
+{
+  "zh-CN": {
+    "entity.number.camera_cooldown.name": "录像间隔",
+    "entity.select.camera_cooldown.name": "云端录像间隔",
+    "entity.switch.camera_cooldown.name": "录像间隔",
+    "exceptions.cooldown_state_unknown.message": "X-Sense 录像间隔的启用状态未知",
+    "entity.binary_sensor.is_life_end.name": "使用寿命已结束",
+    "entity.sensor.device_status.state.end_of_life": "使用寿命已结束"
+  },
+  "zh-Hans": {
+    "entity.number.camera_cooldown.name": "录像间隔",
+    "entity.select.camera_cooldown.name": "云端录像间隔",
+    "entity.switch.camera_cooldown.name": "录像间隔",
+    "exceptions.cooldown_state_unknown.message": "X-Sense 录像间隔的启用状态未知",
+    "entity.binary_sensor.is_life_end.name": "使用寿命已结束",
+    "entity.sensor.device_status.state.end_of_life": "使用寿命已结束"
+  },
+  "zh-TW": {
+    "entity.number.camera_cooldown.name": "錄影間隔",
+    "entity.select.camera_cooldown.name": "雲端錄影間隔",
+    "entity.switch.camera_cooldown.name": "錄影間隔",
+    "exceptions.cooldown_state_unknown.message": "X-Sense 錄影間隔的啟用狀態未知",
+    "entity.binary_sensor.is_life_end.name": "使用壽命已結束",
+    "entity.sensor.device_status.state.end_of_life": "使用壽命已結束"
+  },
+  "zh-Hant": {
+    "entity.number.camera_cooldown.name": "錄影間隔",
+    "entity.select.camera_cooldown.name": "雲端錄影間隔",
+    "entity.switch.camera_cooldown.name": "錄影間隔",
+    "exceptions.cooldown_state_unknown.message": "X-Sense 錄影間隔的啟用狀態未知",
+    "entity.binary_sensor.is_life_end.name": "使用壽命已結束",
+    "entity.sensor.device_status.state.end_of_life": "使用壽命已結束"
+  },
+  "pt": {
+    "entity.number.camera_cooldown.name": "Intervalo entre gravações",
+    "entity.select.camera_cooldown.name": "Intervalo entre gravações na nuvem",
+    "entity.switch.camera_cooldown.name": "Intervalo entre gravações",
+    "exceptions.cooldown_state_unknown.message": "O estado de ativação do intervalo entre gravações X-Sense é desconhecido",
+    "entity.binary_sensor.is_life_end.name": "Fim da vida útil",
+    "entity.sensor.device_status.state.end_of_life": "Fim da vida útil"
+  },
+  "pt-BR": {
+    "entity.number.camera_cooldown.name": "Intervalo entre gravações",
+    "entity.select.camera_cooldown.name": "Intervalo entre gravações na nuvem",
+    "entity.switch.camera_cooldown.name": "Intervalo entre gravações",
+    "exceptions.cooldown_state_unknown.message": "O estado de ativação do intervalo entre gravações X-Sense é desconhecido",
+    "entity.binary_sensor.is_life_end.name": "Fim da vida útil",
+    "entity.sensor.device_status.state.end_of_life": "Fim da vida útil"
+  },
+  "sl": {
+    "entity.number.camera_cooldown.name": "Premor med snemanji",
+    "entity.select.camera_cooldown.name": "Premor med snemanji v oblaku",
+    "entity.switch.camera_cooldown.name": "Premor med snemanji",
+    "exceptions.cooldown_state_unknown.message": "Stanje vklopa premora med snemanji X-Sense ni znano",
+    "entity.binary_sensor.is_life_end.name": "Konec življenjske dobe",
+    "entity.sensor.device_status.state.end_of_life": "Konec življenjske dobe"
+  },
+  "th": {
+    "entity.number.camera_cooldown.name": "ช่วงพักระหว่างการบันทึกวิดีโอ",
+    "entity.select.camera_cooldown.name": "ช่วงพักระหว่างการบันทึกวิดีโอบนคลาวด์",
+    "entity.switch.camera_cooldown.name": "ช่วงพักระหว่างการบันทึกวิดีโอ",
+    "exceptions.cooldown_state_unknown.message": "ไม่ทราบสถานะการเปิดใช้ช่วงพักระหว่างการบันทึกวิดีโอ X-Sense",
+    "entity.binary_sensor.is_life_end.name": "หมดอายุการใช้งาน",
+    "entity.sensor.device_status.state.end_of_life": "หมดอายุการใช้งาน"
+  },
+  "pl": {
+    "entity.number.camera_cooldown.name": "Przerwa między nagraniami",
+    "entity.select.camera_cooldown.name": "Przerwa między nagraniami w chmurze",
+    "entity.switch.camera_cooldown.name": "Przerwa między nagraniami",
+    "exceptions.cooldown_state_unknown.message": "Stan włączenia przerwy między nagraniami X-Sense jest nieznany",
+    "entity.binary_sensor.is_life_end.name": "Koniec okresu eksploatacji",
+    "entity.sensor.device_status.state.end_of_life": "Koniec okresu eksploatacji"
+  },
+  "ro": {
+    "entity.number.camera_cooldown.name": "Pauză între înregistrări",
+    "entity.select.camera_cooldown.name": "Pauză între înregistrări în cloud",
+    "entity.switch.camera_cooldown.name": "Pauză între înregistrări",
+    "exceptions.cooldown_state_unknown.message": "Starea activării pauzei între înregistrări X-Sense este necunoscută",
+    "entity.binary_sensor.is_life_end.name": "Sfârșitul duratei de viață",
+    "entity.sensor.device_status.state.end_of_life": "Sfârșitul duratei de viață"
+  },
+  "ru": {
+    "entity.number.camera_cooldown.name": "Пауза между видеозаписями",
+    "entity.select.camera_cooldown.name": "Пауза между облачными видеозаписями",
+    "entity.switch.camera_cooldown.name": "Пауза между видеозаписями",
+    "exceptions.cooldown_state_unknown.message": "Состояние включения паузы между видеозаписями X-Sense неизвестно",
+    "entity.binary_sensor.is_life_end.name": "Конец срока службы",
+    "entity.sensor.device_status.state.end_of_life": "Конец срока службы"
+  },
+  "sk": {
+    "entity.number.camera_cooldown.name": "Prestávka medzi nahrávkami",
+    "entity.select.camera_cooldown.name": "Prestávka medzi nahrávkami v cloude",
+    "entity.switch.camera_cooldown.name": "Prestávka medzi nahrávkami",
+    "exceptions.cooldown_state_unknown.message": "Stav zapnutia prestávky medzi nahrávkami X-Sense nie je známy",
+    "entity.binary_sensor.is_life_end.name": "Koniec životnosti",
+    "entity.sensor.device_status.state.end_of_life": "Koniec životnosti"
+  },
+  "sv": {
+    "entity.number.camera_cooldown.name": "Paus mellan inspelningar",
+    "entity.select.camera_cooldown.name": "Paus mellan molninspelningar",
+    "entity.switch.camera_cooldown.name": "Paus mellan inspelningar",
+    "exceptions.cooldown_state_unknown.message": "Aktiveringstillståndet för pausen mellan X-Sense-inspelningar är okänt",
+    "entity.binary_sensor.is_life_end.name": "Livslängden slut",
+    "entity.sensor.device_status.state.end_of_life": "Livslängden slut"
+  },
+  "tr": {
+    "entity.number.camera_cooldown.name": "Kayıtlar arası bekleme",
+    "entity.select.camera_cooldown.name": "Bulut kayıtları arası bekleme süresi",
+    "entity.switch.camera_cooldown.name": "Kayıtlar arası bekleme",
+    "exceptions.cooldown_state_unknown.message": "X-Sense kayıtlar arası bekleme süresinin etkinlik durumu bilinmiyor",
+    "entity.binary_sensor.is_life_end.name": "Kullanım Ömrü Sonu",
+    "entity.sensor.device_status.state.end_of_life": "Kullanım Ömrü Sonu"
+  },
+  "uk": {
+    "entity.number.camera_cooldown.name": "Пауза між відеозаписами",
+    "entity.select.camera_cooldown.name": "Пауза між хмарними відеозаписами",
+    "entity.switch.camera_cooldown.name": "Пауза між відеозаписами",
+    "exceptions.cooldown_state_unknown.message": "Стан увімкнення паузи між відеозаписами X-Sense невідомий",
+    "entity.binary_sensor.is_life_end.name": "Кінець терміну служби",
+    "entity.sensor.device_status.state.end_of_life": "Кінець терміну служби"
+  },
+  "vi": {
+    "entity.number.camera_cooldown.name": "Khoảng nghỉ giữa các lần ghi hình",
+    "entity.select.camera_cooldown.name": "Khoảng nghỉ giữa các lần ghi hình trên đám mây",
+    "entity.switch.camera_cooldown.name": "Khoảng nghỉ giữa các lần ghi hình",
+    "exceptions.cooldown_state_unknown.message": "Không rõ trạng thái bật khoảng nghỉ giữa các lần ghi hình X-Sense",
+    "entity.binary_sensor.is_life_end.name": "Hết tuổi thọ sử dụng",
+    "entity.sensor.device_status.state.end_of_life": "Hết tuổi thọ sử dụng"
+  },
+  "ja": {
+    "entity.binary_sensor.is_life_end.name": "寿命終了",
+    "entity.sensor.device_status.state.end_of_life": "寿命終了"
+  },
+  "hi": {
+    "entity.binary_sensor.is_life_end.name": "उपकरण का उपयोगकाल समाप्त",
+    "entity.sensor.device_status.state.end_of_life": "उपकरण का उपयोगकाल समाप्त"
+  },
+  "hu": {
+    "entity.binary_sensor.is_life_end.name": "Készülék élettartamának vége",
+    "entity.sensor.device_status.state.end_of_life": "Készülék élettartamának vége"
+  },
+  "id": {
+    "entity.binary_sensor.is_life_end.name": "Masa pakai perangkat berakhir",
+    "entity.sensor.device_status.state.end_of_life": "Masa pakai perangkat berakhir"
+  },
+  "lt": {
+    "entity.binary_sensor.is_life_end.name": "Įrenginio eksploatavimo pabaiga",
+    "entity.sensor.device_status.state.end_of_life": "Įrenginio eksploatavimo pabaiga"
+  },
+  "lv": {
+    "entity.binary_sensor.is_life_end.name": "Ierīces darbmūža beigas",
+    "entity.sensor.device_status.state.end_of_life": "Ierīces darbmūža beigas"
+  },
+  "ar": {
+    "entity.number.camera_cooldown.name": "الفاصل بين التسجيلات",
+    "entity.switch.camera_cooldown.name": "الفاصل بين التسجيلات",
+    "entity.select.camera_cooldown.name": "الفاصل بين التسجيلات السحابية",
+    "exceptions.cooldown_state_unknown.message": "حالة تفعيل الفاصل بين التسجيلات في X-Sense غير معروفة",
+    "entity.binary_sensor.is_life_end.name": "نهاية العمر التشغيلي",
+    "entity.sensor.device_status.state.end_of_life": "نهاية العمر التشغيلي"
+  },
+  "as": {
+    "entity.number.camera_cooldown.name": "ৰেকৰ্ডিঙৰ মাজৰ বিৰতি",
+    "entity.switch.camera_cooldown.name": "ৰেকৰ্ডিঙৰ মাজৰ বিৰতি",
+    "entity.select.camera_cooldown.name": "ক্লাউড ৰেকৰ্ডিঙৰ মাজৰ বিৰতি",
+    "exceptions.cooldown_state_unknown.message": "X-Senseৰ ৰেকৰ্ডিঙৰ মাজৰ বিৰতি সক্ষম নে নাই অজ্ঞাত",
+    "entity.binary_sensor.is_life_end.name": "কাৰ্যকালৰ সমাপ্তি",
+    "entity.sensor.device_status.state.end_of_life": "কাৰ্যকালৰ সমাপ্তি"
+  },
+  "cs": {
+    "entity.number.camera_cooldown.name": "Prodleva mezi záznamy",
+    "entity.switch.camera_cooldown.name": "Prodleva mezi záznamy",
+    "entity.select.camera_cooldown.name": "Prodleva mezi cloudovými záznamy",
+    "exceptions.cooldown_state_unknown.message": "Není známo, zda je prodleva mezi záznamy X-Sense povolena",
+    "entity.binary_sensor.is_life_end.name": "Konec životnosti",
+    "entity.sensor.device_status.state.end_of_life": "Konec životnosti"
+  },
+  "da": {
+    "entity.number.camera_cooldown.name": "Pause mellem optagelser",
+    "entity.switch.camera_cooldown.name": "Pause mellem optagelser",
+    "entity.select.camera_cooldown.name": "Pause mellem cloudoptagelser",
+    "exceptions.cooldown_state_unknown.message": "Det er ukendt, om X-Sense-pausen mellem optagelser er aktiveret",
+    "entity.binary_sensor.is_life_end.name": "Levetid udløbet",
+    "entity.sensor.device_status.state.end_of_life": "Levetid udløbet"
+  },
+  "de": {
+    "entity.number.camera_cooldown.name": "Intervall zwischen Aufnahmen",
+    "entity.switch.camera_cooldown.name": "Intervall zwischen Aufnahmen",
+    "entity.select.camera_cooldown.name": "Intervall zwischen Cloud-Aufnahmen",
+    "exceptions.cooldown_state_unknown.message": "Es ist unbekannt, ob das X-Sense-Intervall zwischen Aufnahmen aktiviert ist",
+    "entity.binary_sensor.is_life_end.name": "Ende der Lebensdauer",
+    "entity.sensor.device_status.state.end_of_life": "Ende der Lebensdauer"
+  },
+  "el": {
+    "entity.number.camera_cooldown.name": "Διάστημα μεταξύ εγγραφών",
+    "entity.switch.camera_cooldown.name": "Διάστημα μεταξύ εγγραφών",
+    "entity.select.camera_cooldown.name": "Διάστημα μεταξύ εγγραφών στο cloud",
+    "exceptions.cooldown_state_unknown.message": "Η κατάσταση ενεργοποίησης του διαστήματος μεταξύ εγγραφών X-Sense είναι άγνωστη",
+    "entity.binary_sensor.is_life_end.name": "Τέλος διάρκειας λειτουργίας",
+    "entity.sensor.device_status.state.end_of_life": "Τέλος διάρκειας λειτουργίας"
+  },
+  "es": {
+    "entity.number.camera_cooldown.name": "Intervalo entre grabaciones",
+    "entity.switch.camera_cooldown.name": "Intervalo entre grabaciones",
+    "entity.select.camera_cooldown.name": "Intervalo entre grabaciones en la nube",
+    "exceptions.cooldown_state_unknown.message": "Se desconoce si el intervalo entre grabaciones de X-Sense está habilitado",
+    "entity.binary_sensor.is_life_end.name": "Fin de la vida útil",
+    "entity.sensor.device_status.state.end_of_life": "Fin de la vida útil"
+  },
+  "et": {
+    "entity.number.camera_cooldown.name": "Salvestuste vaheline paus",
+    "entity.switch.camera_cooldown.name": "Salvestuste vaheline paus",
+    "entity.select.camera_cooldown.name": "Pilvesalvestuste vaheline paus",
+    "exceptions.cooldown_state_unknown.message": "Pole teada, kas X-Sense'i salvestuste vaheline paus on lubatud",
+    "entity.binary_sensor.is_life_end.name": "Kasutusea lõpp",
+    "entity.sensor.device_status.state.end_of_life": "Kasutusea lõpp"
+  },
+  "fa": {
+    "entity.number.camera_cooldown.name": "فاصله میان ضبط‌ها",
+    "entity.switch.camera_cooldown.name": "فاصله میان ضبط‌ها",
+    "entity.select.camera_cooldown.name": "فاصله میان ضبط‌های ابری",
+    "exceptions.cooldown_state_unknown.message": "وضعیت فعال بودن فاصله میان ضبط‌های X-Sense نامشخص است",
+    "entity.binary_sensor.is_life_end.name": "پایان عمر مفید",
+    "entity.sensor.device_status.state.end_of_life": "پایان عمر مفید"
+  },
+  "fi": {
+    "entity.number.camera_cooldown.name": "Tallennusten välinen viive",
+    "entity.switch.camera_cooldown.name": "Tallennusten välinen viive",
+    "entity.select.camera_cooldown.name": "Pilvitallennusten välinen viive",
+    "exceptions.cooldown_state_unknown.message": "X-Sense-tallennusten välisen viiveen käyttötila ei ole tiedossa",
+    "entity.binary_sensor.is_life_end.name": "Käyttöiän loppu",
+    "entity.sensor.device_status.state.end_of_life": "Käyttöiän loppu"
+  },
+  "fr": {
+    "entity.number.camera_cooldown.name": "Délai entre les enregistrements",
+    "entity.switch.camera_cooldown.name": "Délai entre les enregistrements",
+    "entity.select.camera_cooldown.name": "Délai entre les enregistrements cloud",
+    "exceptions.cooldown_state_unknown.message": "L'état d'activation du délai entre les enregistrements X-Sense est inconnu",
+    "entity.binary_sensor.is_life_end.name": "Fin de vie",
+    "entity.sensor.device_status.state.end_of_life": "Fin de vie"
+  },
+  "he": {
+    "entity.number.camera_cooldown.name": "השהיה בין הקלטות",
+    "entity.switch.camera_cooldown.name": "השהיה בין הקלטות",
+    "entity.select.camera_cooldown.name": "השהיה בין הקלטות בענן",
+    "exceptions.cooldown_state_unknown.message": "לא ידוע אם ההשהיה בין הקלטות ב-X-Sense מופעלת",
+    "entity.binary_sensor.is_life_end.name": "סוף חיי השירות",
+    "entity.sensor.device_status.state.end_of_life": "סוף חיי השירות"
+  }
+}

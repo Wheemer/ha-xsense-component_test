@@ -65,9 +65,12 @@ Ja Motion notikums ietver X-Sense atskaņošanas metadatus, integrācija sagatav
 <!-- xsense-recording-storage-modes -->
 Kameras SD kartes ieraksti tiek parādīti X-Sense Recordings. Tikai atskaņošana ir noklusējuma krātuves režīms: Home Assistant saglabā parakstītos X-Sense vietrāžus URL privātus, pārraksta HLS atskaņošanas sarakstu un izmanto starpniekserveri segmentus tikai tad, kad atskaņotājs tos pieprasa, nesaglabājot pilnīgus klipus. Vietējo ierakstu saglabāšana saglabā pilnīgus klipus zem /media/xsense_recordings un nodrošina konfigurējamu saglabāšanu, maksimālo izmēru, manuālu dzēšanu un izvēles fona sinhronizāciju. Vietējā tīrīšana nekad neizdzēš ierakstus no X-Sense SD kartēm vai mākoņkrātuves.
 
+<!-- xsense-cache-entry-ownership -->
+Vietējo ierakstu piederība tiek uzskaitīta katram integrācijas ierakstam atsevišķi. Iztīrot viena integrācijas ieraksta kešatmiņu, tiek saglabāti ieraksti, ko patur cits integrācijas ieraksts. Esošās kešatmiņas vadīklas paliek nemainīgas.
+
 [![Importēt blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kameras kustība ir pieejama gan kā binārais sensors Noteikts/Brīvs, gan kā vienreizējs Motion notikums katrai jaunai noteikšanai. AI Detection ir vienreizējs notikums. Manuālām automatizācijām izmantojiet `event.received`; `event_type` lietojiet tikai, lai filtrētu tipus kā `person`, `pet`, `vehicle`, `package`, `other` vai `ai_detection`.
+Kameras kustība ir pieejama gan kā binārais sensors Noteikts/Brīvs, gan kā vienreizējs Motion notikums katrai jaunai noteikšanai. AI Detection ir vienreizējs notikums. Izmantojot `event.received`, `options.event_type` ir obligāts: `motion` kustībai vai atbalstīts AI tips, piemēram, `person`. Blueprint izmanto `xsense_camera_event` un filtrē pēc izvēlētās entītijas.
 
 Automatizācijas piemērs:
 

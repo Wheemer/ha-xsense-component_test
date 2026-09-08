@@ -3,6 +3,7 @@ import importlib
 import logging
 import os
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
@@ -1822,7 +1823,7 @@ def test_motion_event_stores_derived_frame_before_firing(monkeypatch):
             ("trigger", event_type, data.get("snapshot_url"))
         ),
     )
-    camera_entity = SimpleNamespace(sn="CAMERA-SN")
+    camera_entity = SimpleNamespace(sn="CAMERA-SN", data={"eventTime": "20260903172848"})
     event_data = {
         "time": "20260903172848",
         "camera_entity_id": "camera.garden",
@@ -4836,10 +4837,12 @@ def test_recording_thumbnail_warmup_schedules_missing_thumbnails(monkeypatch):
     assert cached == list(range(2, 12))
 
 
-def test_clear_recording_caches_removes_managers_and_media(monkeypatch):
+def test_clear_recording_caches_removes_managers_and_media(monkeypatch, tmp_path):
     from custom_components.xsense import recordings_media as media_source
 
     cleared_media = []
+    monkeypatch.setattr(media_source, "DEFAULT_RECORDING_MEDIA_STORAGE_PATH", str(tmp_path))
+    monkeypatch.setattr(media_source, "_recording_media_root_from_value", lambda value: Path(value))
 
     class Manager:
         def __init__(self):
@@ -4857,7 +4860,8 @@ def test_clear_recording_caches_removes_managers_and_media(monkeypatch):
         config_entries=SimpleNamespace(async_entries=lambda domain: []),
         async_add_executor_job=async_add_executor_job,
     )
-    def delete_groups(root, protected, keys, prefixes, suppress_recache=False):
+    def delete_groups(root, protected, keys, prefixes, suppress_recache=False, groups=None):
+        assert root == tmp_path
         cleared_media.append([root])
         return media_source._empty_cache_cleanup_summary()
 
@@ -4868,14 +4872,15 @@ def test_clear_recording_caches_removes_managers_and_media(monkeypatch):
     assert manager.removed
     assert "_recording_indexes" not in hass.data[media_source.DOMAIN]
     assert len(cleared_media) == 1
-    assert [path.as_posix() for path in cleared_media[0]] == ["/media/xsense_recordings"]
+    assert cleared_media[0] == [tmp_path]
 
 
-def test_clear_recording_caches_scopes_media_to_entry(monkeypatch):
+def test_clear_recording_caches_scopes_media_to_entry(monkeypatch, tmp_path):
     from custom_components.xsense import recordings_media as media_source
     from custom_components.xsense.const import CONF_RECORDING_MEDIA_STORAGE_PATH
 
     cleared_media = []
+    monkeypatch.setattr(media_source, "_recording_media_root_from_value", lambda value: Path(value))
 
     async def async_add_executor_job(func, *args):
         return func(*args)
@@ -4883,14 +4888,15 @@ def test_clear_recording_caches_scopes_media_to_entry(monkeypatch):
     entry = SimpleNamespace(
         entry_id="entry-id",
         data={},
-        options={CONF_RECORDING_MEDIA_STORAGE_PATH: "/media/xsense_custom"},
+        options={CONF_RECORDING_MEDIA_STORAGE_PATH: str(tmp_path)},
     )
     hass = SimpleNamespace(
         data={media_source.DOMAIN: {"_recording_indexes": {}}},
         config_entries=SimpleNamespace(async_get_entry=lambda entry_id: entry),
         async_add_executor_job=async_add_executor_job,
     )
-    def delete_groups(root, protected, keys, prefixes, suppress_recache=False):
+    def delete_groups(root, protected, keys, prefixes, suppress_recache=False, groups=None):
+        assert root == tmp_path
         cleared_media.append([root])
         return media_source._empty_cache_cleanup_summary()
 
@@ -4899,12 +4905,16 @@ def test_clear_recording_caches_scopes_media_to_entry(monkeypatch):
     asyncio.run(media_source.async_clear_recording_caches(hass, entry_id="entry-id"))
 
     assert len(cleared_media) == 1
-    assert [path.as_posix() for path in cleared_media[0]] == ["/media/xsense_custom"]
+    assert cleared_media[0] == [tmp_path]
 
 
-def test_clear_recording_caches_removes_scoped_capture_locks(monkeypatch):
+def test_clear_recording_caches_preserves_shared_capture_locks(monkeypatch, tmp_path):
     from custom_components.xsense import recordings_media as media_source
     from custom_components.xsense.const import CONF_RECORDING_MEDIA_STORAGE_PATH
+
+    monkeypatch.setattr(media_source, "_recording_media_root_from_value", lambda value: Path(value))
+    root = tmp_path / "selected"
+    other = tmp_path / "other"
 
     async def async_add_executor_job(func, *args):
         return func(*args)
@@ -4912,12 +4922,17 @@ def test_clear_recording_caches_removes_scoped_capture_locks(monkeypatch):
     entry = SimpleNamespace(
         entry_id="entry-id",
         data={},
-        options={CONF_RECORDING_MEDIA_STORAGE_PATH: "/media/xsense_custom"},
+        options={CONF_RECORDING_MEDIA_STORAGE_PATH: str(root)},
     )
     locks = {
-        "/media/xsense_custom/videos/camera_1_2.mp4": object(),
-        "/media/xsense_other/videos/camera_1_2.mp4": object(),
+        str(root / "videos/camera_1_2.mp4"): object(),
+        str(other / "videos/camera_1_2.mp4"): object(),
     }
+    expected_locks = dict(locks)
+    other_entry = SimpleNamespace(
+        entry_id="other-entry", data={},
+        options={CONF_RECORDING_MEDIA_STORAGE_PATH: str(root)},
+    )
     hass = SimpleNamespace(
         data={
             media_source.DOMAIN: {
@@ -4925,16 +4940,17 @@ def test_clear_recording_caches_removes_scoped_capture_locks(monkeypatch):
                 "_recording_capture_locks": locks,
             }
         },
-        config_entries=SimpleNamespace(async_get_entry=lambda entry_id: entry),
+        config_entries=SimpleNamespace(
+            async_get_entry=lambda entry_id: entry if entry_id == entry.entry_id else other_entry,
+            async_entries=lambda _: [entry, other_entry],
+        ),
         async_add_executor_job=async_add_executor_job,
     )
     asyncio.run(media_source.async_clear_recording_caches(hass, entry_id="entry-id"))
 
-    assert hass.data[media_source.DOMAIN]["_recording_capture_locks"] == {
-        "/media/xsense_other/videos/camera_1_2.mp4": locks[
-            "/media/xsense_other/videos/camera_1_2.mp4"
-        ]
-    }
+    # Both entries can still use the root; removing their shared writer locks
+    # would allow a second lock to be created while an earlier writer owns one.
+    assert hass.data[media_source.DOMAIN]["_recording_capture_locks"] == expected_locks
 
 
 def test_recording_cache_prune_removes_expired_clip_as_one_group(tmp_path):

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from datetime import datetime, timedelta, timezone
 import json
 from typing import Any
@@ -56,6 +56,76 @@ _IGNORED_TOPIC_SUFFIXES = ("/update/accepted", "/update/documents", "/update/rej
 KEYPAD_CODE_EVENT_TYPE = "xsense_keypad_code"
 SELF_TEST_EVENT_TYPE = "xsense_self_test"
 
+# Match the motion-history request horizon. Cutoffs follow each source's
+# observed event time, not the polling clock (AI history has no time filter).
+_HISTORY_DEDUP_WINDOW = timedelta(days=1)
+_HISTORY_FUTURE_TOLERANCE = timedelta(minutes=5)
+
+
+def _history_timestamp(value: Any) -> datetime | None:
+    """Read the compact timestamps produced by the history adapters."""
+    value = str(value or "")
+    if len(value) != 14 or not value.isascii() or not value.isdigit():
+        return None
+    try:
+        return datetime.strptime(value, "%Y%m%d%H%M%S").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+class _HistoryDedupWindow:
+    """Expire timed keys only behind a permanent per-source replay barrier.
+
+    This bounds the event-time span, not cardinality. Unknown timestamps stay
+    in the original seen set: deleting those identities would allow replay.
+    Source watermarks survive empty polls, discovery changes and reconnects.
+    """
+
+    def __init__(self, seen: set[str]) -> None:
+        self.seen = seen
+        self.watermarks: dict[tuple[str, ...], datetime] = {}
+        self.times: dict[str, tuple[tuple[str, ...], datetime]] = {}
+
+    def advance(self, rows: list[tuple[tuple[str, ...], Any]]) -> None:
+        """Establish all batch cutoffs before accepting any row in the batch."""
+        ceiling = datetime.now(timezone.utc) + _HISTORY_FUTURE_TOLERANCE
+        for source, value in rows:
+            timestamp = _history_timestamp(value)
+            if timestamp is None or timestamp > ceiling:
+                continue
+            previous = self.watermarks.get(source)
+            if previous is None or timestamp > previous:
+                self.watermarks[source] = timestamp
+        for key, (source, timestamp) in list(self.times.items()):
+            if timestamp < self.watermarks[source] - _HISTORY_DEDUP_WINDOW:
+                self.seen.discard(key)
+                del self.times[key]
+
+    def expired(self, source: tuple[str, ...], value: Any) -> bool:
+        """Reject old rows even after their exact keys have been forgotten."""
+        timestamp = _history_timestamp(value)
+        watermark = self.watermarks.get(source)
+        return (
+            timestamp is not None
+            and watermark is not None
+            and timestamp < watermark - _HISTORY_DEDUP_WINDOW
+        )
+
+    def remember(self, key: str, source: tuple[str, ...], value: Any) -> None:
+        """Keep unknown/future times pinned rather than evicting unsafely."""
+        pinned = key in self.seen and key not in self.times
+        self.seen.add(key)
+        timestamp = _history_timestamp(value)
+        if (
+            pinned
+            or timestamp is None
+            or source not in self.watermarks
+            or timestamp > datetime.now(timezone.utc) + _HISTORY_FUTURE_TOLERANCE
+        ):
+            self.times.pop(key, None)
+        else:
+            self.times[key] = (source, timestamp)
+
 
 async def _async_init_and_login(xsense: AsyncXSense, email: str, password: str) -> None:
     """Initialize the X-Sense client and log in."""
@@ -76,8 +146,14 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._last_camera_update_attempt: datetime | None = None
         self._camera_station_cache: dict[str, Any] = {}
         self._camera_ai_history_seen: set[str] = set()
+        self._camera_ai_history_initialized: set[str] = set()
         self._camera_event_history_seen: set[str] = set()
         self._camera_event_history_initialized = False
+        self._camera_ai_history_window = _HistoryDedupWindow(self._camera_ai_history_seen)
+        self._camera_event_history_window = _HistoryDedupWindow(
+            self._camera_event_history_seen
+        )
+        self._camera_ai_history_current: dict[str, str] = {}
         self._camera_event_snapshots: dict[str, tuple[str, bytes]] = {}
         self._camera_event_snapshot_tasks: dict[
             str, tuple[str, asyncio.Task[bytes | None]]
@@ -88,6 +164,10 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._startup_refresh_complete = False
         self._deferred_refresh_unsub = None
         self._shutting_down = False
+        self._operation_tasks: dict[asyncio.Task, int] = {}
+        self._connect_lock = asyncio.Lock()
+        self._mqtt_retirement_tasks: dict[int, asyncio.Task] = {}
+        self._camera_event_delivery_locks: dict[str, asyncio.Lock] = {}
         super().__init__(
             hass,
             LOGGER,
@@ -108,12 +188,19 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def store_camera_event_snapshot(
         self, camera: Any, event_time: Any, image: bytes
-    ) -> None:
+    ) -> bool:
         """Store one derived event frame for the matching camera event."""
         serial = camera_addx_serial(camera)
         timestamp = str(event_time or "")
+        current = camera
+        if getattr(self, "xsense", None) is not None:
+            current = camera_for_identifier(_camera_entities(self), serial) or camera
+        if str(getattr(current, "data", {}).get("eventTime") or "") != timestamp:
+            return False
         if serial and timestamp and image:
             self._camera_event_snapshots[serial] = (timestamp, image)
+            return True
+        return False
 
     def camera_event_snapshot(self, camera: Any) -> bytes | None:
         """Return the derived frame only while it matches the current event."""
@@ -186,11 +273,58 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             return hass_create_task(coro)
         return self.hass.async_create_task(coro)
 
+    @asynccontextmanager
+    async def _async_operation(self):
+        """Keep client work owned until shutdown has cancelled and joined it."""
+        if getattr(self, "_shutting_down", False):
+            raise asyncio.CancelledError
+        tasks = self.__dict__.setdefault("_operation_tasks", {})
+        task = asyncio.current_task()
+        tasks[task] = tasks.get(task, 0) + 1
+        try:
+            yield
+        finally:
+            if tasks[task] == 1:
+                del tasks[task]
+            else:
+                tasks[task] -= 1
+
+    async def _async_disconnect_mqtt(self) -> None:
+        """Retire clients whose credential helper belongs to the old session."""
+        tasks = self.__dict__.setdefault("_mqtt_retirement_tasks", {})
+        for mqtt in self.mqtt_servers.values():
+            mqtt.on_data = None
+            if id(mqtt) not in tasks:
+                tasks[id(mqtt)] = asyncio.create_task(
+                    mqtt.async_disconnect(disconnect_paho_client=True),
+                    name="X-Sense MQTT retirement",
+                )
+        self.mqtt_servers.clear()
+        retiring = dict(tasks)
+        if not retiring:
+            return
+        # Cancelling a reconnect must not cancel or orphan socket retirement.
+        # Shutdown joins these same tasks even after the active map is empty.
+        results = await asyncio.shield(
+            asyncio.gather(*retiring.values(), return_exceptions=True)
+        )
+        for key, result in zip(retiring, results, strict=True):
+            tasks.pop(key, None)
+            if isinstance(result, BaseException):
+                LOGGER.warning("Could not disconnect XSense MQTT client: %s", result)
+
     async def async_shutdown(self) -> None:
         """Disconnect all MQTT clients owned by this coordinator."""
         if self._shutting_down:
             return
         self._shutting_down = True
+        await super().async_shutdown()
+
+        tasks = [task for task in self._operation_tasks if task is not asyncio.current_task()]
+        for task in tasks:
+            task.cancel()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
 
         if self._deferred_refresh_unsub is not None:
             self._deferred_refresh_unsub()
@@ -208,14 +342,7 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if snapshot_tasks:
             await asyncio.gather(*snapshot_tasks, return_exceptions=True)
 
-        mqtt_servers = list(self.mqtt_servers.values())
-        self.mqtt_servers.clear()
-
-        for mqtt in mqtt_servers:
-            try:
-                await mqtt.async_disconnect(disconnect_paho_client=True)
-            except Exception as ex:  # noqa: BLE001
-                LOGGER.warning("Could not disconnect XSense MQTT client: %s", ex)
+        await self._async_disconnect_mqtt()
 
         xsense = self.xsense
         self.xsense = None
@@ -224,6 +351,8 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def async_start_camera_ai_history_polling(self, *, immediate: bool = True) -> None:
         """Start the lightweight camera AI-history poller."""
+        if getattr(self, "_shutting_down", False):
+            return
         if self._camera_ai_history_unsub is not None:
             LOGGER.debug("X-Sense camera history polling already started")
             return
@@ -245,11 +374,15 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def async_schedule_deferred_refresh(self) -> None:
         """Schedule live cloud/MQTT refresh work after HA startup."""
+        if getattr(self, "_shutting_down", False):
+            return
         if self._deferred_refresh_unsub is not None:
             return
 
         @callback
         def _schedule_refresh(_event_or_now) -> None:
+            if getattr(self, "_shutting_down", False):
+                return
             self._deferred_refresh_unsub = None
             self._deferred_refresh_unsub = async_call_later(
                 self.hass, 30, _request_refresh
@@ -257,6 +390,8 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         @callback
         def _request_refresh(_now) -> None:
+            if getattr(self, "_shutting_down", False):
+                return
             self._deferred_refresh_unsub = None
             self._async_create_entry_task(
                 self.async_request_refresh(),
@@ -273,6 +408,10 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     async def _async_poll_camera_ai_history(self, _now) -> None:
         """Poll camera AI history outside the heavy coordinator refresh."""
+        async with self._async_operation():
+            await self._async_poll_camera_ai_history_running()
+
+    async def _async_poll_camera_ai_history_running(self) -> None:
         try:
             updated = await self._update_camera_ai_history()
         except (SessionExpired, AuthFailed):
@@ -287,11 +426,19 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self.async_update_listeners()
 
     async def _connect(self) -> None:
+        async with self._async_operation():
+            lock = self.__dict__.setdefault("_connect_lock", asyncio.Lock())
+            async with lock:
+                await self._connect_running()
+
+    async def _connect_running(self) -> None:
         email = self.entry.data[CONF_EMAIL]
         password = self.entry.data[CONF_PASSWORD]
 
-        if self.xsense is not None:
-            await self.xsense.close()
+        await self._async_disconnect_mqtt()
+        old_client, self.xsense = self.xsense, None
+        if old_client is not None:
+            await old_client.close()
 
         xsense = AsyncXSense(
             async_get_clientsession(self.hass), language=self.hass.config.language
@@ -300,9 +447,18 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             await _async_init_and_login(xsense, email, password)
         except AuthFailed as ex:
+            await xsense.close()
             raise ConfigEntryAuthFailed(f"Login failed: {ex!s}") from ex
         except APIFailure as ex:
+            await xsense.close()
             raise UpdateFailed(f"XSense API Issue: {ex}") from ex
+        except BaseException:
+            await xsense.close()
+            raise
+
+        if getattr(self, "_shutting_down", False):
+            await xsense.close()
+            raise asyncio.CancelledError
 
         self.xsense = xsense
         self._initialized = False
@@ -311,6 +467,10 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._camera_station_cache = {}
 
     async def _async_update_data(self) -> dict[str, Any]:
+        async with self._async_operation():
+            return await self._async_update_data_running()
+
+    async def _async_update_data_running(self) -> dict[str, Any]:
         try:
             return await self._async_update_data_once()
         except (aiohttp.ClientError, TimeoutError, OSError) as ex:
@@ -387,6 +547,8 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             return None
         for h in self.xsense.houses.values():
             if s := h.get_station_by_sn(identifier):
+                if is_camera_entity(s):
+                    return camera_for_identifier(_camera_entities(self), identifier)
                 return s
         return None
 
@@ -617,12 +779,15 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     async def _update_camera_ai_service_history(self, server_ids: list[str]) -> bool:
         """Poll APK AI service history for camera events."""
-        first_poll = not self._camera_ai_history_seen
+        initialized = self.__dict__.setdefault("_camera_ai_history_initialized", set())
+        window = self.__dict__.setdefault(
+            "_camera_ai_history_window", _HistoryDedupWindow(self._camera_ai_history_seen)
+        )
         applied = 0
         baselined = 0
         skipped = 0
-        seen_now: set[str] = set()
         for server_id in server_ids:
+            first_poll = server_id not in initialized
             try:
                 history = await self.xsense.get_ai_service_history(server_id)
             except APIFailure as ex:
@@ -635,42 +800,59 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             alarm_items = history.get("alarmItems")
             if not isinstance(alarm_items, list):
                 continue
+            initialized.add(server_id)
+            prepared = []
             for alarm_item in sorted(
                 (item for item in alarm_items if isinstance(item, dict)),
                 key=_camera_ai_history_sort_key,
             ):
-                event_key = _camera_ai_history_event_key(server_id, alarm_item)
-                if first_poll:
-                    payload = dict(alarm_item)
-                    payload.setdefault("serverId", server_id)
-                    if create_time := alarm_item.get("createTime"):
-                        payload.setdefault("eventTime", create_time)
-                    station_data = _mqtt_reported_data(payload)
-                    station = _camera_station_for_ai_server(self, server_id)
-                    if station is None and isinstance(station_data, dict):
-                        station = _camera_station_for_event_data(
-                            self, station_data, payload
-                        )
-                    if station is not None and station_data:
-                        seen_now.add(event_key)
-                        baselined += 1
+                payload = dict(alarm_item)
+                payload.setdefault("serverId", server_id)
+                if create_time := alarm_item.get("createTime"):
+                    payload.setdefault("eventTime", create_time)
+                station_data = _mqtt_reported_data(payload)
+                station = _camera_station_for_ai_server(self, server_id)
+                if station is None and isinstance(station_data, dict):
+                    station = _camera_station_for_event_data(self, station_data, payload)
+                if (
+                    station is None
+                    or not isinstance(station_data, dict)
+                    or not station_data
+                ):
                     continue
-                if event_key in self._camera_ai_history_seen and not first_poll:
+                source = (server_id, camera_addx_serial(station) or station.entity_id)
+                prepared.append((alarm_item, station_data, source))
+            window.advance(
+                [(source, data.get("eventTime")) for _, data, source in prepared]
+            )
+            for alarm_item, station_data, source in prepared:
+                event_key = _camera_ai_history_event_key(server_id, alarm_item)
+                timestamp = station_data.get("eventTime")
+                if window.expired(source, timestamp):
                     skipped += 1
                     continue
+                if first_poll:
+                    window.remember(event_key, source, timestamp)
+                    baselined += 1
+                    continue
+                if event_key in self._camera_ai_history_seen:
+                    # Revisit only the current event so newly ready media can
+                    # retry preparation without replaying older history rows.
+                    if self._apply_camera_ai_history_item(server_id, alarm_item, seen=True):
+                        applied += 1
+                    skipped += 1
+                    continue
+                window.remember(event_key, source, timestamp)
                 if self._apply_camera_ai_history_item(server_id, alarm_item):
                     applied += 1
-                    seen_now.add(event_key)
 
-        self._camera_ai_history_seen.update(seen_now)
         LOGGER.debug(
-            "X-Sense camera AI history poll: services=%s seen=%s applied=%s baselined=%s skipped=%s first_poll=%s",
+            "X-Sense camera AI history poll: services=%s seen=%s applied=%s baselined=%s skipped=%s",
             len(server_ids),
             len(self._camera_ai_history_seen),
             applied,
             baselined,
             skipped,
-            first_poll,
         )
         return applied > 0
 
@@ -689,17 +871,20 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         first_poll = not self._camera_event_history_initialized
         self._camera_event_history_initialized = True
+        window = self.__dict__.setdefault(
+            "_camera_event_history_window",
+            _HistoryDedupWindow(self._camera_event_history_seen),
+        )
         applied = 0
         baselined = 0
         skipped = 0
-        seen_now: set[str] = set()
         active_cameras: list[Any] = []
         baseline_changed = False
         records = sorted(
             _camera_event_records(history), key=_camera_event_record_sort_key
         )
+        prepared = []
         for record in records:
-            event_key = _camera_event_record_event_key(record)
             station_data = _camera_event_record_station_data(record)
             station = (
                 _camera_station_for_event_data(self, station_data, record)
@@ -708,7 +893,19 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             )
             if station is None:
                 continue
-            seen_now.add(event_key)
+            source = (camera_addx_serial(station) or station.entity_id,)
+            prepared.append((record, station_data, station, source))
+        window.advance(
+            [(source, data.get("eventTime")) for _, data, _, source in prepared]
+        )
+        for record, station_data, station, source in prepared:
+            event_key = _camera_event_record_event_key(record)
+            timestamp = station_data.get("eventTime")
+            if window.expired(source, timestamp):
+                skipped += 1
+                continue
+            already_seen = event_key in self._camera_event_history_seen
+            window.remember(event_key, source, timestamp)
             if first_poll:
                 baselined += 1
                 if _camera_event_time_relation(station, station_data) < 0:
@@ -718,26 +915,35 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 self.xsense.parse_get_state(station, station_data)
                 baseline_changed = True
                 continue
-            if event_key in self._camera_event_history_seen:
+            time_relation = _camera_event_time_relation(station, station_data)
+            if already_seen and time_relation != 0:
                 skipped += 1
                 continue
-            time_relation = _camera_event_time_relation(station, station_data)
             if time_relation < 0:
                 skipped += 1
                 continue
             if time_relation == 0:
-                station_data["cameraMotionDetected"] = False
+                changed = any(
+                    station.data.get(key) != value
+                    for key, value in station_data.items()
+                    if key not in {"cameraMotionDetected", "cameraEventBaseline"}
+                )
+                # Preserve the pulse until the loop below observes and clears
+                # it; enrichment must not hide that state transition.
+                station_data["cameraMotionDetected"] = station.data.get("cameraMotionDetected") is True
                 station_data["cameraEventBaseline"] = False
-                self.xsense.parse_get_state(station, station_data)
-                applied += 1
+                if changed or not already_seen:
+                    self.xsense.parse_get_state(station, station_data)
+                self._async_publish_camera_event(station)
+                applied += int(changed or not already_seen)
                 continue
             station_data["cameraMotionDetected"] = True
             station_data["cameraEventBaseline"] = False
             self.xsense.parse_get_state(station, station_data)
+            self._async_publish_camera_event(station)
             active_cameras.append(station)
             applied += 1
 
-        self._camera_event_history_seen.update(seen_now)
         state_changed = False
         for camera in cameras:
             detected = any(
@@ -765,7 +971,7 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return applied > 0 or state_changed or baseline_changed
 
     def _apply_camera_ai_history_item(
-        self, server_id: str, alarm_item: dict[str, Any]
+        self, server_id: str, alarm_item: dict[str, Any], *, seen: bool = False
     ) -> bool:
         """Apply one APK AI-history alarm item to the matching camera entity."""
         payload = dict(alarm_item)
@@ -774,6 +980,16 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             payload.setdefault("eventTime", create_time)
         station_data = _mqtt_reported_data(payload)
         if not isinstance(station_data, dict) or not station_data:
+            return False
+
+        event_time = station_data.get("eventTime")
+        timestamp = _history_timestamp(event_time)
+        ceiling = datetime.now(timezone.utc) + _HISTORY_FUTURE_TOLERANCE
+        # Keep bad history identities pinned, but never let their timestamps
+        # reach camera state and block subsequent legitimate events.
+        if event_time not in (None, "") and (
+            timestamp is None or timestamp > ceiling
+        ):
             return False
 
         station = _camera_station_for_ai_server(self, server_id)
@@ -790,6 +1006,24 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             )
             return False
 
+        current = self.__dict__.setdefault("_camera_ai_history_current", {})
+        camera_id = camera_addx_serial(station) or station.entity_id
+        event_key = _camera_ai_history_event_key(server_id, alarm_item)
+        relation = _camera_event_time_relation(station, station_data)
+        if timestamp is not None:
+            current_time = _history_timestamp(station.data.get("eventTime"))
+            if current_time is None or current_time > ceiling:
+                relation = 1
+            if relation < 0:
+                return False
+        if seen and (
+            not station_data.get("eventTime")
+            or relation != 0
+            or current.get(camera_id) != event_key
+        ):
+            return False
+        changed = any(station.data.get(key) != value for key, value in station_data.items())
+
         LOGGER.debug(
             "X-Sense camera AI history event routed: %s",
             {
@@ -799,8 +1033,21 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 "has_motion_event_time": "eventTime" in station_data,
             },
         )
-        self.xsense.parse_get_state(station, station_data)
-        return True
+        if changed or not seen:
+            self.xsense.parse_get_state(station, station_data)
+        current[camera_id] = event_key
+        self._async_publish_camera_event(station)
+        return changed or not seen
+
+    def _async_publish_camera_event(self, station) -> None:
+        """Deliver each history row before the next row replaces camera state."""
+        if getattr(self, "_shutting_down", False) or not getattr(self, "_listeners", None):
+            return
+        self._camera_event_entity = station
+        try:
+            self.async_update_listeners()
+        finally:
+            self._camera_event_entity = None
 
     def _cache_camera_stations(self) -> None:
         """Remember ADDX camera stations between camera API refreshes."""
@@ -897,6 +1144,8 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def setup_mqtt(self, h: House) -> XSenseMQTT:
         """Create and configure MQTT object for specific house."""
+        if getattr(self, "_shutting_down", False):
+            raise asyncio.CancelledError
         if not self.mqtt_server(h.mqtt_server):
             mqtt = XSenseMQTT(self.hass, self.entry, h.mqtt)
             mqtt.on_data = self.async_event_received
@@ -911,6 +1160,8 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         AWS IoT shadow updates are delivered on update plus accepted/documents
         topics. Only the update topic should mutate local state.
         """
+        if getattr(self, "_shutting_down", False):
+            return
         if any(topic.endswith(suffix) for suffix in _IGNORED_TOPIC_SUFFIXES):
             LOGGER.debug("Ignoring duplicate MQTT shadow topic: %s", topic)
             return
@@ -921,6 +1172,8 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             LOGGER.warning("Could not parse MQTT message: %s", ex)
             return
 
+        if not isinstance(data, dict):
+            return
         station_data = _mqtt_reported_data(data)
 
         station_sn = None
@@ -988,6 +1241,22 @@ class XSenseDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if isinstance(station_data, list):
             self.xsense.parse_get_state(station, station_data)
             self.async_update_listeners()
+            return
+
+        mode_result = None
+        if topic.endswith("/shadow/name/2nd_modeconfirm/update"):
+            mode_result = "confirmation"
+        elif topic.endswith("/shadow/name/2nd_safemode/update") and station_data.get("safeMode"):
+            mode_result = "mode"
+        if mode_result is not None:
+            self._alarm_mode_station = station
+            station._xsense_mode_result = {**station_data, "kind": mode_result}
+            try:
+                self.xsense.parse_get_state(station, station_data, mode_result=mode_result)
+                self.async_update_listeners()
+            finally:
+                del station._xsense_mode_result
+                self._alarm_mode_station = None
             return
 
         is_safemode_topic = "/shadow/name/2nd_safemode/update" in topic
@@ -1262,7 +1531,9 @@ def _camera_ai_history_sort_key(item: dict[str, Any]) -> tuple[bool, str]:
     event_time = item.get("createTime")
     if event_time in (None, ""):
         station_data = _mqtt_reported_data(item)
-        event_time = station_data.get("eventTime") if station_data else None
+        event_time = (
+            station_data.get("eventTime") if isinstance(station_data, dict) else None
+        )
     return (event_time not in (None, ""), str(event_time or ""))
 
 

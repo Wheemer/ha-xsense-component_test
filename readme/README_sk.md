@@ -65,9 +65,12 @@ Keď udalosť Motion obsahuje metadáta prehrávania X-Sense, integrácia pripra
 <!-- xsense-recording-storage-modes -->
 Záznamy z fotoaparátu na SD kartu sa objavia v X-Sense Recordings. Predvoleným režimom ukladania je iba prehrávanie: Home Assistant uchováva podpísané adresy URL X-Sense ako súkromné, prepisuje zoznam skladieb HLS a proxy segmenty iba vtedy, keď si to prehrávač vyžiada, bez uchovania úplných klipov. Keep local recordings ukladá kompletné klipy pod /media/xsense_recordings a umožňuje konfigurovateľné uchovávanie, maximálnu veľkosť, manuálne mazanie a voliteľnú synchronizáciu na pozadí. Miestne čistenie nikdy nevymaže záznamy z SD kariet X-Sense alebo cloudového úložiska.
 
+<!-- xsense-cache-entry-ownership -->
+Vlastníctvo miestnych záznamov sa sleduje samostatne pre každú položku integrácie. Vymazanie vyrovnávacej pamäte jednej položky zachová záznamy uchovávané inou položkou. Existujúce ovládacie prvky vyrovnávacej pamäte zostávajú nezmenené.
+
 [![Importovať blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Pohyb kamery je dostupný ako binárny senzor Zistené/Voľno aj ako jednorazová udalosť Motion pre každú novú detekciu. AI Detection je jednorazová udalosť. Pre manuálne automatizácie použite `event.received`; `event_type` používajte len na filtrovanie typov ako `person`, `pet`, `vehicle`, `package`, `other` alebo `ai_detection`.
+Pohyb kamery je dostupný ako binárny senzor Zistené/Voľno aj ako jednorazová udalosť Motion pre každú novú detekciu. AI Detection je jednorazová udalosť. Pri `event.received` je `options.event_type` povinné: `motion` pre pohyb alebo podporovaný typ AI, napríklad `person`. Blueprint používa `xsense_camera_event` a filtruje podľa vybranej entity.
 
 Príklad automatizácie:
 

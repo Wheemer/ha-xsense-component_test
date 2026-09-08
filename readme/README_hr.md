@@ -65,9 +65,12 @@ Kada događaj Motion uključuje metapodatke reprodukcije X-Sense, integracija pr
 <!-- xsense-recording-storage-modes -->
 Snimke SD kartice kamere pojavljuju se u X-Sense Recordings. Samo reprodukcija je zadani način pohranjivanja: Home Assistant čuva potpisane X-Sense URL-ove privatnim, prepisuje HLS popis za reprodukciju i proksi segmente samo kada ih igrač zatraži, bez zadržavanja kompletnih isječaka. Keep local recordings pohranjuje kompletne isječke pod /media/xsense_recordings i omogućuje konfigurabilno zadržavanje, maksimalnu veličinu, ručno brisanje i izbornu sinkronizaciju u pozadini. Lokalno čišćenje nikada ne briše snimke sa X-Sense SD kartica ili pohrane u oblaku.
 
+<!-- xsense-cache-entry-ownership -->
+Vlasništvo lokalnih snimki prati se za svaki unos integracije zasebno. Brisanje predmemorije jednog unosa čuva snimke koje zadržava drugi unos. Postojeće kontrole predmemorije ostaju nepromijenjene.
+
 [![Uvezi blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kretanje kamere dostupno je kao binarni senzor Otkriveno/Slobodno i kao jednokratni Motion događaj za svaku novu detekciju. AI Detection je jednokratni događaj. Za ručne automatizacije koristite `event.received`; `event_type` treba samo za filtriranje tipova kao `person`, `pet`, `vehicle`, `package`, `other` ili `ai_detection`.
+Kretanje kamere dostupno je kao binarni senzor Otkriveno/Slobodno i kao jednokratni Motion događaj za svaku novu detekciju. AI Detection je jednokratni događaj. Za `event.received` obvezan je `options.event_type`: `motion` za kretanje ili podržana AI vrsta poput `person`. Blueprint koristi `xsense_camera_event` i filtrira prema odabranom entitetu.
 
 Primjer automatizacije:
 

@@ -56,13 +56,13 @@
           "recording_media_storage_path": "Use a folder under /media. New cached videos and thumbnails are stored here.",
           "recording_cache_retention_days": "Delete local cached recordings after this many days. X-Sense cloud and SD card recordings are not changed.",
           "recording_cache_max_size_mb": "Maximum local cache size in MB. When the limit is reached, the least recently viewed recordings are removed first.",
-          "recording_notification_quality": "Choose HD to prefer X-Sense's direct/high-resolution clip URLs for mobile notifications. Choose SD to use the camera playback capture path when available.",
+          "recording_notification_quality": "HD prefers higher-resolution recording URLs. SD prefers standard-resolution URLs when X-Sense provides them.",
           "recording_media_days_order": "Choose whether newer or older days appear first in the recordings viewer.",
           "recording_media_clips_order": "Choose whether newer or older clips appear first within each day."
         }
       },
       "confirm_recording_media_storage_path": {
-        "description": "The recording cache folder will change from `{old_path}` to `{new_path}`. Existing cached videos and thumbnails are not moved automatically. Move the existing `videos` and `thumbs` folders first if you want old cached recordings to remain available."
+        "description": "The recording cache folder will change from `{old_path}` to `{new_path}`. Existing cached videos and thumbnails are not moved automatically. Move the existing `hls`, `videos` and `thumbs` folders first if you want old cached recordings to remain available."
       }
     },
     "error": {

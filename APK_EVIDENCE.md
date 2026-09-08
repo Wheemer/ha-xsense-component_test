@@ -136,6 +136,30 @@ Current local APK evidence:
   Device Silenced entity. SWS51 uses its alarm-aware generic silence entity;
   SWS0B retains its separate alarm-aware water and temperature silence states.
 
+## September 2026 command and lifecycle recheck
+
+- The `modeconfirm` and `safemode` topics have different meanings. In apktool
+  output, `smali_classes3/b2/T.smali` dispatches them separately;
+  `smali_classes4/f3/L1.smali` checks an active request and nonempty
+  `forceReason` to show the bypass prompt. It does not confirm the reported
+  security mode. `smali_classes4/A3/a.smali` handles the actual mode result
+  and completes the active request without requiring it to equal the requested
+  target. Preserve topic provenance through normalization; changing the order
+  of two checks on a merged state object is not equivalent to this behavior.
+- Camera online status alone does not authorize immediate offer delivery.
+  `smali_classes2/com/a4x/player/internal/z.smali` first sets its internal
+  device state offline when signaling is not already connected (around line
+  11803), then takes the ticket-only startup branch. The matching peer handling
+  in `r.smali` supplies the subsequent offer path. Keep the native HA relay's
+  matching `PEER_IN` gate and send-after-offer ICE flow. The earlier untracked
+  `apk-1400-action-topic-audit.md` recommendation to send immediately based on
+  ADDX online status omitted this prerequisite and is superseded.
+- `isLifeEnd` is normalized to a boolean in the adapter. Aggregate status must
+  test that normalized value, not compare it to the raw transport string "1".
+- A combo detector's aggregate alarm does not identify smoke specifically.
+  `smali_classes3/S1/l.smali` shows smoke only for codes "1" or "3"; code "2"
+  must not be presented as smoke merely because it is an active alarm.
+
 ## APK 1400 entity naming policy
 
 Entity IDs and unique IDs remain stable. Display names follow this order:

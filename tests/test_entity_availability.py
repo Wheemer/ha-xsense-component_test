@@ -105,6 +105,16 @@ def _patch_alarm_call_later(monkeypatch, replacement):
     )
 
 
+def _parse_confirmation(station, data):
+    XSenseBase.__new__(XSenseBase).parse_get_state(station, data, mode_result="confirmation")
+    station._xsense_mode_result = {**data, "kind": "confirmation"}
+
+
+def _parse_mode(station, data):
+    XSenseBase.__new__(XSenseBase).parse_get_state(station, data, mode_result="mode")
+    station._xsense_mode_result = {**data, "kind": "mode"}
+
+
 def test_xs01_wx_online_time_report_marks_station_online():
     station = _xs01_wx_from_real_shadow()
 
@@ -892,7 +902,7 @@ async def test_force_arm_prompt_stops_request_timeout(monkeypatch):
     )
 
     await panel.async_alarm_arm_home()
-    XSenseBase.__new__(XSenseBase).parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -947,7 +957,7 @@ async def test_blocked_arm_prompt_survives_empty_acknowledgement_end_to_end(
         await panel.async_alarm_arm_away()
 
     api = XSenseBase.__new__(XSenseBase)
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {"safeMode": "Disarmed", "forceReason": []},
     )
@@ -958,7 +968,7 @@ async def test_blocked_arm_prompt_survives_empty_acknowledgement_end_to_end(
     assert panel._cancel_arm_request_timeout is not None
     assert created == []
 
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -974,7 +984,7 @@ async def test_blocked_arm_prompt_survives_empty_acknowledgement_end_to_end(
     assert len(created) == 1
     assert f"mode={requested_mode}" in created[0][0]
 
-    api.parse_get_state(station, {"safeMode": "Disarmed", "forceReason": []})
+    _parse_confirmation(station, {"safeMode": "Disarmed", "forceReason": []})
     panel._handle_coordinator_update()
 
     assert pending_force_arm_mode(station) == requested_mode
@@ -1042,18 +1052,13 @@ async def test_blocked_arm_prompt_survives_station_object_refresh(
 
     panel._handle_coordinator_update()
 
-    if reported_mode == "requested":
-        assert pending_force_arm_mode(refreshed) is None
-        assert panel._pending_force_arm_mode is None
-        assert cancelled == [True]
-        assert created == []
-    else:
-        assert pending_force_arm_mode(refreshed) == requested_mode
-        assert refreshed.alarm_data["requestedSafeMode"] == requested_mode
-        assert panel._cancel_arm_request_timeout is None
-        assert cancelled == [True]
-        assert len(created) == 1
-        assert f"mode={requested_mode}" in created[0][0]
+    # Refresh payloads, including a matching mode, do not impersonate either
+    # MQTT listener. The local request survives until a real result or timeout.
+    assert pending_force_arm_mode(refreshed) is None
+    assert panel._active_normal_arm_mode == requested_mode
+    assert panel._cancel_arm_request_timeout is not None
+    assert cancelled == []
+    assert created == []
 
 
 async def test_visible_force_arm_prompt_survives_station_object_refresh(monkeypatch):
@@ -1085,7 +1090,7 @@ async def test_visible_force_arm_prompt_survives_station_object_refresh(monkeypa
     )
 
     await panel.async_alarm_arm_home()
-    XSenseBase.__new__(XSenseBase).parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -1139,6 +1144,7 @@ async def test_normal_arm_success_clears_request_after_station_object_refresh(
     refreshed.type = "SBS50"
     refreshed.safe_mode = "Away"
     refreshed.set_alarm_data({"safeMode": "Away"})
+    _parse_mode(refreshed, {"safeMode": "Away"})
     coordinator.data["stations"][station.entity_id] = refreshed
 
     panel._handle_coordinator_update()
@@ -1217,7 +1223,7 @@ def test_force_arm_prompt_is_parsed_and_cleared_from_sbs50_mode_result():
     station.set_alarm_data({"requestedSafeMode": "Home"})
     api = XSenseBase.__new__(XSenseBase)
 
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -1231,7 +1237,7 @@ def test_force_arm_prompt_is_parsed_and_cleared_from_sbs50_mode_result():
     assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
     assert station.alarm_data["exitDelay"] == "0"
 
-    api.parse_get_state(station, {"safeMode": "Home"})
+    _parse_mode(station, {"safeMode": "Home"})
 
     assert pending_force_arm_mode(station) is None
     assert station.alarm_data["forceReason"] is None
@@ -1243,7 +1249,7 @@ def test_force_arm_prompt_preserves_locally_requested_mode_from_apk_response():
     station.set_alarm_data({"requestedSafeMode": "Away"})
     api = XSenseBase.__new__(XSenseBase)
 
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -1472,7 +1478,7 @@ def test_mode_result_keeps_request_target_out_of_adapter_payload_state():
     station.set_alarm_data({"requestedSafeMode": "Home"})
     api = XSenseBase.__new__(XSenseBase)
 
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -1490,7 +1496,7 @@ def test_force_arm_result_is_retained_but_not_exposed_without_local_request():
     station.type = "SBS50"
     api = XSenseBase.__new__(XSenseBase)
 
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -1590,7 +1596,7 @@ def test_empty_force_reason_ack_keeps_normal_arm_request_for_blocked_result():
     station.set_alarm_data({"requestedSafeMode": "Away"})
     api = XSenseBase.__new__(XSenseBase)
 
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -1601,7 +1607,7 @@ def test_empty_force_reason_ack_keeps_normal_arm_request_for_blocked_result():
     assert pending_force_arm_mode(station) is None
     assert station.alarm_data["requestedSafeMode"] == "Away"
 
-    api.parse_get_state(
+    _parse_confirmation(
         station,
         {
             "safeMode": "Disarmed",
@@ -1647,7 +1653,7 @@ def test_force_arm_prompt_does_not_return_after_request_is_cleared():
     assert station.alarm_data.get("requestedSafeMode") is None
 
 
-def test_successful_mode_result_wins_before_force_reason_like_apk_listeners(monkeypatch):
+def test_safemode_topic_completes_request_without_opening_confirmation(monkeypatch):
     station = _xs01_wx_from_real_shadow()
     station.type = "SBS50"
     coordinator = Coordinator(station)
@@ -1661,7 +1667,7 @@ def test_successful_mode_result_wins_before_force_reason_like_apk_listeners(monk
         lambda hass, notification_id: None,
     )
 
-    XSenseBase.__new__(XSenseBase).parse_get_state(
+    _parse_mode(
         station,
         {
             "safeMode": "Home",
@@ -1731,7 +1737,7 @@ def test_force_arm_prompt_creates_and_clears_persistent_notification(monkeypatch
         lambda hass, notification_id: dismissed.append((hass, notification_id)),
     )
 
-    station.set_alarm_data({"forceReason": [{"deviceSN": "door-sn"}]})
+    _parse_confirmation(station, {"forceReason": [{"door-sn": "1"}]})
     panel._handle_coordinator_update()
 
     assert created == [

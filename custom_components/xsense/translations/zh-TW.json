@@ -53,7 +53,7 @@
           "recording_media_sync_enabled": "自動快取最近的錄製內容。這會佔用儲存空間，並且可能會更頻繁地喚醒攝影機。",
           "recording_media_sync_hours": "正常後台追趕同步應運轉的頻率。啟用同步後，每隔幾分鐘就會檢查最近的錄音。",
           "recording_media_storage_path": "使用 /media 下的資料夾。新的快取影片和縮圖會儲存在這裡。",
-          "recording_notification_quality": "選擇 HD 以首選 X-Sense 的行動通知的直接/高解析度剪輯 URL。選擇 SD 以使用相機回放捕獲路徑（如果可用）。",
+          "recording_notification_quality": "HD 優先使用較高解析度的錄影 URL。SD 優先使用 X-Sense 提供的標準解析度 URL（如有）。",
           "recording_media_days_order": "選擇較新的日期還是較舊的日期首先顯示在錄音檢視器中。",
           "recording_media_clips_order": "選擇每天首先顯示較新的剪輯還是較舊的剪輯。",
           "recording_cache_retention_days": "在這麼多天後刪除本地快取的錄音。 X-Sense雲端和SD卡錄音沒有改變。",
@@ -62,7 +62,7 @@
         }
       },
       "confirm_recording_media_storage_path": {
-        "description": "錄製快取資料夾將從 `{old_path}` 變更為 `{new_path}`。現有的快取影片和縮圖不會自動移動。如果您希望舊的快取錄製內容仍然可用，請先移動現有的 `videos` 和 `thumbs` 資料夾。"
+        "description": "錄製快取資料夾將從 `{old_path}` 變更為 `{new_path}`。現有的快取影片和縮圖不會自動移動。如果您希望舊的快取錄製內容仍然可用，請先移動現有的 `hls`, `videos` 和 `thumbs` 資料夾。"
       }
     },
     "error": {
@@ -93,76 +93,76 @@
         "name": "信箱計畫活動"
       },
       "ac_break": {
-        "name": "AC Power Disconnected"
+        "name": "交流電源已中斷"
       },
       "battery_end_of_use": {
-        "name": "Battery End-of-Life"
+        "name": "電池壽命已結束"
       },
       "is_life_end": {
-        "name": "End-of-Life"
+        "name": "使用壽命已結束"
       },
       "armed": {
-        "name": "Armed"
+        "name": "已設防"
       },
       "moved": {
-        "name": "Motion Detected"
+        "name": "偵測到移動"
       },
       "usb_charge": {
-        "name": "USB Charging"
+        "name": "USB 充電中"
       },
       "charging": {
-        "name": "Charging"
+        "name": "充電中"
       },
       "camera_sleeping": {
-        "name": "Sleeping"
+        "name": "休眠中"
       },
       "base_removed": {
-        "name": "Mounting Bracket Removed"
+        "name": "安裝支架已拆下"
       },
       "activated": {
-        "name": "Activated"
+        "name": "已啟用"
       },
       "fire_drill_active": {
-        "name": "Alarm Drill Active"
+        "name": "警報演練進行中"
       },
       "alarm_active": {
-        "name": "Alarm Active"
+        "name": "警報已觸發"
       },
       "initiative_alarm": {
-        "name": "Initiative Alarm"
+        "name": "發起警報"
       },
       "test_active": {
-        "name": "Device Test Active"
+        "name": "裝置測試進行中"
       },
       "mute": {
-        "name": "Device Silenced"
+        "name": "裝置靜音"
       },
       "alarm_sound_enabled": {
-        "name": "Alarm Sound"
+        "name": "警報聲音"
       },
       "app_tip_enabled": {
-        "name": "App Notifications"
+        "name": "應用程式通知"
       },
       "schedule_tip_enabled": {
-        "name": "Schedule Notifications"
+        "name": "排程通知"
       },
       "water_alarm_status": {
-        "name": "Water Leak Alarm"
+        "name": "漏水警報"
       },
       "water_mute_status": {
-        "name": "Water Leak Alarm Silenced"
+        "name": "漏水警報已靜音"
       },
       "temperature_alarm_status": {
-        "name": "Temperature Alarm"
+        "name": "溫度警報"
       },
       "temperature_mute_status": {
-        "name": "Temperature Alarm Silenced"
+        "name": "溫度警報已靜音"
       },
       "timezone_enabled": {
-        "name": "Device Time Zone Enabled"
+        "name": "已啟用裝置時區"
       },
       "timezone_valid": {
-        "name": "Device Time Zone Valid"
+        "name": "裝置時區有效"
       }
     },
     "button": {
@@ -176,7 +176,7 @@
         "name": "靜音"
       },
       "camera_wake": {
-        "name": "Wake Up"
+        "name": "喚醒"
       }
     },
     "event": {
@@ -194,7 +194,7 @@
           "normal": "正常",
           "low_battery": "電池電量低",
           "malfunction": "故障",
-          "end_of_life": "生命終點"
+          "end_of_life": "使用壽命已結束"
         }
       },
       "alarm_vol": {
@@ -260,139 +260,139 @@
         "name": "氡氣峰值時間"
       },
       "camera_battery": {
-        "name": "Battery Level"
+        "name": "電池電量"
       },
       "wifi_rssi_level": {
-        "name": "Wi-Fi Signal Strength"
+        "name": "Wi-Fi 訊號強度"
       },
       "camera_signal_strength": {
-        "name": "Wi-Fi Signal Strength"
+        "name": "Wi-Fi 訊號強度"
       },
       "camera_status_code": {
-        "name": "Camera Status Code"
+        "name": "攝影機狀態代碼"
       },
       "camera_firmware_version": {
-        "name": "Firmware Version"
+        "name": "韌體版本"
       },
       "camera_firmware_status": {
-        "name": "Camera Firmware Status"
+        "name": "攝影機韌體狀態"
       },
       "camera_network_name": {
-        "name": "Wi-Fi Name (SSID)"
+        "name": "Wi-Fi 名稱（SSID）"
       },
       "camera_wifi_channel": {
-        "name": "Wi-Fi Channel"
+        "name": "Wi-Fi 頻道"
       },
       "camera_wired_mac_address": {
-        "name": "MAC Address"
+        "name": "MAC 位址"
       },
       "camera_sd_card_status": {
-        "name": "SD Card Status"
+        "name": "SD 卡狀態"
       },
       "camera_sd_card_total": {
-        "name": "SD Card Total"
+        "name": "SD 卡總容量"
       },
       "camera_sd_card_used": {
-        "name": "SD Card Used"
+        "name": "SD 卡已用空間"
       },
       "camera_activated_time": {
-        "name": "Camera Activated Time"
+        "name": "攝影機啟用時間"
       },
       "camera_offline_time": {
-        "name": "Camera Offline Time"
+        "name": "攝影機離線時間"
       },
       "camera_thumbnail_time": {
-        "name": "Camera Thumbnail Time"
+        "name": "攝影機縮圖時間"
       },
       "camera_dormancy_wake_time": {
-        "name": "Camera Dormancy Wake Time"
+        "name": "攝影機休眠喚醒時間"
       },
       "camera_dormancy_message": {
-        "name": "Camera Dormancy Message"
+        "name": "攝影機休眠訊息"
       },
       "camera_time_zone_area": {
-        "name": "Device Time Zone"
+        "name": "裝置時區"
       },
       "smoke_edition": {
-        "name": "Smoke Edition"
+        "name": "煙霧偵測器型號變體"
       },
       "standard": {
-        "name": "CO Alarm Standard"
+        "name": "CO 警報標準"
       },
       "check_type": {
-        "name": "Check Type"
+        "name": "檢查類型"
       },
       "pir_interval": {
-        "name": "PIR Interval"
+        "name": "PIR 間隔"
       },
       "pir_sensitivity": {
-        "name": "Sensor Sensitivity"
+        "name": "感測器靈敏度"
       },
       "silence_time": {
-        "name": "Silence Time"
+        "name": "靜音時間"
       },
       "temperature_mute_time": {
-        "name": "Temperature Alarm Silence Time"
+        "name": "溫度警報靜音時間"
       },
       "water_mute_time": {
-        "name": "Water Leak Alarm Silence Time"
+        "name": "漏水警報靜音時間"
       },
       "short_warning": {
-        "name": "Short-Term CO Warning"
+        "name": "短期 CO 預警"
       },
       "short_warning_co": {
-        "name": "Short-Term CO Warning Level"
+        "name": "短期 CO 預警濃度"
       },
       "long_warning": {
-        "name": "Long-Term CO Warning"
+        "name": "長期 CO 預警"
       },
       "long_warning_co": {
-        "name": "Long-Term CO Warning Level"
+        "name": "長期 CO 預警濃度"
       },
       "alarm_occur": {
-        "name": "Alarm Occurrence"
+        "name": "警報發生情況"
       },
       "alarm_source": {
-        "name": "Alarm Source"
+        "name": "警報來源"
       },
       "re_alarm": {
-        "name": "Repeated Alarm"
+        "name": "重複警報"
       },
       "time": {
-        "name": "Report Time"
+        "name": "回報時間"
       },
       "utc_time": {
-        "name": "UTC Time"
+        "name": "UTC 時間"
       },
       "test_time": {
-        "name": "Device Test Time"
+        "name": "設備測試時間"
       },
       "timezone": {
-        "name": "Device Time Zone"
+        "name": "裝置時區"
       },
       "zone_name": {
-        "name": "Voice Location"
+        "name": "語音播報位置"
       },
       "location": {
-        "name": "Location"
+        "name": "位置"
       },
       "color": {
-        "name": "Color"
+        "name": "顏色"
       },
       "light_event": {
-        "name": "Light Event"
+        "name": "燈光事件"
       },
       "device_type": {
-        "name": "Device Type"
+        "name": "裝置類型"
       },
       "reported_device_type": {
-        "name": "Reported Device Type"
+        "name": "回報的裝置類型"
       },
       "category": {
-        "name": "Category"
+        "name": "類別"
       },
       "safe_mode": {
-        "name": "Security Mode"
+        "name": "安全防護模式"
       }
     },
     "number": {
@@ -460,28 +460,28 @@
         "name": "待機亮度"
       },
       "camera_alarm_volume": {
-        "name": "Alarm Volume"
+        "name": "警報音量"
       },
       "camera_voice_volume": {
-        "name": "Voice Volume"
+        "name": "語音音量"
       },
       "camera_live_speaker_volume": {
-        "name": "Speaker Volume"
+        "name": "喇叭音量"
       },
       "camera_alarm_seconds": {
-        "name": "Alarm Duration"
+        "name": "警報持續時間"
       },
       "camera_night_threshold": {
-        "name": "Night Vision Sensitivity"
+        "name": "夜視靈敏度"
       },
       "camera_cry_detection_level": {
-        "name": "Cry Detection Sensitivity"
+        "name": "哭聲偵測靈敏度"
       },
       "camera_cooldown": {
-        "name": "Cooldown"
+        "name": "錄影間隔"
       },
       "camera_mechanical_ding_dong_duration": {
-        "name": "Mechanical Chime Duration"
+        "name": "機械門鈴持續時間"
       }
     },
     "select": {
@@ -525,13 +525,13 @@
         "name": "應用準時"
       },
       "camera_language": {
-        "name": "Language"
+        "name": "語言"
       },
       "camera_recording_resolution": {
-        "name": "Recording Resolution"
+        "name": "錄影解析度"
       },
       "camera_motion_sensitivity": {
-        "name": "Detection Sensitivity",
+        "name": "檢測靈敏度",
         "state": {
           "high": "高",
           "medium": "中",
@@ -540,242 +540,242 @@
         }
       },
       "camera_video_seconds": {
-        "name": "Video Duration"
+        "name": "影片長度"
       },
       "camera_antiflicker_rate": {
-        "name": "Flicker Frequency"
+        "name": "閃爍頻率"
       },
       "camera_default_codec": {
-        "name": "Default Codec"
+        "name": "預設編解碼器"
       },
       "camera_motion_tracking_mode": {
-        "name": "Motion Tracking"
+        "name": "移動追蹤"
       },
       "camera_night_vision_mode": {
-        "name": "Night Vision Mode"
+        "name": "夜視模式"
       },
       "camera_cooldown": {
-        "name": "Cloud Cool Down Time"
+        "name": "雲端錄影間隔"
       },
       "camera_doorbell_ring_key": {
-        "name": "Doorbell Tone"
+        "name": "門鈴鈴聲"
       },
       "camera_auto_power_on_capacity": {
-        "name": "Auto Power-On Capacity"
+        "name": "自動開機電量"
       }
     },
     "switch": {
       "led_light": {
-        "name": "LED Indicator"
+        "name": "LED 指示燈"
       },
       "light_power": {
-        "name": "Light"
+        "name": "燈光"
       },
       "alarm_enabled": {
-        "name": "Alarm Enabled"
+        "name": "已啟用警報"
       },
       "continued_alarm": {
-        "name": "Continued Alarm"
+        "name": "持續警報"
       },
       "mail_notice": {
-        "name": "Mail Reminder"
+        "name": "郵件提醒"
       },
       "chirp_tone_enabled": {
-        "name": "Chirp Tone Enabled"
+        "name": "已啟用提示音"
       },
       "reminder_enabled": {
-        "name": "Reminder Enabled"
+        "name": "已啟用提醒"
       },
       "reminder_tone_enabled": {
-        "name": "Reminder Tone Enabled"
+        "name": "已啟用提醒音"
       },
       "await_enabled": {
-        "name": "Await Enabled"
+        "name": "已啟用待機燈"
       },
       "pir_enabled": {
-        "name": "PIR Enabled"
+        "name": "已啟用 PIR"
       },
       "sunshine_enabled": {
-        "name": "Sunshine Enabled"
+        "name": "已啟用環境光偵測"
       },
       "key_sound_enabled": {
-        "name": "Key Sound Enabled"
+        "name": "已啟用按鍵音"
       },
       "warning_enabled": {
-        "name": "Warning Enabled"
+        "name": "已啟用警告"
       },
       "camera_motion_detection": {
-        "name": "Motion Detection"
+        "name": "移動偵測"
       },
       "camera_person_detection": {
-        "name": "Person Detection"
+        "name": "人形偵測"
       },
       "camera_video_recording": {
-        "name": "Record Video"
+        "name": "錄製影片"
       },
       "camera_night_vision": {
-        "name": "Auto Night Vision"
+        "name": "自動夜視"
       },
       "camera_recording_light": {
-        "name": "Status LED"
+        "name": "狀態指示燈"
       },
       "camera_alarm": {
-        "name": "Camera Alarm"
+        "name": "攝影機警報"
       },
       "camera_mirror_flip": {
-        "name": "Rotate Image"
+        "name": "旋轉影像"
       },
       "camera_antiflicker": {
-        "name": "Anti-Flicker"
+        "name": "抗閃爍"
       },
       "camera_cry_detection": {
-        "name": "Cry Detection"
+        "name": "哭聲偵測"
       },
       "camera_cooldown": {
-        "name": "Cooldown"
+        "name": "錄影間隔"
       },
       "camera_device_call": {
-        "name": "Device Call"
+        "name": "裝置呼叫"
       },
       "camera_ding_dong": {
-        "name": "Mechanical Chime"
+        "name": "機械門鈴"
       },
       "camera_motion_tracking": {
-        "name": "Motion Tracking"
+        "name": "移動追蹤"
       },
       "camera_voice_volume": {
-        "name": "Voice Volume"
+        "name": "語音音量"
       },
       "camera_live_audio": {
-        "name": "Live Audio"
+        "name": "即時音訊"
       },
       "camera_recording_audio": {
-        "name": "Recording Audio"
+        "name": "錄製音訊"
       },
       "camera_auto_power_on": {
-        "name": "Auto Power-On"
+        "name": "自動開機"
       },
       "camera_white_light": {
-        "name": "White Light"
+        "name": "白光"
       },
       "camera_alarm_when_removed": {
-        "name": "Alarm When Removed"
+        "name": "拆卸警報"
       },
       "camera_sleep": {
-        "name": "Sleep Mode"
+        "name": "休眠模式"
       },
       "camera_ai_notification_person": {
-        "name": "AI Notification Person"
+        "name": "AI 通知：人員"
       },
       "camera_ai_notification_pet": {
-        "name": "AI Notification Pet"
+        "name": "AI 通知：寵物"
       },
       "camera_ai_notification_vehicle_enter": {
-        "name": "AI Notification Vehicle Enter"
+        "name": "AI 通知：車輛駛入"
       },
       "camera_ai_notification_vehicle_out": {
-        "name": "AI Notification Vehicle Out"
+        "name": "AI 通知：車輛駛出"
       },
       "camera_ai_notification_vehicle_held_up": {
-        "name": "AI Notification Vehicle Held Up"
+        "name": "AI 通知：車輛停放"
       },
       "camera_ai_notification_package_exist": {
-        "name": "AI Notification Package Present"
+        "name": "AI 通知：有包裹"
       },
       "camera_ai_notification_package_drop_off": {
-        "name": "AI Notification Package Drop-Off"
+        "name": "AI 通知：包裹送達"
       },
       "camera_ai_notification_package_pick_up": {
-        "name": "AI Notification Package Pick-Up"
+        "name": "AI 通知：包裹取走"
       },
       "camera_ai_notification_other": {
-        "name": "AI Notification Other"
+        "name": "AI 通知：其他"
       },
       "camera_ai_assistant_person": {
-        "name": "AI Assistant Person"
+        "name": "AI 助理：人員"
       },
       "camera_ai_assistant_pet": {
-        "name": "AI Assistant Pet"
+        "name": "AI 助理：寵物"
       },
       "camera_ai_assistant_vehicle": {
-        "name": "AI Assistant Vehicle"
+        "name": "AI 助理：車輛"
       },
       "camera_ai_assistant_package": {
-        "name": "AI Assistant Package"
+        "name": "AI 助理：包裹"
       }
     },
     "alarm_control_panel": {
       "alarm": {
-        "name": "Alarm"
+        "name": "警報"
       }
     }
   },
   "exceptions": {
     "station_unavailable": {
-      "message": "X-Sense station is no longer available"
+      "message": "X-Sense 基站已無法使用"
     },
     "entity_unavailable": {
-      "message": "X-Sense entity is no longer available"
+      "message": "X-Sense 實體已無法使用"
     },
     "mqtt_not_connected": {
-      "message": "X-Sense MQTT is not connected"
+      "message": "X-Sense 未連線至 MQTT"
     },
     "safe_mode_publish_failed": {
-      "message": "Could not publish X-Sense security mode command"
+      "message": "無法發佈 X-Sense 安全防護模式命令"
     },
     "force_arm_not_pending": {
-      "message": "X-Sense force arm is not pending for {mode} mode"
+      "message": "X-Sense 目前沒有待處理的 {mode} 模式強制設防請求"
     },
     "cooldown_state_unknown": {
-      "message": "X-Sense cooldown enabled state is unknown"
+      "message": "X-Sense 錄影間隔的啟用狀態未知"
     },
     "unsupported_option": {
-      "message": "{option} is not a supported X-Sense option"
+      "message": "{option} 不是 X-Sense 支援的選項"
     },
     "select_not_writable": {
-      "message": "X-Sense select cannot be written"
+      "message": "無法寫入 X-Sense 選擇項目"
     },
     "invalid_radon_threshold": {
-      "message": "X-Sense radon threshold is not valid"
+      "message": "X-Sense 氡氣閾值無效"
     },
     "range_pair_missing": {
-      "message": "X-Sense range setting is missing its paired value"
+      "message": "X-Sense 範圍設定缺少配對值"
     },
     "minimum_greater_than_maximum": {
-      "message": "X-Sense minimum cannot be greater than maximum"
+      "message": "X-Sense 最小值不能大於最大值"
     },
     "light_power_switch_required": {
-      "message": "X-Sense {service} requires a light power switch"
+      "message": "X-Sense {service} 需要燈光電源開關"
     },
     "sbs50_station_required": {
-      "message": "X-Sense {service} requires an SBS50 station"
+      "message": "X-Sense {service} 需要 SBS50 基站"
     },
     "ids_missing": {
-      "message": "X-Sense {service} IDs are missing"
+      "message": "缺少 X-Sense {service} 的 ID"
     },
     "invalid_schedule_time_format": {
-      "message": "X-Sense schedule time must be HH:MM or HHMM"
+      "message": "X-Sense 排程時間必須為 HH:MM 或 HHMM 格式"
     },
     "schedule_time_out_of_range": {
-      "message": "X-Sense schedule time is out of range"
+      "message": "X-Sense 排程時間超出範圍"
     },
     "schedule_weekday_required": {
-      "message": "X-Sense schedule must include at least one weekday"
+      "message": "X-Sense 排程必須至少包含一週中的一天"
     },
     "schedule_weekday_range": {
-      "message": "X-Sense schedule weekdays must be 1 through 7"
+      "message": "X-Sense 排程的星期值必須為 1 至 7"
     },
     "ids_required": {
-      "message": "X-Sense {field} must include at least one ID"
+      "message": "X-Sense {field} 必須至少包含一個 ID"
     },
     "subscription_remove_twice": {
-      "message": "Can't remove subscription twice"
+      "message": "無法重複刪除訂閱"
     },
     "mqtt_topic_not_string": {
-      "message": "Topic needs to be a string"
+      "message": "主題必須是字串"
     },
     "mqtt_error": {
-      "message": "Error talking to MQTT: {error}"
+      "message": "與 MQTT 通訊時發生錯誤：{error}"
     }
   },
   "selector": {
@@ -787,14 +787,14 @@
     },
     "recording_media_days_order": {
       "options": {
-        "ascending": "Ascending",
-        "descending": "Descending"
+        "ascending": "升冪",
+        "descending": "降冪"
       }
     },
     "recording_media_clips_order": {
       "options": {
-        "ascending": "Ascending",
-        "descending": "Descending"
+        "ascending": "升冪",
+        "descending": "降冪"
       }
     },
     "recording_cache_mode": {

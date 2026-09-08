@@ -22,11 +22,17 @@ from .python_xsense.async_xsense import is_camera_entity
 from .const import (
     CAMERA_AI_SERVICE_AVAILABLE,
     DOMAIN,
+    LOGGER,
     NON_ENTITY_DIAGNOSTIC_BINARY_SENSOR_KEYS,
     NON_ENTITY_DIAGNOSTIC_SENSOR_KEYS,
 )
 from .coordinator import XSenseDataUpdateCoordinator
 from .event import async_cancel_recording_cache_tasks
+from .identity_store import (
+    async_close_identity_store,
+    async_load_identity_store,
+    async_remove_identity_store,
+)
 from .frontend import (
     async_register_recordings_panel,
     async_register_recordings_static_paths,
@@ -46,7 +52,7 @@ from .recordings_media import (
     async_unregister_recordings_media_source,
     _looks_like_coordinator,
 )
-from .recordings_gate import has_any_camera_entities, has_camera_entities
+from .recordings_gate import has_camera_entities, has_loaded_camera_entities
 from .repairs import async_check_stale_camera_blueprints
 
 PLATFORMS: list[Platform] = [
@@ -269,6 +275,7 @@ _LIFETIME_DOMAIN_KEYS = frozenset(
     {
         "_recordings_http_views_registered",
         "_recordings_static_paths_registered",
+        "_recording_maintenance_locks",
     }
 )
 
@@ -301,7 +308,7 @@ def _has_camera_entities(data) -> bool:
 
 def _has_any_camera_entities(hass: HomeAssistant) -> bool:
     """Return whether any loaded X-Sense entry currently contains cameras."""
-    return has_any_camera_entities(hass)
+    return has_loaded_camera_entities(hass)
 
 
 def _cleanup_recordings_entry(hass: HomeAssistant, entry_id: str) -> None:
@@ -867,7 +874,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up X-Sense Home Security from a config entry."""
     coordinator = XSenseDataUpdateCoordinator(hass, entry)
 
+    try:
+        return await _async_setup_entry_runtime(hass, entry, coordinator)
+    except BaseException:
+        try:
+            domain_data = hass.data.get(DOMAIN, {})
+            if domain_data.get(entry.entry_id) is coordinator:
+                with suppress(Exception):
+                    await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+                domain_data.pop(entry.entry_id)
+            async_cancel_recording_cache_tasks(hass, entry.entry_id)
+            _cleanup_recordings_runtime(hass, entry.entry_id)
+            _prune_domain_data_after_unload(hass)
+        finally:
+            try:
+                try:
+                    await coordinator.async_shutdown()
+                finally:
+                    await async_close_identity_store(coordinator)
+            except Exception:
+                LOGGER.exception("Could not shut down X-Sense after failed setup")
+        raise
+
+
+async def _async_setup_entry_runtime(
+    hass: HomeAssistant, entry: ConfigEntry, coordinator: XSenseDataUpdateCoordinator
+) -> bool:
+    """Set up entry resources under the setup rollback boundary."""
     await coordinator.async_config_entry_first_refresh()
+    await async_load_identity_store(hass, entry, coordinator)
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     recordings_runtime_registered = _has_camera_entities(coordinator.data)
@@ -941,12 +976,21 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_cancel_recording_cache_tasks(hass, entry.entry_id)
         _cleanup_recordings_entry(hass, entry.entry_id)
         if coordinator is not None:
-            await coordinator.async_shutdown()
+            try:
+                await coordinator.async_shutdown()
+            finally:
+                await async_close_identity_store(coordinator)
         if not _has_any_camera_entities(hass):
             _cleanup_recordings_runtime(hass)
         _prune_domain_data_after_unload(hass)
 
     return unload_ok
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove persisted identities only when the config entry is deleted."""
+    coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    await async_remove_identity_store(hass, entry, coordinator)
 
 
 async def async_remove_config_entry_device(

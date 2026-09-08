@@ -65,9 +65,12 @@ Kui Motion sündmus sisaldab X-Sense taasesituse metaandmeid, valmistab integree
 <!-- xsense-recording-storage-modes -->
 Kaamera SD-kaardi salvestused kuvatakse X-Sense Recordings-s. Ainult taasesitus on vaikesalvestusrežiim: Home Assistant hoiab allkirjastatud X-Sense URL-id privaatsena, kirjutab HLS esitusloendi ümber ja puhverserveritega segmente ainult siis, kui mängija seda nõuab, säilitamata terviklikke klippe. Kohalike salvestiste säilitamine salvestab täielikud klipid /media/xsense_recordings all ning võimaldab konfigureeritavat säilitamist, maksimaalset suurust, käsitsi kustutamist ja valikulist taustal sünkroonimist. Kohalik puhastamine ei kustuta kunagi salvestusi X-Sense SD-kaartidelt või pilvesalvestusest.
 
+<!-- xsense-cache-entry-ownership -->
+Kohalike salvestiste omandiõigust jälgitakse iga integratsioonikirje jaoks eraldi. Ühe kirje tühjendamine säilitab teise kirje hoitavad salvestised. Olemasolevad vahemälu juhtnupud jäävad muutumatuks.
+
 [![Impordi blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kaamera liikumine on saadaval nii Tuvastatud/Vaba binaarandurina kui ka ühekordse Motion-sündmusena iga uue tuvastuse jaoks. AI Detection on ühekordne sündmus. Käsitsi automaatikates kasuta `event.received`; `event_type` on vajalik ainult tüüpide filtreerimiseks nagu `person`, `pet`, `vehicle`, `package`, `other` või `ai_detection`.
+Kaamera liikumine on saadaval nii Tuvastatud/Vaba binaarandurina kui ka ühekordse Motion-sündmusena iga uue tuvastuse jaoks. AI Detection on ühekordne sündmus. `event.received` nõuab välja `options.event_type`: liikumise jaoks `motion` või toetatud AI-tüüp, näiteks `person`. Blueprint kasutab sündmust `xsense_camera_event` ja filtreerib valitud olemi järgi.
 
 Automatiseerimise näide:
 

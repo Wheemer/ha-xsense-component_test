@@ -910,7 +910,7 @@ def test_ai_notification_blueprint_docs_use_github_file_import_url():
 
 
 def test_blueprint_maintenance_interval_callback_stays_event_loop_safe():
-    setup_source = inspect.getsource(xsense_module.async_setup_entry)
+    setup_source = inspect.getsource(xsense_module._async_setup_entry_runtime)
     maintenance_source = inspect.getsource(xsense_module._schedule_startup_maintenance)
 
     assert "@callback" in setup_source
@@ -2199,7 +2199,16 @@ def test_recording_media_sync_can_stop_before_entry_unload(monkeypatch):
     assert len(cancelled) == 5
 
 
-def test_setup_entry_removes_recordings_runtime_without_cameras(monkeypatch):
+@pytest.fixture
+def mock_identity_loading(monkeypatch):
+    """Keep recording runtime tests independent of HA storage infrastructure."""
+    async def load(*_args):
+        return None
+
+    monkeypatch.setattr(xsense_module, "async_load_identity_store", load)
+
+
+def test_setup_entry_removes_recordings_runtime_without_cameras(monkeypatch, mock_identity_loading):
     calls = []
 
     def async_track_time_interval(hass, action, interval):
@@ -2305,7 +2314,7 @@ def test_setup_entry_removes_recordings_runtime_without_cameras(monkeypatch):
     assert "recording_media_sync" not in calls
 
 
-def test_setup_entry_registers_recordings_runtime_with_cameras(monkeypatch):
+def test_setup_entry_registers_recordings_runtime_with_cameras(monkeypatch, mock_identity_loading):
     calls = []
 
     def async_track_time_interval(hass, action, interval):
@@ -2415,6 +2424,7 @@ def test_setup_entry_registers_recordings_runtime_with_cameras(monkeypatch):
 
 def test_setup_entry_registers_recordings_runtime_when_camera_appears_later(
     monkeypatch,
+    mock_identity_loading,
 ):
     calls = []
     listeners = []
@@ -2724,7 +2734,7 @@ def test_recordings_static_paths_register_once(monkeypatch):
     assert hass.data[DOMAIN]["_recordings_static_paths_registered"] is True
 
 
-def test_recordings_entry_reload_reregisters_panel_without_duplicate_assets(monkeypatch):
+def test_recordings_entry_reload_reregisters_panel_without_duplicate_assets(monkeypatch, mock_identity_loading):
     calls = []
 
     async def async_register_recordings_panel(hass):
@@ -2926,7 +2936,7 @@ def test_recordings_cache_management_releases_playback_only_clip(monkeypatch):
     monkeypatch.setattr(http, "async_release_recording_playback", release_playback)
     response = asyncio.run(
         http.XSenseRecordingsCacheManagementView(_recordings_panel_test_hass()).delete(
-            SimpleNamespace(query={"serial": "CAMERA-SN", "start": "1", "end": "2"}),
+            SimpleNamespace(query={"serial": "CAMERA-SN", "start": "1", "end": "2", "token": "own-token"}),
             "playback",
             "entry-id",
         )
@@ -2934,29 +2944,41 @@ def test_recordings_cache_management_releases_playback_only_clip(monkeypatch):
 
     assert response.status == 200
     assert released == [
-        {"entry_id": "entry-id", "serial": "CAMERA-SN", "start": 1, "end": 2}
+        {"entry_id": "entry-id", "serial": "CAMERA-SN", "start": 1, "end": 2, "token": "own-token"}
     ]
 
 
-def test_recordings_cache_management_keeps_retained_clip(monkeypatch):
-    from custom_components.xsense import http
+def test_recordings_cache_management_keeps_retained_clip(monkeypatch, tmp_path):
+    from custom_components.xsense import http, recordings_media
 
     monkeypatch.setattr(http, "_recording_cache_retained", lambda hass, entry_id: True)
+    monkeypatch.setattr(recordings_media, "_recording_media_root", lambda *args: tmp_path)
     monkeypatch.setattr(
-        http,
-        "async_release_recording_playback",
-        lambda *args: pytest.fail("retained playback must not be deleted on close"),
+        recordings_media,
+        "async_delete_recording_cache",
+        lambda *args, **kwargs: pytest.fail("retained playback must not be deleted on close"),
     )
+    hass = _recordings_panel_test_hass()
+    root = tmp_path / "hls" / "CAMERA-SN_1_2"
+    root.mkdir(parents=True)
+    segment = root / "segment.ts"
+    segment.write_bytes(b"retained")
+    own_token = http._create_hls_segment_token(hass, root, "entry-id")
+    other_token = http._create_hls_segment_token(hass, root, "entry-id")
     response = asyncio.run(
-        http.XSenseRecordingsCacheManagementView(_recordings_panel_test_hass()).delete(
-            SimpleNamespace(query={"serial": "CAMERA-SN", "start": "1", "end": "2"}),
+        http.XSenseRecordingsCacheManagementView(hass).delete(
+            SimpleNamespace(query={"serial": "CAMERA-SN", "start": "1", "end": "2", "token": own_token}),
             "playback",
             "entry-id",
         )
     )
 
     assert response.status == 200
-    assert json.loads(response.text)["retained"] is True
+    assert json.loads(response.text)["deleted_items"] == 0
+    tokens = hass.data[DOMAIN]["_recording_hls_tokens"]
+    assert own_token not in tokens
+    assert other_token in tokens
+    assert segment.read_bytes() == b"retained"
 
 
 def test_recordings_hls_playlist_rewrites_segments_to_token_route(tmp_path):

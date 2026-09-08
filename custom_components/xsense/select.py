@@ -551,7 +551,14 @@ class XSenseSelectEntity(XSenseEntity, SelectEntity):
                 entity, **{self.entity_description.addx_key: _typed_option(option)}
             )
         elif not is_camera_entity(entity):
-            if self.entity_description.data_key == "radonUnit":
+            if entity.type == "XR0A-iR" and self.entity_description.data_key == "tempUnit":
+                radon_unit = entity.data.get("radonUnit")
+                if str(radon_unit) not in {"1", "2"}:
+                    raise xsense_error("entity_unavailable")
+                await self.coordinator.xsense.update_radon_unit(
+                    entity, str(radon_unit), temp_unit=option
+                )
+            elif self.entity_description.data_key == "radonUnit":
                 await self.coordinator.xsense.update_radon_unit(entity, option)
             elif self.entity_description.data_key == "comfortType":
                 await self._async_select_comfort_type(entity, option)

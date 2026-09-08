@@ -124,9 +124,12 @@ Motion イベントに X-Sense 再生メタデータが含まれている場合�
 <!-- xsense-recording-storage-modes -->
 カメラの SD カード録画は X-Sense Recordings に表示されます。再生のみがデフォルトのストレージ モードです。Home Assistant は、署名された X-Sense URL を非公開に保ち、HLS プレイリストを書き換え、プレーヤーが要求した場合にのみセグメントをプロキシし、完全なクリップは保持しません。ローカル録画を保持すると、/media/xsense_recordings の下に完全なクリップが保存され、構成可能な保持、最大サイズ、手動削除、およびオプションのバックグラウンド同期が有効になります。ローカル クリーンアップでは、X-Sense SD カードやクラウド ストレージから録画が削除されることはありません。
 
+<!-- xsense-cache-entry-ownership -->
+ローカル録画の所有関係は、インテグレーションのエントリごとに管理されます。あるエントリのキャッシュを削除しても、別のエントリが保持している録画は削除されません。既存のキャッシュ操作は変わりません。
+
 [![blueprint をインポート](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-カメラの Motion は、現在の検出/クリア状態を示すバイナリセンサーと、新しい検出ごとに1回発生する Motion イベントの両方で利用できます。AI Detection は1回限りのイベントです。手動オートメーションでは、Home Assistant の `event.received` トリガーをカメラの `Motion` または `AI Detection` エンティティと一緒に使用します。サブスクリプション付き AI Detection を `person`、`pet`、`vehicle`、`package`、`other`、`ai_detection` などに絞る場合だけ `event_type` を使用してください。
+カメラの Motion は、現在の検出/クリア状態を示すバイナリセンサーと、新しい検出ごとに1回発生する Motion イベントの両方で利用できます。AI Detection は1回限りのイベントです。`event.received` では `options.event_type` が必須です。動きには `motion`、AI 検出には `person` などの対応する種類を指定してください。付属の blueprint は `xsense_camera_event` を使用し、選択したエンティティで絞り込みます。
 
 オートメーション例:
 

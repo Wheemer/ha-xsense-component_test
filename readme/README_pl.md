@@ -126,9 +126,12 @@ Gdy zdarzenie Motion zawiera metadane odtwarzania X-Sense, integracja przygotowu
 <!-- xsense-recording-storage-modes -->
 Nagrania z kamery na karcie SD pojawiają się w X-Sense Recordings. Domyślnym trybem przechowywania jest tylko odtwarzanie: Home Assistant zachowuje prywatność podpisanych adresów URL X-Sense, zapisuje ponownie listę odtwarzania HLS i przesyła segmenty proxy tylko wtedy, gdy gracz o to poprosi, bez zachowywania całych klipów. Funkcja Keep Local Records przechowuje kompletne klipy w /media/xsense_recordings i umożliwia konfigurowalne przechowywanie, maksymalny rozmiar, ręczne usuwanie i opcjonalną synchronizację w tle. Lokalne czyszczenie nigdy nie usuwa nagrań z kart SD X-Sense ani z magazynu w chmurze.
 
+<!-- xsense-cache-entry-ownership -->
+Własność lokalnych nagrań jest śledzona osobno dla każdego wpisu integracji. Wyczyszczenie jednego wpisu zachowuje nagrania przechowywane przez inny wpis. Dotychczasowe elementy sterowania pamięcią podręczną pozostają bez zmian.
+
 [![Importuj blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Ruch kamery jest dostępny jako czujnik binarny Wykryto/Wolne oraz jako jednorazowe zdarzenie Motion dla każdego nowego wykrycia. AI Detection jest jednorazowym zdarzeniem. W automatyzacjach ręcznych użyj wyzwalacza `event.received` Home Assistant z encją kamery `Motion` lub `AI Detection`; `event_type` jest potrzebny tylko do ograniczenia AI Detection z subskrypcją do typów takich jak `person`, `pet`, `vehicle`, `package`, `other` lub `ai_detection`.
+Ruch kamery jest dostępny jako czujnik binarny Wykryto/Wolne oraz jako jednorazowe zdarzenie Motion dla każdego nowego wykrycia. AI Detection jest jednorazowym zdarzeniem. Dla `event.received` wymagane jest `options.event_type`: `motion` dla ruchu lub obsługiwany typ AI, np. `person`. Blueprint używa `xsense_camera_event` i filtruje według wybranej encji.
 
 Przykładowa automatyzacja:
 

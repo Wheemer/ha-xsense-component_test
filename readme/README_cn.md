@@ -25,9 +25,12 @@ ____________________________________________________________
 <!-- xsense-recording-storage-modes -->
 摄像机 SD 卡记录显示在 X-Sense Recordings 中。仅播放是默认存储模式：Home Assistant 将签名的 X-Sense URL 保持私有，重写 HLS 播放列表，并仅在播放器请求时代理片段，而不保留完整的剪辑。保留本地录音将完整的剪辑存储在 /media/xsense_recordings 下，并启用可配置的保留、最大大小、手动删除和可选的后台同步。本地清理永远不会删除 X-Sense SD 卡或云存储中的录音。
 
+<!-- xsense-cache-entry-ownership -->
+本地录像的归属按每个集成条目分别记录。清理一个条目时，会保留由其他条目留存的录像。现有缓存控制功能保持不变。
+
 [![导入 blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-摄像机 Motion 同时提供显示当前已检测/已清除状态的二进制传感器，以及每次新检测触发一次的 Motion 事件。AI Detection 是一次性事件。手动自动化请使用 Home Assistant 的 `event.received` 触发器并选择摄像机 `Motion` 或 `AI Detection` 实体；只有在需要把订阅 AI Detection 限制为 `person`、`pet`、`vehicle`、`package`、`other` 或 `ai_detection` 等对象类型时，才使用 `event_type`。
+摄像机 Motion 同时提供显示当前已检测/已清除状态的二进制传感器，以及每次新检测触发一次的 Motion 事件。AI Detection 是一次性事件。`event.received` 必须设置 `options.event_type`：移动检测使用 `motion`，AI 检测使用 `person` 等受支持的类型。附带的蓝图使用 `xsense_camera_event`，并按所选实体筛选。
 
 自动化示例:
 

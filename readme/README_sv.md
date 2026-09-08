@@ -65,9 +65,12 @@ När en Motion-händelse inkluderar X-Sense-uppspelningsmetadata, förbereder in
 <!-- xsense-recording-storage-modes -->
 Kamerans SD-kortinspelningar visas i X-Sense Recordings. Endast uppspelning är standardlagringsläget: Home Assistant håller signerade X-Sense-URL:er privata, skriver om HLS-spellistan och ger fullmaktssegment endast när spelaren begär dem, utan att behålla fullständiga klipp. Behåll lokala inspelningar lagrar kompletta klipp under /media/xsense_recordings och möjliggör konfigurerbar retention, en maximal storlek, manuell radering och valfri bakgrundssynkronisering. Lokal rensning tar aldrig bort inspelningar från X-Sense SD-kort eller molnlagring.
 
+<!-- xsense-cache-entry-ownership -->
+Ägarskap för lokala inspelningar spåras separat för varje integrationspost. Om en post rensas bevaras inspelningar som behålls av en annan post. Befintliga cachekontroller förblir oförändrade.
+
 [![Importera blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kamerarörelse finns både som en binärsensor med Detekterad/Klar och som en Motion-engångshändelse för varje ny detektering. AI Detection är en engångshändelse. Använd `event.received` för manuella automationer; använd bara `event_type` för att filtrera typer som `person`, `pet`, `vehicle`, `package`, `other` eller `ai_detection`.
+Kamerarörelse finns både som en binärsensor med Detekterad/Klar och som en Motion-engångshändelse för varje ny detektering. AI Detection är en engångshändelse. För `event.received` krävs `options.event_type`: `motion` för rörelse eller en AI-typ som stöds, till exempel `person`. Blueprinten använder `xsense_camera_event` och filtrerar på vald entitet.
 
 Exempelautomation:
 

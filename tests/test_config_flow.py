@@ -8,10 +8,36 @@ import homeassistant.helpers.config_validation as cv
 
 from custom_components.xsense.config_flow import (
     XSenseOptionsFlow,
+    _recording_media_path_allowed,
     options_schema,
     recording_media_storage_path,
     recording_media_storage_path_changed,
 )
+
+
+@pytest.mark.parametrize("path", [
+    "/media/../config/clips", "/media/clips/../../config", "/media-other/clips",
+    "media/clips", "//media/clips", "/media/\x00clips",
+])
+def test_recording_path_rejects_escape(path):
+    assert not _recording_media_path_allowed(path)
+
+
+@pytest.mark.parametrize("path", ["/media", "/media/xsense_recordings", "/media/camera/clips"])
+def test_recording_path_accepts_media_subdirectories(path):
+    assert _recording_media_path_allowed(path)
+
+
+def test_recording_path_rejects_resolved_symlink_escape(monkeypatch, tmp_path):
+    from pathlib import Path
+
+    original_resolve = Path.resolve
+    def resolve(path, *args, **kwargs):
+        if str(path) == "/media/linked":
+            return tmp_path / "outside"
+        return original_resolve(path, *args, **kwargs)
+    monkeypatch.setattr(Path, "resolve", resolve)
+    assert not _recording_media_path_allowed("/media/linked")
 from custom_components.xsense.const import (
     CONF_RECORDING_CACHE_MAX_SIZE_MB,
     CONF_RECORDING_CACHE_MODE,
