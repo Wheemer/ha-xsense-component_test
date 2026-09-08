@@ -124,9 +124,12 @@ Wanneer een Motion-gebeurtenis afspeelmetadata van X-Sense bevat, bereidt de int
 <!-- xsense-recording-storage-modes -->
 Camera-SD-kaartopnamen verschijnen in X-Sense Recordings. Alleen afspelen is de standaardopslagmodus: Home Assistant houdt ondertekende X-Sense-URL's privé, herschrijft de HLS-afspeellijst en proxy-segmenten alleen wanneer de speler daarom vraagt, zonder volledige clips te behouden. Bij Keep Local Recordings worden complete clips opgeslagen onder /media/xsense_recordings en is configureerbare retentie, maximale grootte, handmatige verwijdering en optionele achtergrondsynchronisatie mogelijk. Door lokaal opschonen worden nooit opnamen verwijderd van X-Sense SD-kaarten of cloudopslag.
 
+<!-- xsense-cache-entry-ownership -->
+Het eigendom van lokale opnamen wordt per integratieconfiguratie bijgehouden. Bij het wissen van de cache van één configuratie blijven opnamen behouden die door een andere configuratie worden bewaard. De bestaande cachebediening blijft ongewijzigd.
+
 [![Blueprint importeren](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Camerabeweging is beschikbaar als binaire sensor Gedetecteerd/Vrij en als eenmalige Motion-gebeurtenis voor elke nieuwe detectie. AI Detection is een eenmalige gebeurtenis. Gebruik voor handmatige automatiseringen de Home Assistant-trigger `event.received` met de camera-entiteit `Motion` of `AI Detection`; `event_type` is alleen nodig om AI Detection met abonnement te beperken tot typen zoals `person`, `pet`, `vehicle`, `package`, `other` of `ai_detection`.
+Camerabeweging is beschikbaar als binaire sensor Gedetecteerd/Vrij en als eenmalige Motion-gebeurtenis voor elke nieuwe detectie. AI Detection is een eenmalige gebeurtenis. Bij `event.received` is `options.event_type` verplicht: `motion` voor beweging of een ondersteund AI-type zoals `person`. De blueprint gebruikt `xsense_camera_event` en filtert op de geselecteerde entiteit.
 
 Voorbeeldautomatisering:
 

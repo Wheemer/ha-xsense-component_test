@@ -1742,6 +1742,7 @@ def test_mqtt_ai_plan_event_routes_by_nested_camera_identity():
     from custom_components.xsense.coordinator import XSenseDataUpdateCoordinator
 
     class Camera:
+        entity_id = "camera-id"
         sn = "camera-sn"
         shadow_name = "SSC0Acamera-sn"
         type = "SSC0A"
@@ -1992,6 +1993,7 @@ async def test_camera_ai_history_poll_routes_apk_alarm_items():
     from custom_components.xsense.coordinator import XSenseDataUpdateCoordinator
 
     class Camera:
+        entity_id = "camera-id"
         sn = "camera-sn"
         type = "SSC0A"
         shadow_name = "SSC0Acamera-sn"
@@ -2163,6 +2165,7 @@ async def test_camera_ai_history_applies_new_items_in_timestamp_order():
     coordinator = XSenseDataUpdateCoordinator.__new__(XSenseDataUpdateCoordinator)
     coordinator.xsense = Client()
     coordinator._camera_ai_history_seen = {"already-initialized"}
+    coordinator._camera_ai_history_initialized = {"service-id"}
     coordinator._camera_ai_service_houses = {}
 
     assert await coordinator._update_camera_ai_service_history(["service-id"])

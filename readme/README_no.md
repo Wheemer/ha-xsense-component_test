@@ -65,9 +65,12 @@ Når en Motion-hendelse inkluderer X-Sense-avspillingsmetadata, forbereder integ
 <!-- xsense-recording-storage-modes -->
 Kamera SD-kortopptak vises i X-Sense Recordings. Bare avspilling er standard lagringsmodus: Home Assistant holder signerte X-Sense-URLer private, skriver om HLS-spillelisten og fullfører segmenter bare når spilleren ber om dem, uten å beholde fullstendige klipp. Hold lokale opptak lagrer komplette klipp under /media/xsense_recordings og muliggjør konfigurerbar oppbevaring, en maksimal størrelse, manuell sletting og valgfri bakgrunnssynkronisering. Lokal opprydding sletter aldri opptak fra X-Sense SD-kort eller skylagring.
 
+<!-- xsense-cache-entry-ownership -->
+Eierskap til lokale opptak spores per integrasjonsoppføring. Når hurtigbufferen for én oppføring tømmes, bevares opptak som beholdes av en annen oppføring. De eksisterende hurtigbufferkontrollene er uendret.
+
 [![Importer blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kamerabevegelse er tilgjengelig både som en Detektert/Klar-binærsensor og som en Motion-engangshendelse for hver nye deteksjon. AI Detection er en engangshendelse. Bruk `event.received` for manuelle automatiseringer; bruk bare `event_type` for å filtrere typer som `person`, `pet`, `vehicle`, `package`, `other` eller `ai_detection`.
+Kamerabevegelse er tilgjengelig både som en Detektert/Klar-binærsensor og som en Motion-engangshendelse for hver nye deteksjon. AI Detection er en engangshendelse. For `event.received` er `options.event_type` påkrevd: `motion` for bevegelse eller en støttet AI-type som `person`. Blueprinten bruker `xsense_camera_event` og filtrerer på valgt entitet.
 
 Eksempelautomatisering:
 

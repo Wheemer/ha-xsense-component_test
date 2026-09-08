@@ -65,9 +65,12 @@ Când un eveniment Motion include metadate de redare X-Sense, integrarea pregăt
 <!-- xsense-recording-storage-modes -->
 Înregistrările de pe cardul SD ale camerei apar în X-Sense Recordings. Doar redarea este modul de stocare implicit: Home Assistant păstrează adresele URL semnate X-Sense private, rescrie lista de redare HLS și trimite segmente numai atunci când jucătorul le solicită, fără a reține clipurile complete. Păstrați înregistrările locale stochează clipuri complete sub /media/xsense_recordings și permite reținerea configurabilă, o dimensiune maximă, ștergerea manuală și sincronizarea în fundal opțională. Curățarea locală nu șterge niciodată înregistrările de pe cardurile SD X-Sense sau de pe stocarea în cloud.
 
+<!-- xsense-cache-entry-ownership -->
+Proprietatea înregistrărilor locale este urmărită separat pentru fiecare intrare a integrării. Ștergerea memoriei cache pentru o intrare păstrează înregistrările reținute de altă intrare. Comenzile existente pentru memoria cache rămân neschimbate.
+
 [![Importă blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Mișcarea camerei este disponibilă atât ca senzor binar Detectat/Liber, cât și ca eveniment Motion unic pentru fiecare detecție nouă. AI Detection este un eveniment unic. Pentru automatizări manuale folosiți `event.received`; `event_type` este necesar doar pentru filtrarea tipurilor ca `person`, `pet`, `vehicle`, `package`, `other` sau `ai_detection`.
+Mișcarea camerei este disponibilă atât ca senzor binar Detectat/Liber, cât și ca eveniment Motion unic pentru fiecare detecție nouă. AI Detection este un eveniment unic. Pentru `event.received`, `options.event_type` este obligatoriu: `motion` pentru mișcare sau un tip AI acceptat, precum `person`. Blueprint-ul folosește `xsense_camera_event`, filtrat după entitatea selectată.
 
 Exemplu de automatizare:
 

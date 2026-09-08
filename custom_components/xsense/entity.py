@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import logging
 from typing import TYPE_CHECKING, Any
 
 from .python_xsense.entity import Entity
@@ -18,6 +19,13 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER
+from .identity_store import (
+    IdentityConflictError,
+    IdentityStoreClosedError,
+    validate_current_identities,
+)
+
+LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from .coordinator import XSenseDataUpdateCoordinator
@@ -50,7 +58,15 @@ def setup_dynamic_entities(
     async_add_entities(_new_entities())
 
     def _async_add_new_entities() -> None:
-        if entities := _new_entities():
+        manager = getattr(coordinator, "_xsense_identity_store", None)
+        if getattr(coordinator, "_shutting_down", False) or (manager is not None and manager.closed):
+            return
+        try:
+            entities = _new_entities()
+        except IdentityConflictError:
+            LOGGER.error("X-Sense discovery stopped: conflicting physical device identifiers")
+            return
+        if entities:
             async_add_entities(entities)
 
     if hasattr(entry, "async_on_unload") and hasattr(coordinator, "async_add_listener"):
@@ -150,15 +166,18 @@ class XSenseEntity(CoordinatorEntity):
         )
         station = getattr(entity, "station", None)
         self._station_serial = _entity_serial(station)
-
-        self._attr_unique_id = (
-            f"{entity.entity_id}-{self.entity_description.key}".replace(
-                "_", "-"
-            ).lower()
+        self._physical_identity = (
+            _serial_identity(entity) if not self._camera_identity else None
         )
+        self._parent_identity = _serial_identity(station)
+        stable_id = _stable_device_id(coordinator, entity, self._physical_identity)
+
+        self._attr_unique_id = f"{stable_id}-{self.entity_description.key}".replace(
+            "_", "-"
+        ).lower()
 
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entity.entity_id)},
+            identifiers={(DOMAIN, stable_id)},
             manufacturer=MANUFACTURER,
             model=_device_info_str(entity.type),
             name=_device_info_str(entity.name),
@@ -166,10 +185,15 @@ class XSenseEntity(CoordinatorEntity):
         if sw_version := _software_version(entity.data.get("sw")):
             self._attr_device_info["sw_version"] = sw_version
         if station_id:
+            parent_id = (
+                _stable_device_id(coordinator, station, self._parent_identity)
+                if station is not None
+                else station_id
+            )
             parent_info = _parent_device_info(
                 coordinator,
                 station,
-                station_id,
+                parent_id,
             )
             if parent_info is not None:
                 parent_field, parent_value = parent_info
@@ -194,7 +218,7 @@ class XSenseEntity(CoordinatorEntity):
                 self._camera_identity,
             )
         return _entity_by_id_or_serial(
-            entities, self._dev_id, self._entity_serial
+            entities, self._dev_id, self._entity_serial, self._physical_identity
         )
 
     async def async_added_to_hass(self) -> None:
@@ -213,6 +237,7 @@ class XSenseEntity(CoordinatorEntity):
                 (self.coordinator.data or {}).get("stations", {}),
                 self._station_id,
                 self._station_serial,
+                self._parent_identity,
             )
             return (
                 station is not None
@@ -239,17 +264,66 @@ def coordinator_devices(coordinator: XSenseDataUpdateCoordinator) -> dict:
 
 
 def _entity_by_id_or_serial(
-    entities: dict[str, Entity], entity_id: str | None, serial: str | None
+    entities: dict[str, Entity],
+    entity_id: str | None,
+    serial: str | None,
+    identity: tuple | None = None,
 ) -> Entity | None:
     """Return an entity by stable ID, falling back to its physical serial."""
     if entity_id is not None and (entity := entities.get(entity_id)):
-        return entity
+        if identity is None or _serial_identity(entity) == identity:
+            return entity
     if serial is None:
         return None
-    return next(
-        (entity for entity in entities.values() if _entity_serial(entity) == serial),
-        None,
+    matches = [
+        entity
+        for entity in entities.values()
+        if _entity_serial(entity) == serial
+        and (identity is None or _serial_identity(entity) == identity)
+    ]
+    return matches[0] if len(matches) == 1 else None
+
+
+def _serial_identity(entity: Entity | None) -> tuple | None:
+    """Scope serial fallback to the same model, house, and physical parent."""
+    serial = _entity_serial(entity)
+    if serial is None:
+        return None
+    station = getattr(entity, "station", None)
+    if station is not None and _entity_serial(station) is None:
+        return None
+    house = getattr(station if station is not None else entity, "house", None)
+    return (
+        station is not None,
+        str(house.house_id) if getattr(house, "house_id", None) is not None else None,
+        _entity_serial(station),
+        getattr(entity, "type", None),
+        serial,
     )
+
+
+def _stable_device_id(coordinator, entity: Entity, identity: tuple | None):
+    """Preserve observed IDs across unambiguous physical identity rollovers."""
+    manager = getattr(coordinator, "_xsense_identity_store", None)
+    if getattr(coordinator, "_shutting_down", False) or (manager is not None and manager.closed):
+        raise IdentityStoreClosedError("Cannot assign identities while entry unloads")
+    validate_current_identities(coordinator)
+    if identity is None:
+        return entity.entity_id
+    collection = "devices" if identity[0] else "stations"
+    current = (getattr(coordinator, "data", None) or {}).get(collection, {})
+    matches = [item for item in current.values() if _serial_identity(item) == identity]
+    if len(matches) != 1:
+        return entity.entity_id
+    stable_ids = getattr(coordinator, "_xsense_stable_device_ids", None)
+    if stable_ids is None:
+        stable_ids = coordinator._xsense_stable_device_ids = {}
+    if identity not in stable_ids:
+        stable_ids[identity] = entity.entity_id
+        manager = getattr(coordinator, "_xsense_identity_store", None)
+        if manager is not None:
+            manager.async_schedule_save()
+    return stable_ids[identity]
 
 
 def _entity_serial(entity: Entity | None) -> str | None:

@@ -1066,9 +1066,11 @@ class XSenseSwitchEntity(XSenseEntity, SwitchEntity):
             self.entity_description.data_key,
             self.entity_description.write_value_fn(enabled),
         )
-        entity.data[self.entity_description.data_key] = enabled
         if self.entity_description.read_key:
+            entity.data.pop(self.entity_description.data_key, None)
             entity.data[self.entity_description.read_key] = enabled
+        else:
+            entity.data[self.entity_description.data_key] = enabled
         self.coordinator.async_update_listeners()
 
 

@@ -275,6 +275,29 @@ def cameras_share_identity(left: Entity, right: Entity) -> bool:
     return bool(left_identifiers & right_identifiers)
 
 
+def _camera_library_record_key(record: dict, serials: list[str]) -> str:
+    """Identify library rows independently of refreshed signed media URLs."""
+    serial = (
+        record.get("serialNumber") or record.get("deviceSn")
+        or record.get("sn") or serials
+    )
+    trace = record.get("traceId") or record.get("traceIds") or record.get("id")
+    if trace not in (None, "", []):
+        identity = {"serial": serial, "trace": trace}
+    else:
+        times = {
+            key: record[key]
+            for key in (
+                "timestamp", "date", "startTime", "endTime", "start_time",
+                "end_time", "start_time_s", "end_time_s", "start", "end",
+                "package_time_s",
+            )
+            if record.get(key) not in (None, "")
+        }
+        identity = {"serial": serial, "times": times} if times else record
+    return json.dumps(identity, sort_keys=True)
+
+
 def _camera_history_record_owner(
     cameras: list[Entity], record: dict[str, Any]
 ) -> Entity | None:
@@ -680,7 +703,7 @@ class AsyncXSense(XSenseBase):
             "/library/newselectlibrary",
             startTimestamp=start_timestamp,
             endTimestamp=end_timestamp,
-            to=limit,
+            to=start + limit,
             serialNumber=serials,
             tags=[],
             marked=0,
@@ -719,7 +742,7 @@ class AsyncXSense(XSenseBase):
             accepted_serial = None
             for serial_index, serial in enumerate(serials):
                 try:
-                    history = await self.get_camera_library_history(
+                    history = await self._get_camera_library_pages(
                         [serial],
                         start_timestamp,
                         end_timestamp,
@@ -770,6 +793,51 @@ class AsyncXSense(XSenseBase):
                 successful_requests += 1
         if successful_requests == 0 and first_error is not None:
             raise first_error
+        return {"list": records, "total": len(records)}
+
+    async def _get_camera_library_pages(
+        self, serials, start_timestamp, end_timestamp, *, house, start, limit
+    ) -> dict:
+        """Read every library page, stopping if the service repeats a page."""
+        if limit <= 0:
+            raise ValueError("Camera library page size must be positive")
+        records = []
+        seen = set()
+        offset = start
+        while True:
+            history = await self.get_camera_library_history(
+                serials, start_timestamp, end_timestamp,
+                house=house, start=offset, limit=limit,
+            )
+            data = history.get("data")
+            if not isinstance(data, dict):
+                data = history
+            page = data.get("list")
+            if not isinstance(page, list) or not page:
+                break
+            raw_total = data.get("total")
+            total = None
+            if isinstance(raw_total, int) and not isinstance(raw_total, bool) and raw_total >= 0:
+                total = raw_total
+            elif isinstance(raw_total, str) and raw_total.isdecimal():
+                total = int(raw_total)
+            added = 0
+            for record in page:
+                if not isinstance(record, dict):
+                    continue
+                key = _camera_library_record_key(record, serials)
+                if key not in seen:
+                    seen.add(key)
+                    records.append(record)
+                    added += 1
+            offset += len(page)
+            if not added:
+                break
+            if total is not None:
+                if offset >= total:
+                    break
+            elif len(page) < limit:
+                break
         return {"list": records, "total": len(records)}
 
     async def get_camera_event_record_history_for_cameras(
@@ -2520,7 +2588,9 @@ class AsyncXSense(XSenseBase):
         """Write a volume value through the same settings shadow as the app."""
         return await self.update_shadow_setting(entity, data_key, value)
 
-    async def update_radon_unit(self, entity: Entity, radon_unit: str):
+    async def update_radon_unit(
+        self, entity: Entity, radon_unit: str, *, temp_unit: str | None = None
+    ):
         """Write the XR0A-iR display units through the APK REST operation."""
         station = getattr(entity, "station", entity)
         if not getattr(station, "entity_id", None) or not getattr(station, "sn", None):
@@ -2529,7 +2599,9 @@ class AsyncXSense(XSenseBase):
             "104115",
             stationId=station.entity_id,
             stationSn=station.sn,
-            tempUnit=str(entity.data.get("tempUnit", "1")),
+            tempUnit=str(
+                entity.data.get("tempUnit", "1") if temp_unit is None else temp_unit
+            ),
             radonUnit=str(radon_unit),
         )
 

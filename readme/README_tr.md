@@ -212,9 +212,12 @@ Bir Motion olayı, X-Sense oynatma meta verilerini içerdiğinde entegrasyon, e�
 <!-- xsense-recording-storage-modes -->
 Kamera SD kart kayıtları X-Sense Recordings'de görünür. Yalnızca oynatma varsayılan depolama modudur: Home Assistant, imzalı X-Sense URL'lerini gizli tutar, HLS çalma listesini yeniden yazar ve tüm klipleri saklamadan yalnızca oynatıcı talep ettiğinde bölümleri proxy olarak kullanır. Yerel kayıtları sakla, tüm klipleri /media/xsense_recordings altında saklar ve yapılandırılabilir saklama, maksimum boyut, manuel silme ve isteğe bağlı arka planda senkronizasyon sağlar. Yerel temizleme, X-Sense SD kartlarındaki veya bulut depolama alanındaki kayıtları hiçbir zaman silmez.
 
+<!-- xsense-cache-entry-ownership -->
+Yerel kayıtların sahipliği her entegrasyon girdisi için ayrı izlenir. Bir girdinin önbelleğini temizlemek, başka bir girdinin sakladığı kayıtları korur. Mevcut önbellek kontrolleri değişmez.
+
 [![Blueprint’i içe aktar](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kamera hareketi hem Algılandı/Boş ikili sensörü hem de her yeni algılama için tek seferlik Motion olayı olarak sunulur. AI Detection tek seferlik bir olaydır. Manuel otomasyonlar için `event.received` kullanın; `event_type` yalnızca `person`, `pet`, `vehicle`, `package`, `other` veya `ai_detection` gibi türleri filtrelemek için gerekir.
+Kamera hareketi hem Algılandı/Boş ikili sensörü hem de her yeni algılama için tek seferlik Motion olayı olarak sunulur. AI Detection tek seferlik bir olaydır. `event.received` için `options.event_type` zorunludur: hareket için `motion` veya `person` gibi desteklenen bir AI türü. Blueprint, seçilen varlığa göre filtrelenen `xsense_camera_event` olayını kullanır.
 
 Örnek otomasyon:
 

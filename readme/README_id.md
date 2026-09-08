@@ -211,9 +211,12 @@ Ketika peristiwa Motion menyertakan metadata pemutaran X-Sense, integrasi menyia
 <!-- xsense-recording-storage-modes -->
 Rekaman kartu SD kamera muncul di X-Sense Recordings. Hanya pemutaran yang merupakan mode penyimpanan default: Home Assistant menjaga kerahasiaan URL X-Sense yang ditandatangani, menulis ulang daftar putar HLS, dan memproksi segmen hanya ketika pemutar memintanya, tanpa menyimpan klip lengkap. Simpan rekaman lokal menyimpan klip lengkap di bawah /media/xsense_recordings dan memungkinkan retensi yang dapat dikonfigurasi, ukuran maksimum, penghapusan manual, dan sinkronisasi latar belakang opsional. Pembersihan lokal tidak pernah menghapus rekaman dari kartu SD X-Sense atau penyimpanan cloud.
 
+<!-- xsense-cache-entry-ownership -->
+Kepemilikan rekaman lokal dilacak per entri integrasi. Menghapus cache satu entri tetap mempertahankan rekaman yang disimpan oleh entri lain. Kontrol cache yang ada tidak berubah.
+
 [![Impor blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Gerakan kamera tersedia sebagai sensor biner Terdeteksi/Bebas dan sebagai event Motion satu kali untuk setiap deteksi baru. AI Detection adalah event satu kali. Untuk automasi manual gunakan `event.received`; `event_type` hanya diperlukan untuk memfilter tipe seperti `person`, `pet`, `vehicle`, `package`, `other`, atau `ai_detection`.
+Gerakan kamera tersedia sebagai sensor biner Terdeteksi/Bebas dan sebagai event Motion satu kali untuk setiap deteksi baru. AI Detection adalah event satu kali. Untuk `event.received`, `options.event_type` wajib diisi: `motion` untuk gerakan atau jenis AI yang didukung seperti `person`. Blueprint menggunakan `xsense_camera_event` dengan filter entitas yang dipilih.
 
 Contoh automasi:
 

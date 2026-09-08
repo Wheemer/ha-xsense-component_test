@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from .python_xsense.async_xsense import is_camera_entity
 from .python_xsense.device import Device
 from .python_xsense.entity import Entity
-from .python_xsense.entity_map import EntityType
+from .python_xsense.entity_map import EntityType, entities
 from .python_xsense.station import Station
 
 from homeassistant import config_entries
@@ -251,6 +251,9 @@ COMMAND_ONLY_MUTE_STATUS_DEVICE_TYPES = frozenset({"SMA0A", "SMA51"})
 
 def alarm_device_class(entity: Entity) -> BinarySensorDeviceClass | None:
     """Return the Home Assistant device class for an XSense alarm state."""
+    if entities.get(entity.type, {}).get("type") == EntityType.COMBI:
+        # The normalized aggregate flag cannot distinguish smoke from CO.
+        return None
     for model_prefix, device_class in ALARM_DEVICE_CLASS_BY_TYPE.items():
         if entity.type.startswith(model_prefix):
             return device_class

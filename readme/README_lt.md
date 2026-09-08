@@ -65,9 +65,12 @@ Kai Motion įvykis apima X-Sense atkūrimo metaduomenis, integracija parengia pr
 <!-- xsense-recording-storage-modes -->
 Fotoaparato SD kortelės įrašai rodomi X-Sense Recordings. Tik atkūrimas yra numatytasis saugojimo režimas: Home Assistant išlaiko pasirašytus X-Sense URL privačius, perrašo HLS grojaraštį ir tarpinius segmentus perduoda tik tada, kai grotuvas jų prašo, neišsaugodamas visų klipų. Vietiniuose įrašuose saugomi visi klipai pagal /media/xsense_recordings ir įgalinamas konfigūruojamas saugojimas, maksimalus dydis, rankinis ištrynimas ir pasirenkamas fono sinchronizavimas. Vietinis valymas niekada neištrina įrašų iš X-Sense SD kortelių arba debesies saugyklos.
 
+<!-- xsense-cache-entry-ownership -->
+Vietinių įrašų priklausomybė sekama atskirai kiekvienam integracijos įrašui. Išvalius vieno integracijos įrašo podėlį, kito integracijos įrašo saugomi įrašai išlieka. Esami podėlio valdikliai nesikeičia.
+
 [![Importuoti blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-Kameros judėjimas pateikiamas ir kaip Aptikta/Laisva dvejetainis jutiklis, ir kaip vienkartinis Motion įvykis kiekvienam naujam aptikimui. AI Detection yra vienkartinis įvykis. Rankinėse automatizacijose naudokite `event.received`; `event_type` reikalingas tik tipams filtruoti, pvz., `person`, `pet`, `vehicle`, `package`, `other` arba `ai_detection`.
+Kameros judėjimas pateikiamas ir kaip Aptikta/Laisva dvejetainis jutiklis, ir kaip vienkartinis Motion įvykis kiekvienam naujam aptikimui. AI Detection yra vienkartinis įvykis. Naudojant `event.received`, būtinas `options.event_type`: `motion` judėjimui arba palaikomas AI tipas, pvz., `person`. Blueprint naudoja `xsense_camera_event` ir filtruoja pagal pasirinktą objektą.
 
 Automatizacijos pavyzdys:
 

@@ -201,9 +201,12 @@ ____________________________________________________________
 <!-- xsense-recording-storage-modes -->
 הקלטות כרטיס SD של מצלמה מופיעות ב-X-Sense Recordings. השמעה בלבד היא מצב האחסון המוגדר כברירת מחדל: Home Assistant שומר על פרטיות של כתובות URL חתומות של X-Sense, משכתב את רשימת ההשמעה של HLS ומחלקים פרוקסי רק כאשר הנגן מבקש אותם, מבלי לשמור קליפים שלמים. שמור על הקלטות מקומיות מאחסן קליפים שלמים תחת /media/xsense_recordings ומאפשר שמירה ניתנת להגדרה, גודל מקסימלי, מחיקה ידנית וסנכרון רקע אופציונלי. ניקוי מקומי לעולם לא מוחק הקלטות מכרטיסי X-Sense SD או מאחסון בענן.
 
+<!-- xsense-cache-entry-ownership -->
+הבעלות על הקלטות מקומיות נרשמת בנפרד לכל רשומת אינטגרציה. ניקוי רשומה אחת שומר על הקלטות שנשמרות בידי רשומה אחרת. פקדי המטמון הקיימים נשארים ללא שינוי.
+
 [![ייבוא blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJarnsen%2Fha-xsense-component_test%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fxsense%2Fcamera_ai_notification.yaml)
 
-תנועת המצלמה זמינה גם כחיישן בינארי זוהה/פנוי וגם כאירוע Motion חד-פעמי לכל זיהוי חדש. AI Detection הוא אירוע חד-פעמי. לאוטומציות ידניות השתמשו ב-`event.received`; `event_type` נחוץ רק לסינון סוגים כמו `person`, `pet`, `vehicle`, `package`, `other` או `ai_detection`.
+תנועת המצלמה זמינה גם כחיישן בינארי זוהה/פנוי וגם כאירוע Motion חד-פעמי לכל זיהוי חדש. AI Detection הוא אירוע חד-פעמי. ב־`event.received` חובה להגדיר `options.event_type`: ‏`motion` לתנועה או סוג AI נתמך כגון `person`. ה־blueprint משתמש ב־`xsense_camera_event` ומסנן לפי הישות שנבחרה.
 
 דוגמת אוטומציה:
 
