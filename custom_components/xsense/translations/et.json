@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Seade on juba konfigureeritud",
       "reauth_successful": "Taasautentimine õnnestus",
-      "reconfigure_successful": "Ümberseadistamine õnnestus"
+      "reconfigure_successful": "Ümberseadistamine õnnestus",
+      "unique_id_mismatch": "Logi sisse selle kirjega seotud X-Sense'i kontoga."
     },
     "error": {
       "cannot_connect": "Ühenduse loomine ebaõnnestus",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Viga MQTT-ga suhtlemisel: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "{failed} salvestist ei õnnestunud vahemällu salvestada. Alla laaditi {downloaded} salvestist."
+    },
+    "force_arm_invalid_link": {
+      "message": "See X-Sense'i sundvalvestamise link on vigane."
+    },
+    "force_arm_request_failed": {
+      "message": "X-Sense'i sundvalvestamise taotlus ebaõnnestus."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Ainult taasesitus",
         "retained": "Säilita kohalikud salvestised"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Kodus",
+        "away": "Eemal"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Valvestusrežiim"
+        }
+      },
+      "name": "Sundvalvestamine",
+      "description": "Kinnita ootel valvestamistaotlus režiimis Kodus või Eemal, mida takistavad avatud andurid. Avatud andurid jäetakse vahele."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Valvestusrežiim"
+        }
+      },
+      "name": "Sundvalvestamine kohe",
+      "description": "Valvesta kohe režiimis Kodus või Eemal, jättes avatud andurid vahele ilma kinnitust küsimata."
+    },
+    "trigger_sos": {
+      "name": "Käivita SOS-häire",
+      "description": "Käivita SBS50 SOS-häire kohe."
+    },
+    "cancel_sos": {
+      "name": "Tühista SOS-häire",
+      "description": "Tühista aktiivne SBS50 SOS-häire."
+    },
+    "cancel_alarm": {
+      "name": "Tühista aktiivne häire",
+      "description": "Tühista aktiivne SBS50 andurihäire."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Heliga SOS-häire"
+        }
+      },
+      "name": "Määra SOS-heli",
+      "description": "Vali, kas SOS kasutab ainult vilkuvaid tulesid või käivitab ka sumisti."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "Seadistuskirje ID",
+          "description": "Kõigile X-Sense'i kontodele rakendamiseks jäta tühjaks."
+        }
+      },
+      "name": "Värskenda salvestisi",
+      "description": "Värskenda külgribal ja meediasirvijas kasutatavat kaamerasalvestiste indeksit."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "Seadistuskirje ID",
+          "description": "Kõigile X-Sense'i kontodele rakendamiseks jäta tühjaks."
+        }
+      },
+      "name": "Salvesta salvestised vahemällu",
+      "description": "Laadi kaamerasalvestised alla kohalikuks säilitamiseks. Vajab kohalike salvestiste säilitamise režiimi."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "Seadistuskirje ID",
+          "description": "Kõigile X-Sense'i kontodele rakendamiseks jäta tühjaks."
+        }
+      },
+      "name": "Tühjenda salvestiste vahemälu",
+      "description": "Kustuta kohalikud salvestiste indeksid, videod ja pisipildid. Pilve- ja SD-kaardi salvestised jäävad muutmata."
+    },
+    "query_light_schedules": {
+      "name": "Päri valgustuse ajakavasid",
+      "description": "Päri valgustuse ajakavasid. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Kuvatav nimi"
+        },
+        "start_time": {
+          "name": "Algusaeg (HH:MM või HHMM)"
+        },
+        "end_time": {
+          "name": "Lõpuaeg (HH:MM või HHMM)"
+        },
+        "week_days": {
+          "name": "Nädalapäevad (1 = pühapäev, 7 = laupäev)"
+        },
+        "enabled": {
+          "name": "Lubatud olek"
+        },
+        "time_zone": {
+          "name": "Ajavöönd"
+        }
+      },
+      "name": "Loo valgustuse ajakava",
+      "description": "Loo valgustuse ajakava. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Ajakava tunnus"
+        },
+        "start_time": {
+          "name": "Algusaeg (HH:MM või HHMM)"
+        },
+        "end_time": {
+          "name": "Lõpuaeg (HH:MM või HHMM)"
+        },
+        "week_days": {
+          "name": "Nädalapäevad (1 = pühapäev, 7 = laupäev)"
+        },
+        "enabled": {
+          "name": "Lubatud olek"
+        },
+        "time_zone": {
+          "name": "Ajavöönd"
+        }
+      },
+      "name": "Uuenda valgustuse ajakava",
+      "description": "Uuenda valgustuse ajakava. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Ajakava tunnus"
+        },
+        "name": {
+          "name": "Kuvatav nimi"
+        }
+      },
+      "name": "Nimeta valgustuse ajakava ümber",
+      "description": "Nimeta valgustuse ajakava ümber. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Ajakava tunnus"
+        }
+      },
+      "name": "Kustuta valgustuse ajakava",
+      "description": "Kustuta valgustuse ajakava. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "query_light_groups": {
+      "name": "Päri valgustite rühmi",
+      "description": "Päri valgustite rühmi. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Kuvatav nimi"
+        }
+      },
+      "name": "Loo valgustite rühm",
+      "description": "Loo valgustite rühm. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Rühma tunnus"
+        },
+        "name": {
+          "name": "Kuvatav nimi"
+        }
+      },
+      "name": "Nimeta valgustite rühm ümber",
+      "description": "Nimeta valgustite rühm ümber. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Rühma tunnus"
+        },
+        "timer": {
+          "name": "Taimeri tüüp (pirTime või appTime)"
+        },
+        "value": {
+          "name": "Taimeri väärtus"
+        }
+      },
+      "name": "Uuenda valgustite rühma taimerit",
+      "description": "Uuenda valgustite rühma taimerit. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Kuvatav nimi"
+        },
+        "device_ids": {
+          "name": "Seadmete tunnused"
+        }
+      },
+      "name": "Seo valgustite rühm",
+      "description": "Seo valgustite rühm. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Rühma tunnus"
+        }
+      },
+      "name": "Kustuta valgustite rühm",
+      "description": "Kustuta valgustite rühm. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Seadmete tunnused"
+        }
+      },
+      "name": "Eemalda seadmed valgustite rühmast",
+      "description": "Eemalda seadmed valgustite rühmast. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Rühma tunnus"
+        },
+        "device_ids": {
+          "name": "Seadmete seerianumbrid"
+        },
+        "enabled": {
+          "name": "Lubatud olek"
+        }
+      },
+      "name": "Määra valgustite rühma toiteolek",
+      "description": "Määra valgustite rühma toiteolek. Vali sihtmärgiks SBS50 valgustuse toitelüliti."
+    }
+  },
+  "issues": {}
 }

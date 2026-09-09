@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "המכשיר כבר מוגדר",
       "reauth_successful": "האימות מחדש הצליח",
-      "reconfigure_successful": "ההגדרה מחדש הצליחה"
+      "reconfigure_successful": "ההגדרה מחדש הצליחה",
+      "unique_id_mismatch": "יש להתחבר באמצעות אותו חשבון X-Sense המשויך לרשומה זו."
     },
     "error": {
       "cannot_connect": "החיבור נכשל",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "שגיאה בתקשורת עם MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "לא ניתן היה לשמור {failed} הקלטות במטמון. {downloaded} הקלטות הורדו."
+    },
+    "force_arm_invalid_link": {
+      "message": "קישור זה לדריכה כפויה של X-Sense אינו תקין."
+    },
+    "force_arm_request_failed": {
+      "message": "הבקשה לדריכה כפויה של X-Sense נכשלה."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "הפעלה בלבד",
         "retained": "שמירת הקלטות מקומית"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "בבית",
+        "away": "מחוץ לבית"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "מצב דריכה"
+        }
+      },
+      "name": "דריכה כפויה",
+      "description": "אישור בקשת דריכה ממתינה במצב בבית או מחוץ לבית שנחסמה עקב חיישנים פתוחים. החיישנים הפתוחים ייעקפו."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "מצב דריכה"
+        }
+      },
+      "name": "דריכה כפויה עכשיו",
+      "description": "דריכה מיידית במצב בבית או מחוץ לבית, תוך עקיפת חיישנים פתוחים וללא בקשת אישור."
+    },
+    "trigger_sos": {
+      "name": "הפעלת אזעקת SOS",
+      "description": "הפעלה מיידית של אזעקת SOS ב-SBS50."
+    },
+    "cancel_sos": {
+      "name": "ביטול אזעקת SOS",
+      "description": "ביטול אזעקת SOS פעילה ב-SBS50."
+    },
+    "cancel_alarm": {
+      "name": "ביטול אזעקה פעילה",
+      "description": "ביטול אזעקת חיישן פעילה ב-SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "אזעקת SOS קולית"
+        }
+      },
+      "name": "הגדרת צליל SOS",
+      "description": "בחירה אם SOS ישתמש רק באורות מהבהבים או יפעיל גם את הזמזם."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "מזהה רשומת תצורה",
+          "description": "יש להשאיר ריק כדי להחיל על כל חשבונות X-Sense."
+        }
+      },
+      "name": "רענון הקלטות",
+      "description": "רענון אינדקס הקלטות המצלמה המשמש את סרגל הצד ואת דפדפן המדיה."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "מזהה רשומת תצורה",
+          "description": "יש להשאיר ריק כדי להחיל על כל חשבונות X-Sense."
+        }
+      },
+      "name": "שמירת הקלטות במטמון",
+      "description": "הורדת הקלטות מצלמה לשמירה מקומית. נדרש מצב שמירת הקלטות מקומית."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "מזהה רשומת תצורה",
+          "description": "יש להשאיר ריק כדי להחיל על כל חשבונות X-Sense."
+        }
+      },
+      "name": "ניקוי מטמון ההקלטות",
+      "description": "מחיקת אינדקסים מקומיים של הקלטות, סרטונים ותמונות ממוזערות. ההקלטות בענן ובכרטיס SD לא ישתנו."
+    },
+    "query_light_schedules": {
+      "name": "שליפת לוחות זמנים לתאורה",
+      "description": "שליפת לוחות זמנים לתאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "שם תצוגה"
+        },
+        "start_time": {
+          "name": "שעת התחלה (HH:MM או HHMM)"
+        },
+        "end_time": {
+          "name": "שעת סיום (HH:MM או HHMM)"
+        },
+        "week_days": {
+          "name": "ימי השבוע (1 = יום ראשון, 7 = שבת)"
+        },
+        "enabled": {
+          "name": "מצב הפעלה"
+        },
+        "time_zone": {
+          "name": "אזור זמן"
+        }
+      },
+      "name": "יצירת לוח זמנים לתאורה",
+      "description": "יצירת לוח זמנים לתאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "מזהה לוח זמנים"
+        },
+        "start_time": {
+          "name": "שעת התחלה (HH:MM או HHMM)"
+        },
+        "end_time": {
+          "name": "שעת סיום (HH:MM או HHMM)"
+        },
+        "week_days": {
+          "name": "ימי השבוע (1 = יום ראשון, 7 = שבת)"
+        },
+        "enabled": {
+          "name": "מצב הפעלה"
+        },
+        "time_zone": {
+          "name": "אזור זמן"
+        }
+      },
+      "name": "עדכון לוח זמנים לתאורה",
+      "description": "עדכון לוח זמנים לתאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "מזהה לוח זמנים"
+        },
+        "name": {
+          "name": "שם תצוגה"
+        }
+      },
+      "name": "שינוי שם לוח זמנים לתאורה",
+      "description": "שינוי שם לוח זמנים לתאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "מזהה לוח זמנים"
+        }
+      },
+      "name": "מחיקת לוח זמנים לתאורה",
+      "description": "מחיקת לוח זמנים לתאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "query_light_groups": {
+      "name": "שליפת קבוצות תאורה",
+      "description": "שליפת קבוצות תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "שם תצוגה"
+        }
+      },
+      "name": "יצירת קבוצת תאורה",
+      "description": "יצירת קבוצת תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "מזהה קבוצה"
+        },
+        "name": {
+          "name": "שם תצוגה"
+        }
+      },
+      "name": "שינוי שם קבוצת תאורה",
+      "description": "שינוי שם קבוצת תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "מזהה קבוצה"
+        },
+        "timer": {
+          "name": "סוג טיימר (pirTime או appTime)"
+        },
+        "value": {
+          "name": "ערך טיימר"
+        }
+      },
+      "name": "עדכון טיימר קבוצת תאורה",
+      "description": "עדכון טיימר קבוצת תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "שם תצוגה"
+        },
+        "device_ids": {
+          "name": "מזהי התקנים"
+        }
+      },
+      "name": "קישור קבוצת תאורה",
+      "description": "קישור קבוצת תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "מזהה קבוצה"
+        }
+      },
+      "name": "מחיקת קבוצת תאורה",
+      "description": "מחיקת קבוצת תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "מזהי התקנים"
+        }
+      },
+      "name": "הסרת התקנים מקבוצת תאורה",
+      "description": "הסרת התקנים מקבוצת תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "מזהה קבוצה"
+        },
+        "device_ids": {
+          "name": "מספרים סידוריים של התקנים"
+        },
+        "enabled": {
+          "name": "מצב הפעלה"
+        }
+      },
+      "name": "הגדרת מצב הפעלה של קבוצת תאורה",
+      "description": "הגדרת מצב הפעלה של קבוצת תאורה. יש לבחור במתג החשמל של תאורת SBS50 כיעד."
+    }
+  },
+  "issues": {}
 }

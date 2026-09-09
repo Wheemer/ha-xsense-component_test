@@ -1,6 +1,236 @@
 {
+  "services": {
+    "force_arm": {
+      "name": "Scharfschalten bestätigen",
+      "description": "Eine durch offene Sensoren blockierte Scharfschaltung für Zuhause oder Abwesend bestätigen. Offene Sensoren werden umgangen.",
+      "fields": {
+        "mode": {
+          "name": "Scharfschaltmodus"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "Sofort erzwungen scharfschalten",
+      "description": "Sofort für Zuhause oder Abwesend scharfschalten und offene Sensoren ohne Rückfrage umgehen.",
+      "fields": {
+        "mode": {
+          "name": "Scharfschaltmodus"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "SOS-Alarm auslösen",
+      "description": "Den SOS-Alarm der SBS50 sofort auslösen."
+    },
+    "cancel_sos": {
+      "name": "SOS-Alarm beenden",
+      "description": "Einen aktiven SOS-Alarm der SBS50 beenden."
+    },
+    "cancel_alarm": {
+      "name": "Aktiven Alarm beenden",
+      "description": "Einen aktiven Sensoralarm der SBS50 beenden."
+    },
+    "set_sos_sound": {
+      "name": "SOS-Ton einstellen",
+      "description": "Festlegen, ob SOS nur das Licht blinken lässt oder zusätzlich den Summer einschaltet.",
+      "fields": {
+        "audible": {
+          "name": "Hörbarer SOS-Alarm"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "Aufnahmen aktualisieren",
+      "description": "Den Aufnahmeindex für die Seitenleiste und den Medienbrowser aktualisieren.",
+      "fields": {
+        "entry_id": {
+          "name": "Kennung des Konfigurationseintrags",
+          "description": "Leer lassen, um alle X-Sense-Konten einzubeziehen."
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "Aufnahmen zwischenspeichern",
+      "description": "Kameraaufnahmen lokal herunterladen. Erfordert den Modus Lokale Aufnahmen behalten.",
+      "fields": {
+        "entry_id": {
+          "name": "Kennung des Konfigurationseintrags",
+          "description": "Leer lassen, um alle X-Sense-Konten einzubeziehen."
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "Aufnahme-Cache leeren",
+      "description": "Lokale Aufnahmeindizes, Videos und Vorschaubilder löschen. Cloud- und SD-Aufnahmen bleiben unverändert.",
+      "fields": {
+        "entry_id": {
+          "name": "Kennung des Konfigurationseintrags",
+          "description": "Leer lassen, um alle X-Sense-Konten einzubeziehen."
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "Lichtzeitpläne abfragen",
+      "description": "Lichtzeitpläne abfragen. Den Lichtschalter der SBS50 als Ziel auswählen."
+    },
+    "create_light_schedule": {
+      "name": "Lichtzeitplan erstellen",
+      "description": "Lichtzeitplan erstellen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "name": {
+          "name": "Anzeigename"
+        },
+        "start_time": {
+          "name": "Startzeit (HH:MM oder HHMM)"
+        },
+        "end_time": {
+          "name": "Endzeit (HH:MM oder HHMM)"
+        },
+        "week_days": {
+          "name": "Wochentage (1 = Sonntag, 7 = Samstag)"
+        },
+        "enabled": {
+          "name": "Aktivierungszustand"
+        },
+        "time_zone": {
+          "name": "Zeitzone"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "Lichtzeitplan aktualisieren",
+      "description": "Lichtzeitplan aktualisieren. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "schedule_id": {
+          "name": "Zeitplankennung"
+        },
+        "start_time": {
+          "name": "Startzeit (HH:MM oder HHMM)"
+        },
+        "end_time": {
+          "name": "Endzeit (HH:MM oder HHMM)"
+        },
+        "week_days": {
+          "name": "Wochentage (1 = Sonntag, 7 = Samstag)"
+        },
+        "enabled": {
+          "name": "Aktivierungszustand"
+        },
+        "time_zone": {
+          "name": "Zeitzone"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "Lichtzeitplan umbenennen",
+      "description": "Lichtzeitplan umbenennen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "schedule_id": {
+          "name": "Zeitplankennung"
+        },
+        "name": {
+          "name": "Anzeigename"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "Lichtzeitplan löschen",
+      "description": "Lichtzeitplan löschen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "schedule_id": {
+          "name": "Zeitplankennung"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "Lichtgruppen abfragen",
+      "description": "Lichtgruppen abfragen. Den Lichtschalter der SBS50 als Ziel auswählen."
+    },
+    "create_light_group": {
+      "name": "Lichtgruppe erstellen",
+      "description": "Lichtgruppe erstellen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "name": {
+          "name": "Anzeigename"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "Lichtgruppe umbenennen",
+      "description": "Lichtgruppe umbenennen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "group_id": {
+          "name": "Gruppenkennung"
+        },
+        "name": {
+          "name": "Anzeigename"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "Lichtgruppen-Timer aktualisieren",
+      "description": "Lichtgruppen-Timer aktualisieren. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "group_id": {
+          "name": "Gruppenkennung"
+        },
+        "timer": {
+          "name": "Timertyp (pirTime oder appTime)"
+        },
+        "value": {
+          "name": "Timerwert"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "Lichter einer Gruppe zuordnen",
+      "description": "Lichter einer Gruppe zuordnen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "name": {
+          "name": "Anzeigename"
+        },
+        "device_ids": {
+          "name": "Gerätekennungen"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "Lichtgruppe löschen",
+      "description": "Lichtgruppe löschen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "group_id": {
+          "name": "Gruppenkennung"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "Geräte aus Lichtgruppe entfernen",
+      "description": "Geräte aus Lichtgruppe entfernen. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "device_ids": {
+          "name": "Gerätekennungen"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "Lichtgruppe schalten",
+      "description": "Lichtgruppe schalten. Den Lichtschalter der SBS50 als Ziel auswählen.",
+      "fields": {
+        "group_id": {
+          "name": "Gruppenkennung"
+        },
+        "device_ids": {
+          "name": "Geräteseriennummern"
+        },
+        "enabled": {
+          "name": "Aktivierungszustand"
+        }
+      }
+    }
+  },
   "config": {
     "abort": {
+      "unique_id_mismatch": "Mit demselben X-Sense-Konto wie bei diesem Eintrag anmelden.",
       "already_configured": "Gerät ist bereits konfiguriert",
       "reauth_successful": "Die erneute Authentifizierung war erfolgreich",
       "reconfigure_successful": "Die Neukonfiguration war erfolgreich"
@@ -57,7 +287,7 @@
           "recording_media_days_order": "Wählen Sie, ob neuere oder ältere Tage zuerst im Aufzeichnungsviewer angezeigt werden.",
           "recording_media_clips_order": "Wählen Sie, ob neuere oder ältere Clips an jedem Tag zuerst angezeigt werden.",
           "recording_cache_retention_days": "Löschen Sie lokal zwischengespeicherte Aufzeichnungen nach dieser Anzahl von Tagen. X-Sense-Cloud- und SD-Kartenaufzeichnungen werden nicht verändert.",
-          "recording_cache_max_size_mb": "Maximale lokale Cachegröße in MB. Wenn das Limit erreicht ist, werden zuerst die zuletzt angesehenen Aufnahmen entfernt.",
+          "recording_cache_max_size_mb": "Maximale lokale Cachegröße in MB. Wenn das Limit erreicht ist, werden zuerst die Aufnahmen entfernt, deren letzter Aufruf am längsten zurückliegt.",
           "recording_cache_mode": "Nur Wiedergabe leitet HLS-Medien bei Bedarf über Home Assistant weiter, ohne vollständige Clips zu speichern. Der Beibehalten-Modus speichert lokale Kopien mit den unten festgelegten Limits."
         }
       },
@@ -711,6 +941,15 @@
     }
   },
   "exceptions": {
+    "recording_cache_failed": {
+      "message": "{failed} Aufnahme(n) konnten nicht zwischengespeichert werden. {downloaded} Aufnahme(n) wurden heruntergeladen."
+    },
+    "force_arm_invalid_link": {
+      "message": "Dieser Link zur erzwungenen X-Sense-Scharfschaltung ist ungültig."
+    },
+    "force_arm_request_failed": {
+      "message": "Die erzwungene X-Sense-Scharfschaltung ist fehlgeschlagen."
+    },
     "station_unavailable": {
       "message": "Die X-Sense-Station ist nicht mehr verfügbar"
     },
@@ -779,6 +1018,12 @@
     }
   },
   "selector": {
+    "force_arm_mode": {
+      "options": {
+        "home": "Zuhause",
+        "away": "Abwesend"
+      }
+    },
     "recording_notification_quality": {
       "options": {
         "hd": "HD",

@@ -18,6 +18,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.translation import async_get_translations
 
 from .const import DOMAIN, MANUFACTURER
 from .coordinator import XSenseDataUpdateCoordinator
@@ -44,7 +45,11 @@ TRIGGER_SOS_SERVICE = "trigger_sos"
 CANCEL_SOS_SERVICE = "cancel_sos"
 CANCEL_ALARM_SERVICE = "cancel_alarm"
 SET_SOS_SOUND_SERVICE = "set_sos_sound"
-FORCE_ARM_SCHEMA = {vol.Required("mode"): vol.In(("Home", "Away"))}
+FORCE_ARM_SCHEMA = {
+    vol.Required("mode"): vol.All(
+        vol.In(("Home", "Away", "home", "away")), str.capitalize
+    )
+}
 SET_SOS_SOUND_SCHEMA = {vol.Required("audible"): cv.boolean}
 
 
@@ -180,6 +185,7 @@ class XSenseAlarmControlPanel(
         self._pending_force_arm_mode: str | None = None
         self._pending_force_arm_data: dict | None = None
         self._cancel_arm_request_timeout = None
+        self._force_arm_translations: dict[str, str] = {}
 
     @property
     def _station(self):
@@ -317,16 +323,26 @@ class XSenseAlarmControlPanel(
     @callback
     def _async_create_force_arm_notification(self, station, safe_mode: str) -> None:
         """Create/update the HA notification for an SBS50 bypass prompt."""
-        button_name = f"Force Arm {safe_mode}"
+        translations = self._force_arm_translations
+        service_prefix = f"component.{DOMAIN}.services.force_arm"
+        mode = translations.get(
+            f"component.{DOMAIN}.selector.force_arm_mode.options.{safe_mode.lower()}",
+            safe_mode,
+        )
+        button_name = f"{translations.get(service_prefix + '.name', 'Force Arm')} {mode}"
         action_url = self._force_arm_url(safe_mode)
+        description = translations.get(service_prefix + ".description")
         persistent_notification.async_create(
             self.hass,
             (
+                f"{description}\n\n"
+                f"[**{button_name}**]({action_url})"
+                if description else
                 "One or more sensors are open.\n\n"
                 f"[**{button_name}**]({action_url})\n\n"
                 "Select the link to confirm the pending X-Sense arm request."
             ),
-            title="X-Sense arm blocked",
+            title=translations.get(service_prefix + ".name", "X-Sense arm blocked"),
             notification_id=self._force_arm_notification_id,
         )
         LOGGER.debug(
@@ -359,6 +375,16 @@ class XSenseAlarmControlPanel(
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to coordinator updates and read initial state."""
+        # Persistent notifications are shared, so use HA's configured language.
+        for category in ("services", "selector"):
+            try:
+                self._force_arm_translations.update(
+                    await async_get_translations(
+                        self.hass, self.hass.config.language, category, {DOMAIN}
+                    )
+                )
+            except Exception:  # Translation loading must not block alarm entities.
+                LOGGER.warning("Could not load X-Sense %s translations", category)
         await super().async_added_to_hass()
         self._handle_coordinator_update()
 

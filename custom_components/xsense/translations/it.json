@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Il dispositivo è già configurato",
       "reauth_successful": "La riautenticazione ha avuto successo",
-      "reconfigure_successful": "La riconfigurazione ha avuto successo"
+      "reconfigure_successful": "La riconfigurazione ha avuto successo",
+      "unique_id_mismatch": "Accedi con lo stesso account X-Sense associato a questa voce."
     },
     "error": {
       "cannot_connect": "Impossibile connettersi",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Errore di comunicazione con MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Impossibile memorizzare nella cache {failed} registrazioni. Sono state scaricate {downloaded} registrazioni."
+    },
+    "force_arm_invalid_link": {
+      "message": "Questo collegamento per l'inserimento forzato X-Sense non è valido."
+    },
+    "force_arm_request_failed": {
+      "message": "La richiesta di inserimento forzato X-Sense non è riuscita."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Solo riproduzione",
         "retained": "Conserva le registrazioni locali"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "In casa",
+        "away": "Fuori casa"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "name": "Inserimento forzato",
+      "description": "Conferma una richiesta di inserimento in modalità In casa o Fuori casa in attesa, bloccata da sensori aperti. I sensori aperti vengono esclusi.",
+      "fields": {
+        "mode": {
+          "name": "Modalità di inserimento"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "Inserimento forzato immediato",
+      "description": "Inserisce immediatamente l'allarme in modalità In casa o Fuori casa, escludendo i sensori aperti senza richiedere conferma.",
+      "fields": {
+        "mode": {
+          "name": "Modalità di inserimento"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "Attiva allarme SOS",
+      "description": "Attiva immediatamente l'allarme SOS della SBS50."
+    },
+    "cancel_sos": {
+      "name": "Annulla allarme SOS",
+      "description": "Annulla un allarme SOS attivo della SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Annulla allarme attivo",
+      "description": "Annulla un allarme sensore attivo della SBS50."
+    },
+    "set_sos_sound": {
+      "name": "Imposta suono SOS",
+      "description": "Sceglie se l'SOS utilizza solo luci lampeggianti o attiva anche il segnalatore acustico.",
+      "fields": {
+        "audible": {
+          "name": "Allarme SOS acustico"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "Aggiorna registrazioni",
+      "description": "Aggiorna l'indice delle registrazioni della telecamera utilizzato dalla barra laterale e dal browser multimediale.",
+      "fields": {
+        "entry_id": {
+          "name": "ID della voce di configurazione",
+          "description": "Lascia vuoto per applicare a tutti gli account X-Sense."
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "Memorizza registrazioni nella cache",
+      "description": "Scarica le registrazioni della telecamera per conservarle localmente. Richiede la modalità Conserva le registrazioni locali.",
+      "fields": {
+        "entry_id": {
+          "name": "ID della voce di configurazione",
+          "description": "Lascia vuoto per applicare a tutti gli account X-Sense."
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "Svuota cache delle registrazioni",
+      "description": "Elimina gli indici delle registrazioni, i video e le miniature locali. Le registrazioni nel cloud e sulla scheda SD restano invariate.",
+      "fields": {
+        "entry_id": {
+          "name": "ID della voce di configurazione",
+          "description": "Lascia vuoto per applicare a tutti gli account X-Sense."
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "Consulta programmazioni della luce",
+      "description": "Consulta le programmazioni della luce. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50."
+    },
+    "create_light_schedule": {
+      "name": "Crea programmazione della luce",
+      "description": "Crea una programmazione della luce. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "name": {
+          "name": "Nome visualizzato"
+        },
+        "start_time": {
+          "name": "Ora di inizio (HH:MM o HHMM)"
+        },
+        "end_time": {
+          "name": "Ora di fine (HH:MM o HHMM)"
+        },
+        "week_days": {
+          "name": "Giorni della settimana (1 = domenica, 7 = sabato)"
+        },
+        "enabled": {
+          "name": "Stato di abilitazione"
+        },
+        "time_zone": {
+          "name": "Fuso orario"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "Aggiorna programmazione della luce",
+      "description": "Aggiorna una programmazione della luce. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identificatore della programmazione"
+        },
+        "start_time": {
+          "name": "Ora di inizio (HH:MM o HHMM)"
+        },
+        "end_time": {
+          "name": "Ora di fine (HH:MM o HHMM)"
+        },
+        "week_days": {
+          "name": "Giorni della settimana (1 = domenica, 7 = sabato)"
+        },
+        "enabled": {
+          "name": "Stato di abilitazione"
+        },
+        "time_zone": {
+          "name": "Fuso orario"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "Rinomina programmazione della luce",
+      "description": "Rinomina una programmazione della luce. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identificatore della programmazione"
+        },
+        "name": {
+          "name": "Nome visualizzato"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "Elimina programmazione della luce",
+      "description": "Elimina una programmazione della luce. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identificatore della programmazione"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "Consulta gruppi di luci",
+      "description": "Consulta i gruppi di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50."
+    },
+    "create_light_group": {
+      "name": "Crea gruppo di luci",
+      "description": "Crea un gruppo di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "name": {
+          "name": "Nome visualizzato"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "Rinomina gruppo di luci",
+      "description": "Rinomina un gruppo di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identificatore del gruppo"
+        },
+        "name": {
+          "name": "Nome visualizzato"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "Aggiorna timer del gruppo di luci",
+      "description": "Aggiorna il timer di un gruppo di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identificatore del gruppo"
+        },
+        "timer": {
+          "name": "Tipo di timer (pirTime o appTime)"
+        },
+        "value": {
+          "name": "Valore del timer"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "Associa gruppo di luci",
+      "description": "Associa un gruppo di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "name": {
+          "name": "Nome visualizzato"
+        },
+        "device_ids": {
+          "name": "Identificatori dei dispositivi"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "Elimina gruppo di luci",
+      "description": "Elimina un gruppo di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identificatore del gruppo"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "Rimuovi dispositivi dal gruppo di luci",
+      "description": "Rimuove dispositivi da un gruppo di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "device_ids": {
+          "name": "Identificatori dei dispositivi"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "Imposta alimentazione del gruppo di luci",
+      "description": "Imposta l'alimentazione di un gruppo di luci. Seleziona come destinazione l'interruttore di alimentazione della luce SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identificatore del gruppo"
+        },
+        "device_ids": {
+          "name": "Numeri di serie dei dispositivi"
+        },
+        "enabled": {
+          "name": "Stato di abilitazione"
+        }
+      }
+    }
+  },
+  "issues": {}
 }

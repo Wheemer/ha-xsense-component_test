@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "设备已配置",
       "reauth_successful": "重新认证成功",
-      "reconfigure_successful": "重新配置成功"
+      "reconfigure_successful": "重新配置成功",
+      "unique_id_mismatch": "请使用与此条目相同的 X-Sense 账户登录。"
     },
     "error": {
       "cannot_connect": "连接失败",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "与 MQTT 通信时出错：{error}"
+    },
+    "recording_cache_failed": {
+      "message": "无法缓存 {failed} 条录像。已下载 {downloaded} 条录像。"
+    },
+    "force_arm_invalid_link": {
+      "message": "此 X-Sense 强制布防链接无效。"
+    },
+    "force_arm_request_failed": {
+      "message": "X-Sense 强制布防请求失败。"
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "仅播放",
         "retained": "保留本地录像"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "居家",
+        "away": "离家"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "布防模式"
+        }
+      },
+      "name": "强制布防",
+      "description": "确认因传感器处于打开状态而受阻的待处理居家或离家布防请求。将绕过处于打开状态的传感器。"
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "布防模式"
+        }
+      },
+      "name": "立即强制布防",
+      "description": "立即以居家或离家模式布防，绕过处于打开状态的传感器，无需确认。"
+    },
+    "trigger_sos": {
+      "name": "触发 SOS 警报",
+      "description": "立即触发 SBS50 的 SOS 警报。"
+    },
+    "cancel_sos": {
+      "name": "取消 SOS 警报",
+      "description": "取消 SBS50 当前的 SOS 警报。"
+    },
+    "cancel_alarm": {
+      "name": "取消当前警报",
+      "description": "取消 SBS50 当前的传感器警报。"
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "SOS 声音警报"
+        }
+      },
+      "name": "设置 SOS 声音",
+      "description": "选择 SOS 仅闪灯，还是同时鸣响蜂鸣器。"
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "配置条目 ID",
+          "description": "留空以应用于所有 X-Sense 账户。"
+        }
+      },
+      "name": "刷新录像",
+      "description": "刷新侧边栏和媒体浏览器使用的摄像头录像索引。"
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "配置条目 ID",
+          "description": "留空以应用于所有 X-Sense 账户。"
+        }
+      },
+      "name": "缓存录像",
+      "description": "下载摄像头录像以保留在本地。需要启用“保留本地录像”模式。"
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "配置条目 ID",
+          "description": "留空以应用于所有 X-Sense 账户。"
+        }
+      },
+      "name": "清除录像缓存",
+      "description": "删除本地录像索引、视频和缩略图。云端和 SD 卡录像不受影响。"
+    },
+    "query_light_schedules": {
+      "name": "查询灯光计划",
+      "description": "查询灯光计划。目标应为 SBS50 灯光电源开关。"
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "显示名称"
+        },
+        "start_time": {
+          "name": "开始时间（HH:MM 或 HHMM）"
+        },
+        "end_time": {
+          "name": "结束时间（HH:MM 或 HHMM）"
+        },
+        "week_days": {
+          "name": "星期（1 = 星期日，7 = 星期六）"
+        },
+        "enabled": {
+          "name": "启用状态"
+        },
+        "time_zone": {
+          "name": "时区"
+        }
+      },
+      "name": "创建灯光计划",
+      "description": "创建灯光计划。目标应为 SBS50 灯光电源开关。"
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "计划标识符"
+        },
+        "start_time": {
+          "name": "开始时间（HH:MM 或 HHMM）"
+        },
+        "end_time": {
+          "name": "结束时间（HH:MM 或 HHMM）"
+        },
+        "week_days": {
+          "name": "星期（1 = 星期日，7 = 星期六）"
+        },
+        "enabled": {
+          "name": "启用状态"
+        },
+        "time_zone": {
+          "name": "时区"
+        }
+      },
+      "name": "更新灯光计划",
+      "description": "更新灯光计划。目标应为 SBS50 灯光电源开关。"
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "计划标识符"
+        },
+        "name": {
+          "name": "显示名称"
+        }
+      },
+      "name": "重命名灯光计划",
+      "description": "重命名灯光计划。目标应为 SBS50 灯光电源开关。"
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "计划标识符"
+        }
+      },
+      "name": "删除灯光计划",
+      "description": "删除灯光计划。目标应为 SBS50 灯光电源开关。"
+    },
+    "query_light_groups": {
+      "name": "查询灯光组",
+      "description": "查询灯光组。目标应为 SBS50 灯光电源开关。"
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "显示名称"
+        }
+      },
+      "name": "创建灯光组",
+      "description": "创建灯光组。目标应为 SBS50 灯光电源开关。"
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "组标识符"
+        },
+        "name": {
+          "name": "显示名称"
+        }
+      },
+      "name": "重命名灯光组",
+      "description": "重命名灯光组。目标应为 SBS50 灯光电源开关。"
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "组标识符"
+        },
+        "timer": {
+          "name": "定时器类型（pirTime 或 appTime）"
+        },
+        "value": {
+          "name": "定时器值"
+        }
+      },
+      "name": "更新灯光组定时器",
+      "description": "更新灯光组定时器。目标应为 SBS50 灯光电源开关。"
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "显示名称"
+        },
+        "device_ids": {
+          "name": "设备标识符"
+        }
+      },
+      "name": "绑定灯光组",
+      "description": "绑定灯光组。目标应为 SBS50 灯光电源开关。"
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "组标识符"
+        }
+      },
+      "name": "删除灯光组",
+      "description": "删除灯光组。目标应为 SBS50 灯光电源开关。"
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "设备标识符"
+        }
+      },
+      "name": "移除灯光组设备",
+      "description": "移除灯光组设备。目标应为 SBS50 灯光电源开关。"
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "组标识符"
+        },
+        "device_ids": {
+          "name": "设备序列号"
+        },
+        "enabled": {
+          "name": "启用状态"
+        }
+      },
+      "name": "设置灯光组电源状态",
+      "description": "设置灯光组电源状态。目标应为 SBS50 灯光电源开关。"
+    }
+  },
+  "issues": {}
 }

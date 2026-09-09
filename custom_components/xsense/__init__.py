@@ -275,6 +275,7 @@ _LIFETIME_DOMAIN_KEYS = frozenset(
     {
         "_recordings_http_views_registered",
         "_recordings_static_paths_registered",
+        "_recordings_panel_lock",
         "_recording_maintenance_locks",
     }
 )
@@ -334,8 +335,15 @@ async def _async_register_recordings_runtime(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> None:
     """Register reloadable recordings UI/runtime pieces once cameras are present."""
+    owner = hass.data.get(DOMAIN, {}).get(entry.entry_id)
     await async_register_recordings_panel(hass)
+    if hass.data.get(DOMAIN, {}).get(entry.entry_id) is not owner:
+        _cleanup_recordings_runtime(hass)
+        return
     await async_register_recording_services(hass)
+    if hass.data.get(DOMAIN, {}).get(entry.entry_id) is not owner:
+        _cleanup_recordings_runtime(hass)
+        return
     async_register_recordings_media_source(hass)
     async_start_recording_media_sync(hass, entry)
     async_schedule_hls_playback_profile_migration(hass, entry)
@@ -911,21 +919,64 @@ async def _async_setup_entry_runtime(
     else:
         _cleanup_recordings_runtime(hass, entry.entry_id)
 
+    recordings_registration_pending = False
+    recordings_registration_attempted = recordings_runtime_registered
+
+    async def _async_register_late_recordings_runtime() -> None:
+        nonlocal recordings_runtime_registered, recordings_registration_pending
+        nonlocal recordings_registration_attempted
+        try:
+            if hass.data.get(DOMAIN, {}).get(entry.entry_id) is not coordinator:
+                return
+            await _async_register_recordings_runtime(hass, entry)
+            if hass.data.get(DOMAIN, {}).get(entry.entry_id) is not coordinator:
+                return
+            if _has_camera_entities(coordinator.data):
+                recordings_runtime_registered = True
+            else:
+                _cleanup_recordings_runtime(hass, entry.entry_id)
+                recordings_registration_attempted = False
+        except Exception:
+            if hass.data.get(DOMAIN, {}).get(entry.entry_id) is coordinator:
+                if _has_camera_entities(coordinator.data):
+                    async_stop_recording_media_sync(hass, entry.entry_id)
+                else:
+                    _cleanup_recordings_runtime(hass, entry.entry_id)
+                    recordings_registration_attempted = False
+            LOGGER.exception(
+                "Could not register X-Sense recordings; retrying on the next update"
+            )
+        finally:
+            recordings_registration_pending = False
+
     @callback
     def _async_sync_recordings_runtime() -> None:
         """Register recordings runtime if cameras appear after setup."""
-        nonlocal recordings_runtime_registered
+        nonlocal recordings_runtime_registered, recordings_registration_pending
+        nonlocal recordings_registration_attempted
+        if hass.data.get(DOMAIN, {}).get(entry.entry_id) is not coordinator:
+            return
         has_cameras = _has_camera_entities(coordinator.data)
-        if has_cameras and not recordings_runtime_registered:
-            recordings_runtime_registered = True
+        if (
+            has_cameras
+            and not recordings_runtime_registered
+            and not recordings_registration_pending
+        ):
+            recordings_registration_pending = True
+            recordings_registration_attempted = True
             _create_entry_task(
                 hass,
                 entry,
-                _async_register_recordings_runtime(hass, entry),
+                _async_register_late_recordings_runtime(),
                 "X-Sense recordings runtime registration",
             )
-        elif not has_cameras and recordings_runtime_registered:
+        elif (
+            not has_cameras
+            and recordings_registration_attempted
+            and not recordings_registration_pending
+        ):
             recordings_runtime_registered = False
+            recordings_registration_attempted = False
             _cleanup_recordings_runtime(hass, entry.entry_id)
 
     if hasattr(coordinator, "async_add_listener"):

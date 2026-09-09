@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Įrenginys jau sukonfigūruotas",
       "reauth_successful": "Pakartotinis autentifikavimas buvo sėkmingas",
-      "reconfigure_successful": "Perkonfigūravimas buvo sėkmingas"
+      "reconfigure_successful": "Perkonfigūravimas buvo sėkmingas",
+      "unique_id_mismatch": "Prisijunkite naudodami tą pačią X-Sense paskyrą kaip šiame įraše."
     },
     "error": {
       "cannot_connect": "Nepavyko prisijungti",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Ryšio su MQTT klaida: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Į podėlį nepavyko įrašyti {failed} įrašų. Atsisiųsta {downloaded} įrašų."
+    },
+    "force_arm_invalid_link": {
+      "message": "Ši X-Sense priverstinio apsaugos įjungimo nuoroda negalioja."
+    },
+    "force_arm_request_failed": {
+      "message": "X-Sense priverstinio apsaugos įjungimo užklausa nepavyko."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Tik atkūrimas",
         "retained": "Saugoti vietinius įrašus"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Namuose",
+        "away": "Išvykus"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "name": "Priverstinai įjungti apsaugą",
+      "description": "Patvirtinkite laukiančią apsaugos įjungimo režimu Namuose arba Išvykus užklausą, kurią blokuoja atviri jutikliai. Atviri jutikliai bus apeiti.",
+      "fields": {
+        "mode": {
+          "name": "Apsaugos įjungimo režimas"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "Priverstinai įjungti apsaugą dabar",
+      "description": "Nedelsiant įjunkite apsaugą režimu Namuose arba Išvykus, apeidami atvirus jutiklius be patvirtinimo užklausos.",
+      "fields": {
+        "mode": {
+          "name": "Apsaugos įjungimo režimas"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "Įjungti SOS signalizaciją",
+      "description": "Nedelsiant įjunkite SBS50 SOS signalizaciją."
+    },
+    "cancel_sos": {
+      "name": "Išjungti SOS signalizaciją",
+      "description": "Išjunkite aktyvią SBS50 SOS signalizaciją."
+    },
+    "cancel_alarm": {
+      "name": "Išjungti aktyvią signalizaciją",
+      "description": "Išjunkite aktyvią SBS50 jutiklio signalizaciją."
+    },
+    "set_sos_sound": {
+      "name": "Nustatyti SOS garsą",
+      "description": "Pasirinkite, ar SOS naudos tik mirksinčias šviesas, ar taip pat įjungs garsinį signalą.",
+      "fields": {
+        "audible": {
+          "name": "Garsinė SOS signalizacija"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "Atnaujinti įrašų sąrašą",
+      "description": "Atnaujinkite kameros įrašų indeksą, naudojamą šoninėje juostoje ir medijos naršyklėje.",
+      "fields": {
+        "entry_id": {
+          "name": "Konfigūracijos įrašo ID",
+          "description": "Palikite tuščią, kad būtų taikoma visoms X-Sense paskyroms."
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "Įrašyti į podėlį",
+      "description": "Atsisiųskite kameros įrašus vietiniam saugojimui. Reikalingas režimas Saugoti vietinius įrašus.",
+      "fields": {
+        "entry_id": {
+          "name": "Konfigūracijos įrašo ID",
+          "description": "Palikite tuščią, kad būtų taikoma visoms X-Sense paskyroms."
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "Išvalyti įrašų podėlį",
+      "description": "Ištrinkite vietinius įrašų indeksus, vaizdo įrašus ir miniatiūras. Įrašai debesyje ir SD kortelėje nekeičiami.",
+      "fields": {
+        "entry_id": {
+          "name": "Konfigūracijos įrašo ID",
+          "description": "Palikite tuščią, kad būtų taikoma visoms X-Sense paskyroms."
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "Gauti apšvietimo tvarkaraščius",
+      "description": "Gaukite apšvietimo tvarkaraščius. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį."
+    },
+    "create_light_schedule": {
+      "name": "Sukurti apšvietimo tvarkaraštį",
+      "description": "Sukurkite apšvietimo tvarkaraštį. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "name": {
+          "name": "Rodomas pavadinimas"
+        },
+        "start_time": {
+          "name": "Pradžios laikas (HH:MM arba HHMM)"
+        },
+        "end_time": {
+          "name": "Pabaigos laikas (HH:MM arba HHMM)"
+        },
+        "week_days": {
+          "name": "Savaitės dienos (1 = sekmadienis, 7 = šeštadienis)"
+        },
+        "enabled": {
+          "name": "Įjungimo būsena"
+        },
+        "time_zone": {
+          "name": "Laiko juosta"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "Atnaujinti apšvietimo tvarkaraštį",
+      "description": "Atnaujinkite apšvietimo tvarkaraštį. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "schedule_id": {
+          "name": "Tvarkaraščio identifikatorius"
+        },
+        "start_time": {
+          "name": "Pradžios laikas (HH:MM arba HHMM)"
+        },
+        "end_time": {
+          "name": "Pabaigos laikas (HH:MM arba HHMM)"
+        },
+        "week_days": {
+          "name": "Savaitės dienos (1 = sekmadienis, 7 = šeštadienis)"
+        },
+        "enabled": {
+          "name": "Įjungimo būsena"
+        },
+        "time_zone": {
+          "name": "Laiko juosta"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "Pervadinti apšvietimo tvarkaraštį",
+      "description": "Pervadinkite apšvietimo tvarkaraštį. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "schedule_id": {
+          "name": "Tvarkaraščio identifikatorius"
+        },
+        "name": {
+          "name": "Rodomas pavadinimas"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "Ištrinti apšvietimo tvarkaraštį",
+      "description": "Ištrinkite apšvietimo tvarkaraštį. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "schedule_id": {
+          "name": "Tvarkaraščio identifikatorius"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "Gauti apšvietimo grupes",
+      "description": "Gaukite apšvietimo grupes. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį."
+    },
+    "create_light_group": {
+      "name": "Sukurti apšvietimo grupę",
+      "description": "Sukurkite apšvietimo grupę. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "name": {
+          "name": "Rodomas pavadinimas"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "Pervadinti apšvietimo grupę",
+      "description": "Pervadinkite apšvietimo grupę. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "group_id": {
+          "name": "Grupės identifikatorius"
+        },
+        "name": {
+          "name": "Rodomas pavadinimas"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "Atnaujinti apšvietimo grupės laikmatį",
+      "description": "Atnaujinkite apšvietimo grupės laikmatį. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "group_id": {
+          "name": "Grupės identifikatorius"
+        },
+        "timer": {
+          "name": "Laikmačio tipas (pirTime arba appTime)"
+        },
+        "value": {
+          "name": "Laikmačio reikšmė"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "Susieti apšvietimo grupę",
+      "description": "Susiekite apšvietimo grupę. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "name": {
+          "name": "Rodomas pavadinimas"
+        },
+        "device_ids": {
+          "name": "Įrenginių identifikatoriai"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "Ištrinti apšvietimo grupę",
+      "description": "Ištrinkite apšvietimo grupę. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "group_id": {
+          "name": "Grupės identifikatorius"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "Pašalinti įrenginius iš apšvietimo grupės",
+      "description": "Pašalinkite įrenginius iš apšvietimo grupės. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "device_ids": {
+          "name": "Įrenginių identifikatoriai"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "Nustatyti apšvietimo grupės maitinimą",
+      "description": "Nustatykite apšvietimo grupės maitinimą. Kaip tikslą pasirinkite SBS50 apšvietimo maitinimo jungiklį.",
+      "fields": {
+        "group_id": {
+          "name": "Grupės identifikatorius"
+        },
+        "device_ids": {
+          "name": "Įrenginių serijos numeriai"
+        },
+        "enabled": {
+          "name": "Įjungimo būsena"
+        }
+      }
+    }
+  },
+  "issues": {}
 }

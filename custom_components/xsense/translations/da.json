@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Enheden er allerede konfigureret",
       "reauth_successful": "Gengodkendelse lykkedes",
-      "reconfigure_successful": "Omkonfigurationen lykkedes"
+      "reconfigure_successful": "Omkonfigurationen lykkedes",
+      "unique_id_mismatch": "Log ind med den samme X-Sense-konto som denne post."
     },
     "error": {
       "cannot_connect": "Kunne ikke oprette forbindelse",
@@ -57,7 +58,7 @@
           "recording_media_days_order": "Vælg, om nyere eller ældre dage vises først i optagelsesfremviseren.",
           "recording_media_clips_order": "Vælg, om nyere eller ældre klip vises først inden for hver dag.",
           "recording_cache_retention_days": "Slet lokale cachelagrede optagelser efter disse mange dage. X-Sense cloud- og SD-kortoptagelser ændres ikke.",
-          "recording_cache_max_size_mb": "Maksimal lokal cachestørrelse i MB. Når grænsen er nået, fjernes de senest sete optagelser først.",
+          "recording_cache_max_size_mb": "Maksimal lokal cachestørrelse i MB. Når grænsen er nået, fjernes først de optagelser, der ikke er blevet set i længst tid.",
           "recording_cache_mode": "Kun afspilning videresender HLS-medier gennem Home Assistant efter behov uden at gemme hele klip. Lagringstilstand beholder lokale kopier efter grænserne nedenfor."
         }
       },
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Fejl ved kommunikation med MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Kunne ikke gemme {failed} optagelse(r) i cache. {downloaded} optagelse(r) blev downloadet."
+    },
+    "force_arm_invalid_link": {
+      "message": "Dette X-Sense-link til tvungen tilkobling er ugyldigt."
+    },
+    "force_arm_request_failed": {
+      "message": "X-Sense-anmodningen om tvungen tilkobling mislykkedes."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Kun afspilning",
         "retained": "Behold lokale optagelser"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Hjemme",
+        "away": "Ude"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Tilkoblingstilstand"
+        }
+      },
+      "name": "Gennemtving tilkobling",
+      "description": "Bekræft en afventende tilkobling i tilstanden Hjemme eller Ude, som er blokeret af åbne sensorer. Åbne sensorer omgås."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Tilkoblingstilstand"
+        }
+      },
+      "name": "Gennemtving tilkobling nu",
+      "description": "Tilkobl straks i tilstanden Hjemme eller Ude, og omgå åbne sensorer uden at bede om bekræftelse."
+    },
+    "trigger_sos": {
+      "name": "Udløs SOS-alarm",
+      "description": "Udløs SBS50 SOS-alarmen med det samme."
+    },
+    "cancel_sos": {
+      "name": "Annuller SOS-alarm",
+      "description": "Annuller en aktiv SBS50 SOS-alarm."
+    },
+    "cancel_alarm": {
+      "name": "Annuller aktiv alarm",
+      "description": "Annuller en aktiv SBS50-sensoralarm."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Hørbar SOS-alarm"
+        }
+      },
+      "name": "Indstil SOS-lyd",
+      "description": "Vælg, om SOS kun skal bruge blinkende lys eller også aktivere summeren."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID for konfigurationspost",
+          "description": "Lad feltet være tomt for at anvende på alle X-Sense-konti."
+        }
+      },
+      "name": "Opdater optagelser",
+      "description": "Opdater indekset over kameraoptagelser, som bruges af sidepanelet og mediebrowseren."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID for konfigurationspost",
+          "description": "Lad feltet være tomt for at anvende på alle X-Sense-konti."
+        }
+      },
+      "name": "Gem optagelser i cache",
+      "description": "Download kameraoptagelser til lokal opbevaring. Kræver tilstanden Behold lokale optagelser."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID for konfigurationspost",
+          "description": "Lad feltet være tomt for at anvende på alle X-Sense-konti."
+        }
+      },
+      "name": "Ryd optagelsescache",
+      "description": "Slet lokale optagelsesindekser, videoer og miniaturebilleder. Optagelser i skyen og på SD-kort ændres ikke."
+    },
+    "query_light_schedules": {
+      "name": "Hent lysplaner",
+      "description": "Hent lysplaner. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Vist navn"
+        },
+        "start_time": {
+          "name": "Starttidspunkt (HH:MM eller HHMM)"
+        },
+        "end_time": {
+          "name": "Sluttidspunkt (HH:MM eller HHMM)"
+        },
+        "week_days": {
+          "name": "Ugedage (1 = søndag, 7 = lørdag)"
+        },
+        "enabled": {
+          "name": "Aktiveringstilstand"
+        },
+        "time_zone": {
+          "name": "Tidszone"
+        }
+      },
+      "name": "Opret lysplan",
+      "description": "Opret lysplan. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Planidentifikator"
+        },
+        "start_time": {
+          "name": "Starttidspunkt (HH:MM eller HHMM)"
+        },
+        "end_time": {
+          "name": "Sluttidspunkt (HH:MM eller HHMM)"
+        },
+        "week_days": {
+          "name": "Ugedage (1 = søndag, 7 = lørdag)"
+        },
+        "enabled": {
+          "name": "Aktiveringstilstand"
+        },
+        "time_zone": {
+          "name": "Tidszone"
+        }
+      },
+      "name": "Opdater lysplan",
+      "description": "Opdater lysplan. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Planidentifikator"
+        },
+        "name": {
+          "name": "Vist navn"
+        }
+      },
+      "name": "Omdøb lysplan",
+      "description": "Omdøb lysplan. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Planidentifikator"
+        }
+      },
+      "name": "Slet lysplan",
+      "description": "Slet lysplan. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "query_light_groups": {
+      "name": "Hent lysgrupper",
+      "description": "Hent lysgrupper. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Vist navn"
+        }
+      },
+      "name": "Opret lysgruppe",
+      "description": "Opret lysgruppe. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        },
+        "name": {
+          "name": "Vist navn"
+        }
+      },
+      "name": "Omdøb lysgruppe",
+      "description": "Omdøb lysgruppe. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        },
+        "timer": {
+          "name": "Timertype (pirTime eller appTime)"
+        },
+        "value": {
+          "name": "Timerværdi"
+        }
+      },
+      "name": "Opdater lysgruppens timer",
+      "description": "Opdater lysgruppens timer. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Vist navn"
+        },
+        "device_ids": {
+          "name": "Enhedsidentifikatorer"
+        }
+      },
+      "name": "Tilknyt lysgruppe",
+      "description": "Tilknyt lysgruppe. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        }
+      },
+      "name": "Slet lysgruppe",
+      "description": "Slet lysgruppe. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Enhedsidentifikatorer"
+        }
+      },
+      "name": "Fjern enheder fra lysgruppe",
+      "description": "Fjern enheder fra lysgruppe. Vælg SBS50-lysets strømkontakt som mål."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        },
+        "device_ids": {
+          "name": "Enhedernes serienumre"
+        },
+        "enabled": {
+          "name": "Aktiveringstilstand"
+        }
+      },
+      "name": "Indstil lysgruppens strømtilstand",
+      "description": "Indstil lysgruppens strømtilstand. Vælg SBS50-lysets strømkontakt som mål."
+    }
+  },
+  "issues": {}
 }

@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "設備已配置",
       "reauth_successful": "重新認證成功",
-      "reconfigure_successful": "重新配置成功"
+      "reconfigure_successful": "重新配置成功",
+      "unique_id_mismatch": "請使用與此項目相同的 X-Sense 帳號登入。"
     },
     "error": {
       "cannot_connect": "連線失敗",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "與 MQTT 通訊時發生錯誤：{error}"
+    },
+    "recording_cache_failed": {
+      "message": "無法快取 {failed} 筆錄影。已下載 {downloaded} 筆錄影。"
+    },
+    "force_arm_invalid_link": {
+      "message": "此 X-Sense 強制設防連結無效。"
+    },
+    "force_arm_request_failed": {
+      "message": "X-Sense 強制設防請求失敗。"
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "僅播放",
         "retained": "保留本機錄影"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "居家",
+        "away": "離家"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "設防模式"
+        }
+      },
+      "name": "強制設防",
+      "description": "確認因感測器處於開啟狀態而受阻的待處理居家或離家設防請求。將略過處於開啟狀態的感測器。"
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "設防模式"
+        }
+      },
+      "name": "立即強制設防",
+      "description": "立即以居家或離家模式設防，略過處於開啟狀態的感測器，無須確認。"
+    },
+    "trigger_sos": {
+      "name": "觸發 SOS 警報",
+      "description": "立即觸發 SBS50 的 SOS 警報。"
+    },
+    "cancel_sos": {
+      "name": "取消 SOS 警報",
+      "description": "取消 SBS50 目前的 SOS 警報。"
+    },
+    "cancel_alarm": {
+      "name": "取消目前警報",
+      "description": "取消 SBS50 目前的感測器警報。"
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "SOS 聲音警報"
+        }
+      },
+      "name": "設定 SOS 聲音",
+      "description": "選擇 SOS 僅閃燈，或同時鳴響蜂鳴器。"
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "設定項目 ID",
+          "description": "留空以套用至所有 X-Sense 帳號。"
+        }
+      },
+      "name": "重新整理錄影",
+      "description": "重新整理側邊欄和媒體瀏覽器使用的攝影機錄影索引。"
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "設定項目 ID",
+          "description": "留空以套用至所有 X-Sense 帳號。"
+        }
+      },
+      "name": "快取錄影",
+      "description": "下載攝影機錄影以保留在本機。需要啟用「保留本機錄影」模式。"
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "設定項目 ID",
+          "description": "留空以套用至所有 X-Sense 帳號。"
+        }
+      },
+      "name": "清除錄影快取",
+      "description": "刪除本機錄影索引、影片和縮圖。雲端和 SD 卡錄影不受影響。"
+    },
+    "query_light_schedules": {
+      "name": "查詢燈光排程",
+      "description": "查詢燈光排程。目標應為 SBS50 燈光電源開關。"
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "顯示名稱"
+        },
+        "start_time": {
+          "name": "開始時間（HH:MM 或 HHMM）"
+        },
+        "end_time": {
+          "name": "結束時間（HH:MM 或 HHMM）"
+        },
+        "week_days": {
+          "name": "星期（1 = 星期日，7 = 星期六）"
+        },
+        "enabled": {
+          "name": "啟用狀態"
+        },
+        "time_zone": {
+          "name": "時區"
+        }
+      },
+      "name": "建立燈光排程",
+      "description": "建立燈光排程。目標應為 SBS50 燈光電源開關。"
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "排程識別碼"
+        },
+        "start_time": {
+          "name": "開始時間（HH:MM 或 HHMM）"
+        },
+        "end_time": {
+          "name": "結束時間（HH:MM 或 HHMM）"
+        },
+        "week_days": {
+          "name": "星期（1 = 星期日，7 = 星期六）"
+        },
+        "enabled": {
+          "name": "啟用狀態"
+        },
+        "time_zone": {
+          "name": "時區"
+        }
+      },
+      "name": "更新燈光排程",
+      "description": "更新燈光排程。目標應為 SBS50 燈光電源開關。"
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "排程識別碼"
+        },
+        "name": {
+          "name": "顯示名稱"
+        }
+      },
+      "name": "重新命名燈光排程",
+      "description": "重新命名燈光排程。目標應為 SBS50 燈光電源開關。"
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "排程識別碼"
+        }
+      },
+      "name": "刪除燈光排程",
+      "description": "刪除燈光排程。目標應為 SBS50 燈光電源開關。"
+    },
+    "query_light_groups": {
+      "name": "查詢燈光群組",
+      "description": "查詢燈光群組。目標應為 SBS50 燈光電源開關。"
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "顯示名稱"
+        }
+      },
+      "name": "建立燈光群組",
+      "description": "建立燈光群組。目標應為 SBS50 燈光電源開關。"
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "群組識別碼"
+        },
+        "name": {
+          "name": "顯示名稱"
+        }
+      },
+      "name": "重新命名燈光群組",
+      "description": "重新命名燈光群組。目標應為 SBS50 燈光電源開關。"
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "群組識別碼"
+        },
+        "timer": {
+          "name": "計時器類型（pirTime 或 appTime）"
+        },
+        "value": {
+          "name": "計時器值"
+        }
+      },
+      "name": "更新燈光群組計時器",
+      "description": "更新燈光群組計時器。目標應為 SBS50 燈光電源開關。"
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "顯示名稱"
+        },
+        "device_ids": {
+          "name": "裝置識別碼"
+        }
+      },
+      "name": "綁定燈光群組",
+      "description": "綁定燈光群組。目標應為 SBS50 燈光電源開關。"
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "群組識別碼"
+        }
+      },
+      "name": "刪除燈光群組",
+      "description": "刪除燈光群組。目標應為 SBS50 燈光電源開關。"
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "裝置識別碼"
+        }
+      },
+      "name": "移除燈光群組裝置",
+      "description": "移除燈光群組裝置。目標應為 SBS50 燈光電源開關。"
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "群組識別碼"
+        },
+        "device_ids": {
+          "name": "裝置序號"
+        },
+        "enabled": {
+          "name": "啟用狀態"
+        }
+      },
+      "name": "設定燈光群組電源狀態",
+      "description": "設定燈光群組電源狀態。目標應為 SBS50 燈光電源開關。"
+    }
+  },
+  "issues": {}
 }

@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Cihaz zaten yapılandırılmış",
       "reauth_successful": "Yeniden kimlik doğrulama başarılı oldu",
-      "reconfigure_successful": "Yeniden yapılandırma başarılı oldu"
+      "reconfigure_successful": "Yeniden yapılandırma başarılı oldu",
+      "unique_id_mismatch": "Bu girdide kullanılan X-Sense hesabıyla oturum açın."
     },
     "error": {
       "cannot_connect": "Bağlantı başarısız oldu",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "MQTT ile iletişim hatası: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "{failed} kayıt önbelleğe alınamadı. {downloaded} kayıt indirildi."
+    },
+    "force_arm_invalid_link": {
+      "message": "Bu X-Sense zorla kurma bağlantısı geçersiz."
+    },
+    "force_arm_request_failed": {
+      "message": "X-Sense zorla kurma isteği başarısız oldu."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Yalnızca oynatma",
         "retained": "Yerel kayıtları sakla"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Evde",
+        "away": "Dışarıda"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Kurma modu"
+        }
+      },
+      "name": "Zorla kur",
+      "description": "Açık sensörler tarafından engellenen, bekleyen Evde veya Dışarıda modunda kurma isteğini onaylayın. Açık sensörler atlanır."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Kurma modu"
+        }
+      },
+      "name": "Şimdi zorla kur",
+      "description": "Onay istemeden açık sensörleri atlayarak Evde veya Dışarıda modunda hemen kurun."
+    },
+    "trigger_sos": {
+      "name": "SOS alarmını tetikle",
+      "description": "SBS50 SOS alarmını hemen tetikleyin."
+    },
+    "cancel_sos": {
+      "name": "SOS alarmını iptal et",
+      "description": "Etkin bir SBS50 SOS alarmını iptal edin."
+    },
+    "cancel_alarm": {
+      "name": "Etkin alarmı iptal et",
+      "description": "Etkin bir SBS50 sensör alarmını iptal edin."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Sesli SOS alarmı"
+        }
+      },
+      "name": "SOS sesini ayarla",
+      "description": "SOS için yalnızca yanıp sönen ışıkların mı kullanılacağını yoksa sesli uyarının da mı çalacağını seçin."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "Yapılandırma girdisi kimliği",
+          "description": "Tüm X-Sense hesaplarına uygulamak için boş bırakın."
+        }
+      },
+      "name": "Kayıtları yenile",
+      "description": "Kenar çubuğu ve Medya Tarayıcısı tarafından kullanılan kamera kayıt dizinini yenileyin."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "Yapılandırma girdisi kimliği",
+          "description": "Tüm X-Sense hesaplarına uygulamak için boş bırakın."
+        }
+      },
+      "name": "Kayıtları önbelleğe al",
+      "description": "Yerel olarak saklamak için kamera kayıtlarını indirin. Yerel kayıtları sakla modu gereklidir."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "Yapılandırma girdisi kimliği",
+          "description": "Tüm X-Sense hesaplarına uygulamak için boş bırakın."
+        }
+      },
+      "name": "Kayıt önbelleğini temizle",
+      "description": "Yerel kayıt dizinlerini, videoları ve küçük resimleri silin. Bulut ve SD kayıtları değişmez."
+    },
+    "query_light_schedules": {
+      "name": "Işık zamanlamalarını sorgula",
+      "description": "Işık zamanlamalarını sorgulayın. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Görünen ad"
+        },
+        "start_time": {
+          "name": "Başlangıç saati (HH:MM veya HHMM)"
+        },
+        "end_time": {
+          "name": "Bitiş saati (HH:MM veya HHMM)"
+        },
+        "week_days": {
+          "name": "Haftanın günleri (1 = Pazar, 7 = Cumartesi)"
+        },
+        "enabled": {
+          "name": "Etkinlik durumu"
+        },
+        "time_zone": {
+          "name": "Saat dilimi"
+        }
+      },
+      "name": "Işık zamanlaması oluştur",
+      "description": "Işık zamanlaması oluşturun. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Zamanlama kimliği"
+        },
+        "start_time": {
+          "name": "Başlangıç saati (HH:MM veya HHMM)"
+        },
+        "end_time": {
+          "name": "Bitiş saati (HH:MM veya HHMM)"
+        },
+        "week_days": {
+          "name": "Haftanın günleri (1 = Pazar, 7 = Cumartesi)"
+        },
+        "enabled": {
+          "name": "Etkinlik durumu"
+        },
+        "time_zone": {
+          "name": "Saat dilimi"
+        }
+      },
+      "name": "Işık zamanlamasını güncelle",
+      "description": "Işık zamanlamasını güncelleyin. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Zamanlama kimliği"
+        },
+        "name": {
+          "name": "Görünen ad"
+        }
+      },
+      "name": "Işık zamanlamasını yeniden adlandır",
+      "description": "Işık zamanlamasını yeniden adlandırın. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Zamanlama kimliği"
+        }
+      },
+      "name": "Işık zamanlamasını sil",
+      "description": "Işık zamanlamasını silin. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "query_light_groups": {
+      "name": "Işık gruplarını sorgula",
+      "description": "Işık gruplarını sorgulayın. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Görünen ad"
+        }
+      },
+      "name": "Işık grubu oluştur",
+      "description": "Işık grubu oluşturun. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Grup kimliği"
+        },
+        "name": {
+          "name": "Görünen ad"
+        }
+      },
+      "name": "Işık grubunu yeniden adlandır",
+      "description": "Işık grubunu yeniden adlandırın. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Grup kimliği"
+        },
+        "timer": {
+          "name": "Zamanlayıcı türü (pirTime veya appTime)"
+        },
+        "value": {
+          "name": "Zamanlayıcı değeri"
+        }
+      },
+      "name": "Işık grubu zamanlayıcısını güncelle",
+      "description": "Işık grubu zamanlayıcısını güncelleyin. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Görünen ad"
+        },
+        "device_ids": {
+          "name": "Cihaz kimlikleri"
+        }
+      },
+      "name": "Işık grubunu bağla",
+      "description": "Işık grubunu bağlayın. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Grup kimliği"
+        }
+      },
+      "name": "Işık grubunu sil",
+      "description": "Işık grubunu silin. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Cihaz kimlikleri"
+        }
+      },
+      "name": "Işık grubu cihazlarını kaldır",
+      "description": "Işık grubu cihazlarını kaldırın. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Grup kimliği"
+        },
+        "device_ids": {
+          "name": "Cihaz seri numaraları"
+        },
+        "enabled": {
+          "name": "Etkinlik durumu"
+        }
+      },
+      "name": "Işık grubu gücünü ayarla",
+      "description": "Işık grubu gücünü ayarlayın. Hedef olarak SBS50 ışık güç anahtarını seçin."
+    }
+  },
+  "issues": {}
 }

@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Thiết bị đã được định cấu hình",
       "reauth_successful": "Xác thực lại thành công",
-      "reconfigure_successful": "Cấu hình lại đã thành công"
+      "reconfigure_successful": "Cấu hình lại đã thành công",
+      "unique_id_mismatch": "Đăng nhập bằng cùng tài khoản X-Sense được dùng cho mục này."
     },
     "error": {
       "cannot_connect": "Không thể kết nối",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Lỗi giao tiếp với MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Không thể lưu {failed} bản ghi vào bộ nhớ đệm. Đã tải xuống {downloaded} bản ghi."
+    },
+    "force_arm_invalid_link": {
+      "message": "Liên kết bắt buộc bật bảo vệ X-Sense này không hợp lệ."
+    },
+    "force_arm_request_failed": {
+      "message": "Yêu cầu bắt buộc bật bảo vệ X-Sense thất bại."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Chỉ phát lại",
         "retained": "Giữ bản ghi cục bộ"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Ở nhà",
+        "away": "Vắng nhà"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Chế độ bật bảo vệ"
+        }
+      },
+      "name": "Bắt buộc bật bảo vệ",
+      "description": "Xác nhận yêu cầu bật bảo vệ ở chế độ Ở nhà hoặc Vắng nhà đang chờ do bị chặn bởi các cảm biến báo mở. Các cảm biến báo mở sẽ được bỏ qua."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Chế độ bật bảo vệ"
+        }
+      },
+      "name": "Bắt buộc bật bảo vệ ngay",
+      "description": "Bật bảo vệ ngay ở chế độ Ở nhà hoặc Vắng nhà, bỏ qua các cảm biến báo mở mà không yêu cầu xác nhận."
+    },
+    "trigger_sos": {
+      "name": "Kích hoạt báo động SOS",
+      "description": "Kích hoạt ngay báo động SOS của SBS50."
+    },
+    "cancel_sos": {
+      "name": "Hủy báo động SOS",
+      "description": "Hủy báo động SOS đang hoạt động của SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Hủy báo động đang hoạt động",
+      "description": "Hủy báo động cảm biến đang hoạt động của SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Báo động SOS có âm thanh"
+        }
+      },
+      "name": "Đặt âm thanh SOS",
+      "description": "Chọn SOS chỉ nhấp nháy đèn hay đồng thời phát âm báo."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID mục cấu hình",
+          "description": "Để trống để áp dụng cho tất cả tài khoản X-Sense."
+        }
+      },
+      "name": "Làm mới bản ghi",
+      "description": "Làm mới chỉ mục bản ghi của camera được dùng trong thanh bên và trình duyệt đa phương tiện."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID mục cấu hình",
+          "description": "Để trống để áp dụng cho tất cả tài khoản X-Sense."
+        }
+      },
+      "name": "Lưu bản ghi vào bộ nhớ đệm",
+      "description": "Tải xuống bản ghi của camera để lưu trữ cục bộ. Yêu cầu chế độ Giữ bản ghi cục bộ."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID mục cấu hình",
+          "description": "Để trống để áp dụng cho tất cả tài khoản X-Sense."
+        }
+      },
+      "name": "Xóa bộ nhớ đệm bản ghi",
+      "description": "Xóa chỉ mục bản ghi, video và ảnh thu nhỏ cục bộ. Bản ghi trên đám mây và thẻ SD không thay đổi."
+    },
+    "query_light_schedules": {
+      "name": "Truy vấn lịch đèn",
+      "description": "Truy vấn lịch đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Tên hiển thị"
+        },
+        "start_time": {
+          "name": "Giờ bắt đầu (HH:MM hoặc HHMM)"
+        },
+        "end_time": {
+          "name": "Giờ kết thúc (HH:MM hoặc HHMM)"
+        },
+        "week_days": {
+          "name": "Ngày trong tuần (1 = Chủ nhật, 7 = Thứ bảy)"
+        },
+        "enabled": {
+          "name": "Trạng thái bật"
+        },
+        "time_zone": {
+          "name": "Múi giờ"
+        }
+      },
+      "name": "Tạo lịch đèn",
+      "description": "Tạo lịch đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Mã định danh lịch"
+        },
+        "start_time": {
+          "name": "Giờ bắt đầu (HH:MM hoặc HHMM)"
+        },
+        "end_time": {
+          "name": "Giờ kết thúc (HH:MM hoặc HHMM)"
+        },
+        "week_days": {
+          "name": "Ngày trong tuần (1 = Chủ nhật, 7 = Thứ bảy)"
+        },
+        "enabled": {
+          "name": "Trạng thái bật"
+        },
+        "time_zone": {
+          "name": "Múi giờ"
+        }
+      },
+      "name": "Cập nhật lịch đèn",
+      "description": "Cập nhật lịch đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Mã định danh lịch"
+        },
+        "name": {
+          "name": "Tên hiển thị"
+        }
+      },
+      "name": "Đổi tên lịch đèn",
+      "description": "Đổi tên lịch đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Mã định danh lịch"
+        }
+      },
+      "name": "Xóa lịch đèn",
+      "description": "Xóa lịch đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "query_light_groups": {
+      "name": "Truy vấn nhóm đèn",
+      "description": "Truy vấn nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Tên hiển thị"
+        }
+      },
+      "name": "Tạo nhóm đèn",
+      "description": "Tạo nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Mã định danh nhóm"
+        },
+        "name": {
+          "name": "Tên hiển thị"
+        }
+      },
+      "name": "Đổi tên nhóm đèn",
+      "description": "Đổi tên nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Mã định danh nhóm"
+        },
+        "timer": {
+          "name": "Loại bộ hẹn giờ (pirTime hoặc appTime)"
+        },
+        "value": {
+          "name": "Giá trị bộ hẹn giờ"
+        }
+      },
+      "name": "Cập nhật bộ hẹn giờ nhóm đèn",
+      "description": "Cập nhật bộ hẹn giờ nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Tên hiển thị"
+        },
+        "device_ids": {
+          "name": "Mã định danh thiết bị"
+        }
+      },
+      "name": "Liên kết nhóm đèn",
+      "description": "Liên kết nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Mã định danh nhóm"
+        }
+      },
+      "name": "Xóa nhóm đèn",
+      "description": "Xóa nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Mã định danh thiết bị"
+        }
+      },
+      "name": "Xóa thiết bị khỏi nhóm đèn",
+      "description": "Xóa thiết bị khỏi nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Mã định danh nhóm"
+        },
+        "device_ids": {
+          "name": "Số sê-ri thiết bị"
+        },
+        "enabled": {
+          "name": "Trạng thái bật"
+        }
+      },
+      "name": "Đặt trạng thái nguồn nhóm đèn",
+      "description": "Đặt trạng thái nguồn nhóm đèn. Chọn công tắc nguồn đèn SBS50 làm đối tượng."
+    }
+  },
+  "issues": {}
 }

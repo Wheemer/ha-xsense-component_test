@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Ierīce jau ir konfigurēta",
       "reauth_successful": "Atkārtota autentifikācija bija veiksmīga",
-      "reconfigure_successful": "Pārkonfigurācija bija veiksmīga"
+      "reconfigure_successful": "Pārkonfigurācija bija veiksmīga",
+      "unique_id_mismatch": "Pierakstieties ar to pašu X-Sense kontu, kas saistīts ar šo ierakstu."
     },
     "error": {
       "cannot_connect": "Neizdevās izveidot savienojumu",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Kļūda saziņā ar MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Neizdevās saglabāt kešatmiņā {failed} ierakstus. Lejupielādēti {downloaded} ieraksti."
+    },
+    "force_arm_invalid_link": {
+      "message": "Šī X-Sense piespiedu apsardzes ieslēgšanas saite nav derīga."
+    },
+    "force_arm_request_failed": {
+      "message": "X-Sense piespiedu apsardzes ieslēgšanas pieprasījums neizdevās."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Tikai atskaņošana",
         "retained": "Saglabāt vietējos ierakstus"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Mājās",
+        "away": "Prom"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "name": "Piespiedu apsardzes ieslēgšana",
+      "description": "Apstipriniet gaidošu apsardzes ieslēgšanas pieprasījumu režīmā Mājās vai Prom, ko bloķē atvērti sensori. Atvērtie sensori tiks apieti.",
+      "fields": {
+        "mode": {
+          "name": "Apsardzes ieslēgšanas režīms"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "Tūlītēja piespiedu apsardzes ieslēgšana",
+      "description": "Nekavējoties ieslēdziet apsardzi režīmā Mājās vai Prom, apejot atvērtus sensorus bez apstiprinājuma pieprasījuma.",
+      "fields": {
+        "mode": {
+          "name": "Apsardzes ieslēgšanas režīms"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "Aktivizēt SOS trauksmi",
+      "description": "Nekavējoties aktivizējiet SBS50 SOS trauksmi."
+    },
+    "cancel_sos": {
+      "name": "Atcelt SOS trauksmi",
+      "description": "Atceliet aktīvu SBS50 SOS trauksmi."
+    },
+    "cancel_alarm": {
+      "name": "Atcelt aktīvo trauksmi",
+      "description": "Atceliet aktīvu SBS50 sensora trauksmi."
+    },
+    "set_sos_sound": {
+      "name": "Iestatīt SOS skaņu",
+      "description": "Izvēlieties, vai SOS izmanto tikai mirgojošas gaismas vai arī skaņas signālu.",
+      "fields": {
+        "audible": {
+          "name": "SOS skaņas trauksme"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "Atsvaidzināt ierakstus",
+      "description": "Atsvaidziniet kameras ierakstu indeksu, ko izmanto sānjosla un multivides pārlūks.",
+      "fields": {
+        "entry_id": {
+          "name": "Konfigurācijas ieraksta ID",
+          "description": "Atstājiet tukšu, lai piemērotu visiem X-Sense kontiem."
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "Saglabāt ierakstus kešatmiņā",
+      "description": "Lejupielādējiet kameras ierakstus vietējai glabāšanai. Nepieciešams režīms Saglabāt vietējos ierakstus.",
+      "fields": {
+        "entry_id": {
+          "name": "Konfigurācijas ieraksta ID",
+          "description": "Atstājiet tukšu, lai piemērotu visiem X-Sense kontiem."
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "Notīrīt ierakstu kešatmiņu",
+      "description": "Dzēsiet vietējos ierakstu indeksus, video un sīktēlus. Ieraksti mākonī un SD kartē netiek mainīti.",
+      "fields": {
+        "entry_id": {
+          "name": "Konfigurācijas ieraksta ID",
+          "description": "Atstājiet tukšu, lai piemērotu visiem X-Sense kontiem."
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "Iegūt apgaismojuma grafikus",
+      "description": "Iegūstiet apgaismojuma grafikus. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi."
+    },
+    "create_light_schedule": {
+      "name": "Izveidot apgaismojuma grafiku",
+      "description": "Izveidojiet apgaismojuma grafiku. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "name": {
+          "name": "Parādāmais nosaukums"
+        },
+        "start_time": {
+          "name": "Sākuma laiks (HH:MM vai HHMM)"
+        },
+        "end_time": {
+          "name": "Beigu laiks (HH:MM vai HHMM)"
+        },
+        "week_days": {
+          "name": "Nedēļas dienas (1 = svētdiena, 7 = sestdiena)"
+        },
+        "enabled": {
+          "name": "Iespējošanas stāvoklis"
+        },
+        "time_zone": {
+          "name": "Laika josla"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "Atjaunināt apgaismojuma grafiku",
+      "description": "Atjauniniet apgaismojuma grafiku. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "schedule_id": {
+          "name": "Grafika identifikators"
+        },
+        "start_time": {
+          "name": "Sākuma laiks (HH:MM vai HHMM)"
+        },
+        "end_time": {
+          "name": "Beigu laiks (HH:MM vai HHMM)"
+        },
+        "week_days": {
+          "name": "Nedēļas dienas (1 = svētdiena, 7 = sestdiena)"
+        },
+        "enabled": {
+          "name": "Iespējošanas stāvoklis"
+        },
+        "time_zone": {
+          "name": "Laika josla"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "Pārdēvēt apgaismojuma grafiku",
+      "description": "Pārdēvējiet apgaismojuma grafiku. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "schedule_id": {
+          "name": "Grafika identifikators"
+        },
+        "name": {
+          "name": "Parādāmais nosaukums"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "Dzēst apgaismojuma grafiku",
+      "description": "Dzēsiet apgaismojuma grafiku. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "schedule_id": {
+          "name": "Grafika identifikators"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "Iegūt apgaismojuma grupas",
+      "description": "Iegūstiet apgaismojuma grupas. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi."
+    },
+    "create_light_group": {
+      "name": "Izveidot apgaismojuma grupu",
+      "description": "Izveidojiet apgaismojuma grupu. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "name": {
+          "name": "Parādāmais nosaukums"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "Pārdēvēt apgaismojuma grupu",
+      "description": "Pārdēvējiet apgaismojuma grupu. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "group_id": {
+          "name": "Grupas identifikators"
+        },
+        "name": {
+          "name": "Parādāmais nosaukums"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "Atjaunināt apgaismojuma grupas taimeri",
+      "description": "Atjauniniet apgaismojuma grupas taimeri. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "group_id": {
+          "name": "Grupas identifikators"
+        },
+        "timer": {
+          "name": "Taimera veids (pirTime vai appTime)"
+        },
+        "value": {
+          "name": "Taimera vērtība"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "Piesaistīt apgaismojuma grupu",
+      "description": "Piesaistiet apgaismojuma grupu. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "name": {
+          "name": "Parādāmais nosaukums"
+        },
+        "device_ids": {
+          "name": "Ierīču identifikatori"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "Dzēst apgaismojuma grupu",
+      "description": "Dzēsiet apgaismojuma grupu. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "group_id": {
+          "name": "Grupas identifikators"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "Noņemt ierīces no apgaismojuma grupas",
+      "description": "Noņemiet ierīces no apgaismojuma grupas. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "device_ids": {
+          "name": "Ierīču identifikatori"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "Iestatīt apgaismojuma grupas barošanu",
+      "description": "Iestatiet apgaismojuma grupas barošanu. Kā mērķi izvēlieties SBS50 apgaismojuma barošanas slēdzi.",
+      "fields": {
+        "group_id": {
+          "name": "Grupas identifikators"
+        },
+        "device_ids": {
+          "name": "Ierīču sērijas numuri"
+        },
+        "enabled": {
+          "name": "Iespējošanas stāvoklis"
+        }
+      }
+    }
+  },
+  "issues": {}
 }

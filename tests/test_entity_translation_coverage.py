@@ -40,6 +40,9 @@ ACTION_ERROR_FILES = (
     "switch.py",
 )
 EXPECTED_EXCEPTION_KEYS = {
+    "recording_cache_failed",
+    "force_arm_invalid_link",
+    "force_arm_request_failed",
     "cooldown_state_unknown",
     "entity_unavailable",
     "force_arm_not_pending",
@@ -64,6 +67,7 @@ EXPECTED_EXCEPTION_KEYS = {
     "unsupported_option",
 }
 EXPECTED_SELECTOR_KEYS = {
+    "force_arm_mode": {"home", "away"},
     "recording_cache_mode": {"playback_only", "retained"},
     "recording_media_clips_order": {"ascending", "descending"},
     "recording_media_days_order": {"ascending", "descending"},

@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Zařízení je již nakonfigurováno",
       "reauth_successful": "Opětovné ověření bylo úspěšné",
-      "reconfigure_successful": "Rekonfigurace byla úspěšná"
+      "reconfigure_successful": "Rekonfigurace byla úspěšná",
+      "unique_id_mismatch": "Přihlaste se ke stejnému účtu X-Sense, který je přiřazen k této položce."
     },
     "error": {
       "cannot_connect": "Připojení se nezdařilo",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Chyba komunikace s MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Počet záznamů, které se nepodařilo uložit do mezipaměti: {failed}. Počet stažených záznamů: {downloaded}."
+    },
+    "force_arm_invalid_link": {
+      "message": "Tento odkaz na vynucené střežení X-Sense je neplatný."
+    },
+    "force_arm_request_failed": {
+      "message": "Požadavek na vynucené střežení X-Sense selhal."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Pouze přehrávání",
         "retained": "Uchovávat místní nahrávky"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Doma",
+        "away": "Pryč"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Režim střežení"
+        }
+      },
+      "name": "Vynutit střežení",
+      "description": "Potvrďte čekající požadavek na střežení v režimu Doma nebo Pryč, který blokují otevřené senzory. Otevřené senzory budou vynechány."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Režim střežení"
+        }
+      },
+      "name": "Vynutit střežení ihned",
+      "description": "Okamžitě zapněte střežení v režimu Doma nebo Pryč a vynechte otevřené senzory bez výzvy k potvrzení."
+    },
+    "trigger_sos": {
+      "name": "Spustit SOS poplach",
+      "description": "Okamžitě spusťte SOS poplach stanice SBS50."
+    },
+    "cancel_sos": {
+      "name": "Zrušit SOS poplach",
+      "description": "Zrušte aktivní SOS poplach stanice SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Zrušit aktivní poplach",
+      "description": "Zrušte aktivní poplach senzoru stanice SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Zvukový SOS poplach"
+        }
+      },
+      "name": "Nastavit zvuk SOS",
+      "description": "Vyberte, zda má SOS pouze blikat světly, nebo také spustit bzučák."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID položky konfigurace",
+          "description": "Ponechte prázdné pro použití na všechny účty X-Sense."
+        }
+      },
+      "name": "Obnovit záznamy",
+      "description": "Obnovte index kamerových záznamů používaný postranním panelem a prohlížečem médií."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID položky konfigurace",
+          "description": "Ponechte prázdné pro použití na všechny účty X-Sense."
+        }
+      },
+      "name": "Uložit záznamy do mezipaměti",
+      "description": "Stáhněte kamerové záznamy pro místní uchování. Vyžaduje režim Uchovávat místní nahrávky."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID položky konfigurace",
+          "description": "Ponechte prázdné pro použití na všechny účty X-Sense."
+        }
+      },
+      "name": "Vymazat mezipaměť záznamů",
+      "description": "Smažte místní indexy záznamů, videa a náhledy. Záznamy v cloudu a na kartě SD zůstanou beze změny."
+    },
+    "query_light_schedules": {
+      "name": "Načíst rozvrhy osvětlení",
+      "description": "Načíst rozvrhy osvětlení. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Zobrazovaný název"
+        },
+        "start_time": {
+          "name": "Čas začátku (HH:MM nebo HHMM)"
+        },
+        "end_time": {
+          "name": "Čas konce (HH:MM nebo HHMM)"
+        },
+        "week_days": {
+          "name": "Dny v týdnu (1 = neděle, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stav povolení"
+        },
+        "time_zone": {
+          "name": "Časové pásmo"
+        }
+      },
+      "name": "Vytvořit rozvrh osvětlení",
+      "description": "Vytvořit rozvrh osvětlení. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikátor rozvrhu"
+        },
+        "start_time": {
+          "name": "Čas začátku (HH:MM nebo HHMM)"
+        },
+        "end_time": {
+          "name": "Čas konce (HH:MM nebo HHMM)"
+        },
+        "week_days": {
+          "name": "Dny v týdnu (1 = neděle, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stav povolení"
+        },
+        "time_zone": {
+          "name": "Časové pásmo"
+        }
+      },
+      "name": "Aktualizovat rozvrh osvětlení",
+      "description": "Aktualizovat rozvrh osvětlení. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikátor rozvrhu"
+        },
+        "name": {
+          "name": "Zobrazovaný název"
+        }
+      },
+      "name": "Přejmenovat rozvrh osvětlení",
+      "description": "Přejmenovat rozvrh osvětlení. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikátor rozvrhu"
+        }
+      },
+      "name": "Smazat rozvrh osvětlení",
+      "description": "Smazat rozvrh osvětlení. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "query_light_groups": {
+      "name": "Načíst skupiny světel",
+      "description": "Načíst skupiny světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Zobrazovaný název"
+        }
+      },
+      "name": "Vytvořit skupinu světel",
+      "description": "Vytvořit skupinu světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        },
+        "name": {
+          "name": "Zobrazovaný název"
+        }
+      },
+      "name": "Přejmenovat skupinu světel",
+      "description": "Přejmenovat skupinu světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        },
+        "timer": {
+          "name": "Typ časovače (pirTime nebo appTime)"
+        },
+        "value": {
+          "name": "Hodnota časovače"
+        }
+      },
+      "name": "Aktualizovat časovač skupiny světel",
+      "description": "Aktualizovat časovač skupiny světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Zobrazovaný název"
+        },
+        "device_ids": {
+          "name": "Identifikátory zařízení"
+        }
+      },
+      "name": "Propojit skupinu světel",
+      "description": "Propojit skupinu světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        }
+      },
+      "name": "Smazat skupinu světel",
+      "description": "Smazat skupinu světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Identifikátory zařízení"
+        }
+      },
+      "name": "Odebrat zařízení ze skupiny světel",
+      "description": "Odebrat zařízení ze skupiny světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        },
+        "device_ids": {
+          "name": "Sériová čísla zařízení"
+        },
+        "enabled": {
+          "name": "Stav povolení"
+        }
+      },
+      "name": "Nastavit zapnutí skupiny světel",
+      "description": "Nastavit zapnutí skupiny světel. Jako cíl vyberte vypínač osvětlení SBS50."
+    }
+  },
+  "issues": {}
 }
