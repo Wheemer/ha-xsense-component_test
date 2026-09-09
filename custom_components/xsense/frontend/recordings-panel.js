@@ -2,9 +2,10 @@ const HLS_JS_URL = "/xsense_recordings_static/vendor/hls.light.min.js";
 
 const TRANSLATIONS = {
   "en": {
+    cacheClearSummary: "{deleted} cached recordings deleted; {remaining} remaining.",
     allCamerasOffline: "All cameras offline",
     allCamerasOnline: "All cameras online",
-    allCaughtUp: "All caught up",
+    allCaughtUp: "No pending recordings",
     back: "Back",
     backgroundSyncControlsVisibility: "Background sync controls visibility",
     cached: "Cached",
@@ -46,16 +47,17 @@ const TRANSLATIONS = {
     refresh: "Refresh",
     selectRecordingToPlay: "Select a recording to play",
     storageUsed: "Storage Used",
-    stillSyncing: "{count} still syncing",
+    stillSyncing: "Not cached: {count}",
     couldNotLoadHlsPlayer: "Could not load HLS player",
     date: "Date",
     deleteCachedRecording: "Delete cached recording",
     recordingInUse: "This recording is currently playing. Close it and try again.",
   },
   "as": {
+    cacheClearSummary: "\u0995\u09c7\u099b\u09a4 \u09f0\u0996\u09be {deleted} \u099f\u09be \u09f0\u09c7\u0995\u09f0\u09cd\u09a1\u09bf\u0982 \u09ae\u099a\u09bf \u09aa\u09c7\u09b2\u09cb\u09f1\u09be \u09b9\u09c8\u099b\u09c7; {remaining} \u099f\u09be \u09ac\u09be\u0995\u09c0 \u0986\u099b\u09c7\u0964",
     allCamerasOffline: "\u09b8\u0995\u09b2\u09cb \u0995\u09c7\u09ae\u09c7\u09f0\u09be \u0985\u09ab\u09b2\u09be\u0987\u09a8",
     allCamerasOnline: "\u09b8\u0995\u09b2\u09cb \u0995\u09c7\u09ae\u09c7\u09f0\u09be \u0985\u09a8\u09b2\u09be\u0987\u09a8",
-    allCaughtUp: "\u09b8\u0995\u09b2\u09cb\u09f1\u09c7 \u09a7\u09f0\u09bf\u09b2\u09c7",
+    allCaughtUp: "\u0995\u09cb\u09a8\u09cb \u09f0\u09c7\u0995\u09f0\u09cd\u09a1\u09bf\u0982 \u09ac\u09be\u0995\u09c0 \u09a8\u09be\u0987",
     back: "\u09aa\u09bf\u099b\u09b2\u09c8 \u0998\u09c2\u09f0\u09bf \u0986\u09b9\u09bf\u09b2",
     backgroundSyncControlsVisibility: "\u09aa\u099f\u09ad\u09c2\u09ae\u09bf \u099b\u09bf\u0999\u09cd\u0995\u09c7 \u09a6\u09c3\u09b6\u09cd\u09af\u09ae\u09be\u09a8\u09a4\u09be \u09a8\u09bf\u09af\u09bc\u09a8\u09cd\u09a4\u09cd\u09f0\u09a3 \u0995\u09f0\u09c7",
     cached: "\u0995\u09c7\u099a \u0995\u09f0\u09be \u09b9\u09c8\u099b\u09c7",
@@ -91,7 +93,7 @@ const TRANSLATIONS = {
     refresh: "\u09b8\u09a4\u09c7\u099c \u0995\u09f0\u0995",
     selectRecordingToPlay: "\u09ac\u099c\u09be\u09ac\u09b2\u09c8 \u098f\u099f\u09be \u09f0\u09c7\u0995\u09f0\u09cd\u09a1\u09bf\u0982 \u09a8\u09bf\u09f0\u09cd\u09ac\u09be\u099a\u09a8 \u0995\u09f0\u0995",
     storageUsed: "\u09b8\u0982\u09f0\u0995\u09cd\u09b7\u09a3 \u09ac\u09cd\u09af\u09f1\u09b9\u09c3\u09a4",
-    stillSyncing: "{count} \u098f\u09a4\u09bf\u09af\u09bc\u09be\u0993 \u099b\u09bf\u0999\u09cd\u0995 \u09b9\u09c8 \u0986\u099b\u09c7",
+    stillSyncing: "\u0995\u09c7\u099b\u09a4 \u09f0\u0996\u09be \u09b9\u09cb\u09f1\u09be \u09a8\u09be\u0987: {count}",
     couldNotLoadHlsPlayer: "HLS \u09aa\u09cd\u09b2\u09c7\u09af\u09bc\u09be\u09f0 \u09b2\u09cb\u09a1 \u0995\u09f0\u09bf\u09ac \u09aa\u09f0\u09be \u09a8\u0997'\u09b2",
     date: "\u09a4\u09be\u09f0\u09bf\u0996",
     cacheCleared: "\u09f0\u09c7\u0995\u09f0\u09cd\u09a1\u09bf\u0982 \u0995\u09c7\u099a \u0995\u09cd\u09b2\u09bf\u09af\u09bc\u09be\u09f0 \u0995\u09f0\u09be \u09b9\u09c8\u099b\u09c7",
@@ -104,12 +106,13 @@ const TRANSLATIONS = {
     recordingInUse: "\u098f\u0987 \u09f0\u09c7\u0995\u09f0\u09cd\u09a1\u09bf\u0982 \u09ac\u09f0\u09cd\u09a4\u09ae\u09be\u09a8 \u09ac\u09be\u099c\u09bf \u0986\u099b\u09c7\u0964 \u09ac\u09a8\u09cd\u09a7 \u0995\u09f0\u0995 \u0986\u09f0\u09c1 \u09aa\u09c1\u09a8\u09f0 \u099a\u09c7\u09b7\u09cd\u099f\u09be \u0995\u09f0\u0995\u0964",
   },
   "ar": {
+    cacheClearSummary: "\u062a\u0645 \u062d\u0630\u0641 {deleted} \u0645\u0646 \u0627\u0644\u062a\u0633\u062c\u064a\u0644\u0627\u062a \u0627\u0644\u0645\u062e\u0632\u0646\u0629 \u0645\u0624\u0642\u062a\u064b\u0627\u061b \u0627\u0644\u0645\u062a\u0628\u0642\u064a: {remaining}.",
     allCamerasOffline: "\u062c\u0645\u064a\u0639 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627\u062a \u063a\u064a\u0631 \u0645\u062a\u0635\u0644\u0629 \u0628\u0627\u0644\u0625\u0646\u062a\u0631\u0646\u062a",
     allCamerasOnline: "\u062c\u0645\u064a\u0639 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627\u062a \u0639\u0644\u0649 \u0627\u0644\u0627\u0646\u062a\u0631\u0646\u062a",
-    allCaughtUp: "\u062c\u0645\u064a\u0639 \u0627\u0644\u0645\u062d\u0627\u0635\u0631\u064a\u0646",
+    allCaughtUp: "\u0644\u0627 \u062a\u0648\u062c\u062f \u062a\u0633\u062c\u064a\u0644\u0627\u062a \u0645\u0639\u0644\u0651\u0642\u0629",
     back: "\u0627\u0644\u0639\u0648\u062f\u0629",
     backgroundSyncControlsVisibility: "\u062a\u062a\u062d\u0643\u0645 \u0645\u0632\u0627\u0645\u0646\u0629 \u0627\u0644\u062e\u0644\u0641\u064a\u0629 \u0641\u064a \u0627\u0644\u0631\u0624\u064a\u0629",
-    cached: "\u0645\u062e\u0628\u0623\u0629",
+    cached: "\u0645\u062e\u0632\u0646\u0629 \u0645\u0624\u0642\u062a\u064b\u0627",
     camera: "\u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627",
     camerasOnline: "\u0643\u0627\u0645\u064a\u0631\u0627\u062a \u0639\u0644\u0649 \u0627\u0644\u0627\u0646\u062a\u0631\u0646\u062a",
     genericCamera: "\u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627",
@@ -126,7 +129,7 @@ const TRANSLATIONS = {
     noRecordingsReady: "\u0644\u0627 \u062a\u0648\u062c\u062f \u062a\u0633\u062c\u064a\u0644\u0627\u062a \u062c\u0627\u0647\u0632\u0629",
     noThumbnail: "\u0644\u0627 \u062a\u0648\u062c\u062f \u0635\u0648\u0631\u0629 \u0645\u0635\u063a\u0631\u0629",
     noneYet: "\u0644\u0627 \u0634\u064a\u0621 \u062d\u062a\u0649 \u0627\u0644\u0622\u0646",
-    notCached: "\u063a\u064a\u0631 \u0645\u062e\u0628\u0623\u0629",
+    notCached: "\u063a\u064a\u0631 \u0645\u062e\u0632\u0646\u0629 \u0645\u0624\u0642\u062a\u064b\u0627",
     offline: "\u063a\u064a\u0631 \u0645\u062a\u0635\u0644",
     offlineCount: "{count} \u063a\u064a\u0631 \u0645\u062a\u0635\u0644",
     online: "\u0639\u0644\u0649 \u0627\u0644\u0627\u0646\u062a\u0631\u0646\u062a",
@@ -142,7 +145,7 @@ const TRANSLATIONS = {
     refresh: "\u062a\u062d\u062f\u064a\u062b",
     selectRecordingToPlay: "\u062d\u062f\u062f \u062a\u0633\u062c\u064a\u0644\u0627\u064b \u0644\u062a\u0634\u063a\u064a\u0644\u0647",
     storageUsed: "\u0627\u0644\u062a\u062e\u0632\u064a\u0646 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u0629",
-    stillSyncing: "\u0644\u0627 \u064a\u0632\u0627\u0644 {count} \u0642\u064a\u062f \u0627\u0644\u0645\u0632\u0627\u0645\u0646\u0629",
+    stillSyncing: "\u063a\u064a\u0631 \u0645\u062e\u0632\u0646\u0629 \u0645\u0624\u0642\u062a\u064b\u0627: {count}",
     couldNotLoadHlsPlayer: "\u062a\u0639\u0630\u0631 \u062a\u062d\u0645\u064a\u0644 \u0645\u0634\u063a\u0644 HLS",
     date: "\u0627\u0644\u062a\u0627\u0631\u064a\u062e",
     cacheCleared: "\u062a\u0645 \u0645\u0633\u062d \u0630\u0627\u0643\u0631\u0629 \u0627\u0644\u062a\u062e\u0632\u064a\u0646 \u0627\u0644\u0645\u0624\u0642\u062a \u0644\u0644\u062a\u0633\u062c\u064a\u0644",
@@ -150,20 +153,21 @@ const TRANSLATIONS = {
     clearCameraCache: "\u0627\u0645\u0633\u062d \u0627\u0644\u062a\u0633\u062c\u064a\u0644\u0627\u062a \u0627\u0644\u0645\u062e\u0632\u0646\u0629 \u0645\u0624\u0642\u062a\u064b\u0627 \u0644\u0647\u0630\u0647 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627",
     confirmClearAllCache: "\u0647\u0644 \u062a\u0631\u064a\u062f \u062d\u0630\u0641 \u062c\u0645\u064a\u0639 \u062a\u0633\u062c\u064a\u0644\u0627\u062a X-Sense \u0627\u0644\u0645\u062e\u0632\u0646\u0629 \u0645\u0624\u0642\u062a\u064b\u0627 \u0645\u062d\u0644\u064a\u064b\u0627\u061f \u0644\u0627 \u062a\u062a\u0623\u062b\u0631 \u0627\u0644\u062a\u0633\u062c\u064a\u0644\u0627\u062a \u0627\u0644\u0645\u0648\u062c\u0648\u062f\u0629 \u0639\u0644\u0649 \u0648\u062d\u062f\u0629 \u062a\u062e\u0632\u064a\u0646 X-Sense.",
     confirmClearCameraCache: "\u0647\u0644 \u062a\u0631\u064a\u062f \u062d\u0630\u0641 \u062c\u0645\u064a\u0639 \u0627\u0644\u062a\u0633\u062c\u064a\u0644\u0627\u062a \u0627\u0644\u0645\u062e\u0632\u0646\u0629 \u0645\u0624\u0642\u062a\u064b\u0627 \u0645\u062d\u0644\u064a\u064b\u0627 \u0644\u0647\u0630\u0647 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627\u061f",
-    confirmDeleteClipCache: "\u0647\u0644 \u062a\u0631\u064a\u062f \u062d\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u0645\u062e\u0628\u0623 \u0645\u062d\u0644\u064a\u064b\u0627\u061f",
+    confirmDeleteClipCache: "\u0647\u0644 \u062a\u0631\u064a\u062f \u062d\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u0645\u062e\u0632\u0646 \u0645\u0624\u0642\u062a\u064b\u0627 \u0645\u062d\u0644\u064a\u064b\u0627\u061f",
     deleteCachedRecording: "\u062d\u0630\u0641 \u0627\u0644\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u0645\u062e\u0632\u0646 \u0645\u0624\u0642\u062a\u0627",
     recordingInUse: "\u0647\u0630\u0627 \u0627\u0644\u062a\u0633\u062c\u064a\u0644 \u0642\u064a\u062f \u0627\u0644\u062a\u0634\u063a\u064a\u0644 \u062d\u0627\u0644\u064a\u064b\u0627. \u0623\u063a\u0644\u0642\u0647 \u0648\u062d\u0627\u0648\u0644 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649.",
   },
   "cs": {
+    cacheClearSummary: "Smazan\u00e9 z\u00e1znamy z mezipam\u011bti: {deleted}; zb\u00fdvaj\u00edc\u00ed: {remaining}.",
     allCamerasOffline: "V\u0161echny kamery jsou offline",
     allCamerasOnline: "V\u0161echny kamery online",
-    allCaughtUp: "V\u0161e dohn\u00e1no",
+    allCaughtUp: "\u017d\u00e1dn\u00e9 \u010dekaj\u00edc\u00ed z\u00e1znamy",
     back: "Zp\u011bt",
     backgroundSyncControlsVisibility: "Synchronizace na pozad\u00ed \u0159\u00edd\u00ed viditelnost",
     cached: "Ulo\u017eeno do mezipam\u011bti",
-    camera: "Fotoapar\u00e1t",
+    camera: "Kamera",
     camerasOnline: "Kamery online",
-    genericCamera: "Fotoapar\u00e1t",
+    genericCamera: "Kamera",
     hlsPlaybackFailed: "P\u0159ehr\u00e1v\u00e1n\u00ed HLS se nezda\u0159ilo",
     hlsPlaybackUnsupported: "P\u0159ehr\u00e1v\u00e1n\u00ed HLS tento prohl\u00ed\u017ee\u010d nepodporuje",
     lazyCacheOnPlayback: "Proxy HLS na vy\u017e\u00e1d\u00e1n\u00ed",
@@ -193,7 +197,7 @@ const TRANSLATIONS = {
     refresh: "Obnovit",
     selectRecordingToPlay: "Vyberte nahr\u00e1vku, kterou chcete p\u0159ehr\u00e1t",
     storageUsed: "Pou\u017eit\u00e9 \u00falo\u017ei\u0161t\u011b",
-    stillSyncing: "{count} se st\u00e1le synchronizuje",
+    stillSyncing: "Nen\u00ed v mezipam\u011bti: {count}",
     couldNotLoadHlsPlayer: "P\u0159ehr\u00e1va\u010d HLS nelze na\u010d\u00edst",
     date: "Datum",
     cacheCleared: "Mezipam\u011b\u0165 z\u00e1znamu byla vymaz\u00e1na",
@@ -206,9 +210,10 @@ const TRANSLATIONS = {
     recordingInUse: "Tato nahr\u00e1vka se pr\u00e1v\u011b p\u0159ehr\u00e1v\u00e1. Zav\u0159ete jej a zkuste to znovu.",
   },
   "da": {
+    cacheClearSummary: "{deleted} cachelagrede optagelser slettet; {remaining} tilbage.",
     allCamerasOffline: "Alle kameraer offline",
     allCamerasOnline: "Alle kameraer online",
-    allCaughtUp: "Alle indhentet",
+    allCaughtUp: "Ingen afventende optagelser",
     back: "Tilbage",
     backgroundSyncControlsVisibility: "Baggrundssynkronisering styrer synlighed",
     cached: "Cachelagret",
@@ -244,7 +249,7 @@ const TRANSLATIONS = {
     refresh: "Opdater",
     selectRecordingToPlay: "V\u00e6lg en optagelse, der skal afspilles",
     storageUsed: "Opbevaring brugt",
-    stillSyncing: "{count} synkroniserer stadig",
+    stillSyncing: "Ikke cachelagret: {count}",
     couldNotLoadHlsPlayer: "HLS-afspilleren kunne ikke indl\u00e6ses",
     date: "Dato",
     cacheCleared: "Optagelsescache ryddet",
@@ -257,9 +262,10 @@ const TRANSLATIONS = {
     recordingInUse: "Denne optagelse afspilles i \u00f8jeblikket. Luk den og pr\u00f8v igen.",
   },
   "de": {
+    cacheClearSummary: "{deleted} zwischengespeicherte Aufnahmen gel\u00f6scht; {remaining} verbleibend.",
     allCamerasOffline: "Alle Kameras offline",
     allCamerasOnline: "Alle Kameras online",
-    allCaughtUp: "Alles eingeholt",
+    allCaughtUp: "Keine ausstehenden Aufnahmen",
     back: "Zur\u00fcck",
     backgroundSyncControlsVisibility: "Die Hintergrundsynchronisierung steuert die Sichtbarkeit",
     cached: "Zwischengespeichert",
@@ -295,7 +301,7 @@ const TRANSLATIONS = {
     refresh: "Aktualisieren",
     selectRecordingToPlay: "W\u00e4hlen Sie eine Aufnahme zum Abspielen aus",
     storageUsed: "Verwendeter Speicher",
-    stillSyncing: "{count} wird noch synchronisiert",
+    stillSyncing: "Nicht zwischengespeichert: {count}",
     couldNotLoadHlsPlayer: "Der HLS-Player konnte nicht geladen werden",
     date: "Datum",
     cacheCleared: "Aufnahmecache geleert",
@@ -308,9 +314,10 @@ const TRANSLATIONS = {
     recordingInUse: "Diese Aufnahme wird gerade abgespielt. Schlie\u00dfen Sie es und versuchen Sie es erneut.",
   },
   "el": {
+    cacheClearSummary: "\u0394\u03b9\u03b1\u03b3\u03c1\u03ac\u03c6\u03b7\u03ba\u03b1\u03bd {deleted} \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ad\u03c2 \u03b1\u03c0\u03cc \u03c4\u03b7\u03bd \u03c0\u03c1\u03bf\u03c3\u03c9\u03c1\u03b9\u03bd\u03ae \u03bc\u03bd\u03ae\u03bc\u03b7\u00b7 \u03b1\u03c0\u03bf\u03bc\u03ad\u03bd\u03bf\u03c5\u03bd {remaining}.",
     allCamerasOffline: "\u038c\u03bb\u03b5\u03c2 \u03bf\u03b9 \u03ba\u03ac\u03bc\u03b5\u03c1\u03b5\u03c2 \u03b5\u03ba\u03c4\u03cc\u03c2 \u03c3\u03cd\u03bd\u03b4\u03b5\u03c3\u03b7\u03c2",
     allCamerasOnline: "\u038c\u03bb\u03b5\u03c2 \u03bf\u03b9 \u03ba\u03ac\u03bc\u03b5\u03c1\u03b5\u03c2 online",
-    allCaughtUp: "\u038c\u03bb\u03b1 \u03c0\u03b9\u03ac\u03c3\u03c4\u03b7\u03ba\u03b1\u03bd",
+    allCaughtUp: "\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03bf\u03c5\u03bd \u03b5\u03ba\u03ba\u03c1\u03b5\u03bc\u03b5\u03af\u03c2 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ad\u03c2",
     back: "\u03a0\u03af\u03c3\u03c9",
     backgroundSyncControlsVisibility: "\u039f \u03c3\u03c5\u03b3\u03c7\u03c1\u03bf\u03bd\u03b9\u03c3\u03bc\u03cc\u03c2 \u03c6\u03cc\u03bd\u03c4\u03bf\u03c5 \u03b5\u03bb\u03ad\u03b3\u03c7\u03b5\u03b9 \u03c4\u03b7\u03bd \u03bf\u03c1\u03b1\u03c4\u03cc\u03c4\u03b7\u03c4\u03b1",
     cached: "\u0391\u03c0\u03bf\u03b8\u03b7\u03ba\u03b5\u03c5\u03bc\u03ad\u03bd\u03bf \u03c3\u03c4\u03b7\u03bd \u03ba\u03c1\u03c5\u03c6\u03ae \u03bc\u03bd\u03ae\u03bc\u03b7",
@@ -322,12 +329,12 @@ const TRANSLATIONS = {
     lazyCacheOnPlayback: "\u0394\u03b9\u03b1\u03ba\u03bf\u03bc\u03b9\u03c3\u03c4\u03ae\u03c2 \u03bc\u03b5\u03c3\u03bf\u03bb\u03ac\u03b2\u03b7\u03c3\u03b7\u03c2 HLS \u03ba\u03b1\u03c4' \u03b1\u03c0\u03b1\u03af\u03c4\u03b7\u03c3\u03b7",
     loading: "\u03a6\u03cc\u03c1\u03c4\u03c9\u03c3\u03b7",
     loadingRecordings: "\u03a6\u03cc\u03c1\u03c4\u03c9\u03c3\u03b7 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ce\u03bd...",
-    newestRecording: "\u039d\u03b5\u03cc\u03c4\u03b5\u03c1\u03b7 \u03b7\u03c7\u03bf\u03b3\u03c1\u03ac\u03c6\u03b7\u03c3\u03b7",
+    newestRecording: "\u039d\u03b5\u03cc\u03c4\u03b5\u03c1\u03b7 \u03b2\u03b9\u03bd\u03c4\u03b5\u03bf\u03c3\u03ba\u03cc\u03c0\u03b7\u03c3\u03b7",
     noCameraSelected: "\u0394\u03b5\u03bd \u03ad\u03c7\u03b5\u03b9 \u03b5\u03c0\u03b9\u03bb\u03b5\u03b3\u03b5\u03af \u03ba\u03ac\u03bc\u03b5\u03c1\u03b1",
     noCamerasFound: "\u0394\u03b5\u03bd \u03b2\u03c1\u03ad\u03b8\u03b7\u03ba\u03b1\u03bd \u03ba\u03ac\u03bc\u03b5\u03c1\u03b5\u03c2",
     noCamerasFoundSentence: "\u0394\u03b5\u03bd \u03b2\u03c1\u03ad\u03b8\u03b7\u03ba\u03b1\u03bd \u03ba\u03ac\u03bc\u03b5\u03c1\u03b5\u03c2.",
     noRecordingsForDate: "\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03bf\u03c5\u03bd \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ad\u03c2 \u03b3\u03b9\u03b1 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7\u03bd \u03b7\u03bc\u03b5\u03c1\u03bf\u03bc\u03b7\u03bd\u03af\u03b1.",
-    noRecordingsReady: "\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03bf\u03c5\u03bd \u03ad\u03c4\u03bf\u03b9\u03bc\u03b5\u03c2 \u03b7\u03c7\u03bf\u03b3\u03c1\u03b1\u03c6\u03ae\u03c3\u03b5\u03b9\u03c2",
+    noRecordingsReady: "\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03bf\u03c5\u03bd \u03ad\u03c4\u03bf\u03b9\u03bc\u03b5\u03c2 \u03b2\u03b9\u03bd\u03c4\u03b5\u03bf\u03c3\u03ba\u03bf\u03c0\u03ae\u03c3\u03b5\u03b9\u03c2",
     noThumbnail: "\u03a7\u03c9\u03c1\u03af\u03c2 \u03bc\u03b9\u03ba\u03c1\u03bf\u03b3\u03c1\u03b1\u03c6\u03af\u03b1",
     noneYet: "\u039a\u03b1\u03bc\u03af\u03b1 \u03b1\u03ba\u03cc\u03bc\u03b1",
     notCached: "\u0394\u03b5\u03bd \u03ad\u03c7\u03b5\u03b9 \u03b1\u03c0\u03bf\u03b8\u03b7\u03ba\u03b5\u03c5\u03c4\u03b5\u03af \u03c3\u03c4\u03b7\u03bd \u03ba\u03c1\u03c5\u03c6\u03ae \u03bc\u03bd\u03ae\u03bc\u03b7",
@@ -339,14 +346,14 @@ const TRANSLATIONS = {
     ready: "\u0388\u03c4\u03bf\u03b9\u03bc\u03bf\u03b9",
     readyToWatch: "\u0388\u03c4\u03bf\u03b9\u03bc\u03bf \u03b3\u03b9\u03b1 \u03c0\u03b1\u03c1\u03b1\u03ba\u03bf\u03bb\u03bf\u03cd\u03b8\u03b7\u03c3\u03b7",
     recordingEmpty: "\u0397 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ae \u03b5\u03af\u03bd\u03b1\u03b9 \u03ac\u03b4\u03b5\u03b9\u03b1",
-    recordingIsNotReady: "\u0397 \u03b7\u03c7\u03bf\u03b3\u03c1\u03ac\u03c6\u03b7\u03c3\u03b7 \u03b4\u03b5\u03bd \u03b5\u03af\u03bd\u03b1\u03b9 \u03b1\u03ba\u03cc\u03bc\u03b1 \u03ad\u03c4\u03bf\u03b9\u03bc\u03b7.",
+    recordingIsNotReady: "\u0397 \u03b2\u03b9\u03bd\u03c4\u03b5\u03bf\u03c3\u03ba\u03cc\u03c0\u03b7\u03c3\u03b7 \u03b4\u03b5\u03bd \u03b5\u03af\u03bd\u03b1\u03b9 \u03b1\u03ba\u03cc\u03bc\u03b1 \u03ad\u03c4\u03bf\u03b9\u03bc\u03b7.",
     recordingIsNotReadyStatus: "\u0397 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ae \u03b4\u03b5\u03bd \u03b5\u03af\u03bd\u03b1\u03b9 \u03ad\u03c4\u03bf\u03b9\u03bc\u03b7 ({status})",
     recordingsCountStatus: "{shown} \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ce\u03bd {total} - {state}",
-    recordingsReady: "\u039f\u03b9 \u03b7\u03c7\u03bf\u03b3\u03c1\u03b1\u03c6\u03ae\u03c3\u03b5\u03b9\u03c2 \u03b5\u03af\u03bd\u03b1\u03b9 \u03ad\u03c4\u03bf\u03b9\u03bc\u03b5\u03c2",
+    recordingsReady: "\u039f\u03b9 \u03b2\u03b9\u03bd\u03c4\u03b5\u03bf\u03c3\u03ba\u03bf\u03c0\u03ae\u03c3\u03b5\u03b9\u03c2 \u03b5\u03af\u03bd\u03b1\u03b9 \u03ad\u03c4\u03bf\u03b9\u03bc\u03b5\u03c2",
     refresh: "\u0391\u03bd\u03b1\u03bd\u03ad\u03c9\u03c3\u03b7",
     selectRecordingToPlay: "\u0395\u03c0\u03b9\u03bb\u03ad\u03be\u03c4\u03b5 \u03bc\u03b9\u03b1 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ae \u03b3\u03b9\u03b1 \u03b1\u03bd\u03b1\u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03ae",
     storageUsed: "\u0391\u03c0\u03bf\u03b8\u03ae\u03ba\u03b5\u03c5\u03c3\u03b7 \u03c0\u03bf\u03c5 \u03c7\u03c1\u03b7\u03c3\u03b9\u03bc\u03bf\u03c0\u03bf\u03b9\u03b5\u03af\u03c4\u03b1\u03b9",
-    stillSyncing: "{count} \u03b5\u03be\u03b1\u03ba\u03bf\u03bb\u03bf\u03c5\u03b8\u03b5\u03af \u03bd\u03b1 \u03c3\u03c5\u03b3\u03c7\u03c1\u03bf\u03bd\u03af\u03b6\u03b5\u03c4\u03b1\u03b9",
+    stillSyncing: "\u03a7\u03c9\u03c1\u03af\u03c2 \u03c0\u03c1\u03bf\u03c3\u03c9\u03c1\u03b9\u03bd\u03ae \u03b1\u03c0\u03bf\u03b8\u03ae\u03ba\u03b5\u03c5\u03c3\u03b7: {count}",
     couldNotLoadHlsPlayer: "\u0394\u03b5\u03bd \u03ae\u03c4\u03b1\u03bd \u03b4\u03c5\u03bd\u03b1\u03c4\u03ae \u03b7 \u03c6\u03cc\u03c1\u03c4\u03c9\u03c3\u03b7 \u03c4\u03bf\u03c5 \u03c0\u03c1\u03bf\u03b3\u03c1\u03ac\u03bc\u03bc\u03b1\u03c4\u03bf\u03c2 \u03b1\u03bd\u03b1\u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03ae\u03c2 HLS",
     date: "\u0397\u03bc\u03b5\u03c1\u03bf\u03bc\u03b7\u03bd\u03af\u03b1",
     cacheCleared: "\u0397 \u03c0\u03c1\u03bf\u03c3\u03c9\u03c1\u03b9\u03bd\u03ae \u03bc\u03bd\u03ae\u03bc\u03b7 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ae\u03c2 \u03b4\u03b9\u03b1\u03b3\u03c1\u03ac\u03c6\u03b7\u03ba\u03b5",
@@ -356,12 +363,13 @@ const TRANSLATIONS = {
     confirmClearCameraCache: "\u0394\u03b9\u03b1\u03b3\u03c1\u03b1\u03c6\u03ae \u03cc\u03bb\u03c9\u03bd \u03c4\u03c9\u03bd \u03c4\u03bf\u03c0\u03b9\u03ba\u03ac \u03b1\u03c0\u03bf\u03b8\u03b7\u03ba\u03b5\u03c5\u03bc\u03ad\u03bd\u03c9\u03bd \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ce\u03bd \u03b3\u03b9\u03b1 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7\u03bd \u03ba\u03ac\u03bc\u03b5\u03c1\u03b1;",
     confirmDeleteClipCache: "\u039d\u03b1 \u03b4\u03b9\u03b1\u03b3\u03c1\u03b1\u03c6\u03b5\u03af \u03b1\u03c5\u03c4\u03ae \u03b7 \u03c4\u03bf\u03c0\u03b9\u03ba\u03ac \u03b1\u03c0\u03bf\u03b8\u03b7\u03ba\u03b5\u03c5\u03bc\u03ad\u03bd\u03b7 \u03c3\u03c4\u03b7\u03bd \u03ba\u03c1\u03c5\u03c6\u03ae \u03bc\u03bd\u03ae\u03bc\u03b7 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ae;",
     deleteCachedRecording: "\u0394\u03b9\u03b1\u03b3\u03c1\u03b1\u03c6\u03ae \u03b1\u03c0\u03bf\u03b8\u03b7\u03ba\u03b5\u03c5\u03bc\u03ad\u03bd\u03b7\u03c2 \u03b5\u03b3\u03b3\u03c1\u03b1\u03c6\u03ae\u03c2",
-    recordingInUse: "\u0391\u03c5\u03c4\u03ae \u03b7 \u03b7\u03c7\u03bf\u03b3\u03c1\u03ac\u03c6\u03b7\u03c3\u03b7 \u03b1\u03bd\u03b1\u03c0\u03b1\u03c1\u03ac\u03b3\u03b5\u03c4\u03b1\u03b9 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03c4\u03b9\u03b3\u03bc\u03ae. \u039a\u03bb\u03b5\u03af\u03c3\u03c4\u03b5 \u03c4\u03bf \u03ba\u03b1\u03b9 \u03b4\u03bf\u03ba\u03b9\u03bc\u03ac\u03c3\u03c4\u03b5 \u03be\u03b1\u03bd\u03ac.",
+    recordingInUse: "\u0391\u03c5\u03c4\u03ae \u03b7 \u03b2\u03b9\u03bd\u03c4\u03b5\u03bf\u03c3\u03ba\u03cc\u03c0\u03b7\u03c3\u03b7 \u03b1\u03bd\u03b1\u03c0\u03b1\u03c1\u03ac\u03b3\u03b5\u03c4\u03b1\u03b9 \u03b1\u03c5\u03c4\u03ae\u03bd \u03c4\u03b7 \u03c3\u03c4\u03b9\u03b3\u03bc\u03ae. \u039a\u03bb\u03b5\u03af\u03c3\u03c4\u03b5 \u03c4\u03b7\u03bd \u03ba\u03b1\u03b9 \u03b4\u03bf\u03ba\u03b9\u03bc\u03ac\u03c3\u03c4\u03b5 \u03be\u03b1\u03bd\u03ac.",
   },
   "es": {
+    cacheClearSummary: "{deleted} grabaciones en cach\u00e9 eliminadas; quedan {remaining}.",
     allCamerasOffline: "Todas las c\u00e1maras sin conexi\u00f3n",
     allCamerasOnline: "Todas las c\u00e1maras en l\u00ednea",
-    allCaughtUp: "todos atrapados",
+    allCaughtUp: "No hay grabaciones pendientes",
     back: "Atr\u00e1s",
     backgroundSyncControlsVisibility: "La sincronizaci\u00f3n en segundo plano controla la visibilidad",
     cached: "En cach\u00e9",
@@ -397,7 +405,7 @@ const TRANSLATIONS = {
     refresh: "Actualizar",
     selectRecordingToPlay: "Seleccione una grabaci\u00f3n para reproducir",
     storageUsed: "Almacenamiento utilizado",
-    stillSyncing: "{count} sigue sincroniz\u00e1ndose",
+    stillSyncing: "Sin almacenar en cach\u00e9: {count}",
     couldNotLoadHlsPlayer: "No se pudo cargar el reproductor HLS",
     date: "Fecha",
     cacheCleared: "Cach\u00e9 de grabaci\u00f3n borrado",
@@ -410,9 +418,10 @@ const TRANSLATIONS = {
     recordingInUse: "Esta grabaci\u00f3n se est\u00e1 reproduciendo actualmente. Ci\u00e9rralo y vuelve a intentarlo.",
   },
   "et": {
+    cacheClearSummary: "Kustutatud vahem\u00e4llu salvestatud salvestisi: {deleted}; alles: {remaining}.",
     allCamerasOffline: "K\u00f5ik kaamerad v\u00f5rgu\u00fchenduseta",
     allCamerasOnline: "K\u00f5ik kaamerad v\u00f5rgus",
-    allCaughtUp: "K\u00f5ik j\u00f5udsid j\u00e4rele",
+    allCaughtUp: "Ootel salvestisi pole",
     back: "Tagasi",
     backgroundSyncControlsVisibility: "Taustal s\u00fcnkroonimine juhib n\u00e4htavust",
     cached: "Vahem\u00e4llu salvestatud",
@@ -448,7 +457,7 @@ const TRANSLATIONS = {
     refresh: "V\u00e4rskenda",
     selectRecordingToPlay: "Valige esitamiseks salvestis",
     storageUsed: "Ladustamine kasutatud",
-    stillSyncing: "{count} on endiselt s\u00fcnkroonimisel",
+    stillSyncing: "Vahem\u00e4llu salvestamata: {count}",
     couldNotLoadHlsPlayer: "HLS pleierit ei saanud laadida",
     date: "Kuup\u00e4ev",
     cacheCleared: "Salvestusvahem\u00e4lu on t\u00fchjendatud",
@@ -461,9 +470,10 @@ const TRANSLATIONS = {
     recordingInUse: "Seda salvestist esitatakse praegu. Sulgege see ja proovige uuesti.",
   },
   "fa": {
+    cacheClearSummary: "{deleted} \u0636\u0628\u0637 \u0630\u062e\u06cc\u0631\u0647\u200c\u0634\u062f\u0647 \u062f\u0631 \u062d\u0627\u0641\u0638\u0647 \u067e\u0646\u0647\u0627\u0646 \u062d\u0630\u0641 \u0634\u062f\u061b {remaining} \u0628\u0627\u0642\u06cc \u0645\u0627\u0646\u062f\u0647 \u0627\u0633\u062a.",
     allCamerasOffline: "\u0647\u0645\u0647 \u062f\u0648\u0631\u0628\u06cc\u0646 \u0647\u0627 \u0622\u0641\u0644\u0627\u06cc\u0646",
     allCamerasOnline: "\u0647\u0645\u0647 \u062f\u0648\u0631\u0628\u06cc\u0646 \u0647\u0627 \u0622\u0646\u0644\u0627\u06cc\u0646",
-    allCaughtUp: "\u0647\u0645\u0647 \u06af\u0631\u0641\u062a\u0627\u0631 \u0634\u062f\u0646\u062f",
+    allCaughtUp: "\u0647\u06cc\u0686 \u0636\u0628\u0637\u06cc \u062f\u0631 \u0627\u0646\u062a\u0638\u0627\u0631 \u0646\u06cc\u0633\u062a",
     back: "\u0628\u0631\u06af\u0634\u062a",
     backgroundSyncControlsVisibility: "\u0647\u0645\u06af\u0627\u0645\u200c\u0633\u0627\u0632\u06cc \u067e\u0633\u200c\u0632\u0645\u06cc\u0646\u0647\u060c \u062f\u06cc\u062f \u0631\u0627 \u06a9\u0646\u062a\u0631\u0644 \u0645\u06cc\u200c\u06a9\u0646\u062f",
     cached: "\u0630\u062e\u06cc\u0631\u0647 \u0634\u062f\u0647 \u0627\u0633\u062a",
@@ -499,7 +509,7 @@ const TRANSLATIONS = {
     refresh: "\u062a\u0627\u0632\u0647 \u06a9\u0631\u062f\u0646",
     selectRecordingToPlay: "\u0636\u0628\u0637 \u0631\u0627 \u0628\u0631\u0627\u06cc \u067e\u062e\u0634 \u0627\u0646\u062a\u062e\u0627\u0628 \u06a9\u0646\u06cc\u062f",
     storageUsed: "\u0630\u062e\u06cc\u0631\u0647 \u0633\u0627\u0632\u06cc \u0627\u0633\u062a\u0641\u0627\u062f\u0647 \u0634\u062f\u0647",
-    stillSyncing: "{count} \u0647\u0645\u0686\u0646\u0627\u0646 \u062f\u0631 \u062d\u0627\u0644 \u0647\u0645\u06af\u0627\u0645 \u0633\u0627\u0632\u06cc \u0627\u0633\u062a",
+    stillSyncing: "\u0630\u062e\u06cc\u0631\u0647\u200c\u0646\u0634\u062f\u0647 \u062f\u0631 \u062d\u0627\u0641\u0638\u0647 \u067e\u0646\u0647\u0627\u0646: {count}",
     couldNotLoadHlsPlayer: "\u067e\u062e\u0634 \u06a9\u0646\u0646\u062f\u0647 HLS \u0628\u0627\u0631\u06af\u06cc\u0631\u06cc \u0646\u0634\u062f",
     date: "\u062a\u0627\u0631\u06cc\u062e",
     cacheCleared: "\u062d\u0627\u0641\u0638\u0647 \u067e\u0646\u0647\u0627\u0646 \u0636\u0628\u0637 \u067e\u0627\u06a9 \u0634\u062f",
@@ -512,9 +522,10 @@ const TRANSLATIONS = {
     recordingInUse: "\u0627\u06cc\u0646 \u0636\u0628\u0637 \u062f\u0631 \u062d\u0627\u0644 \u062d\u0627\u0636\u0631 \u062f\u0631 \u062d\u0627\u0644 \u067e\u062e\u0634 \u0627\u0633\u062a. \u0622\u0646 \u0631\u0627 \u0628\u0628\u0646\u062f\u06cc\u062f \u0648 \u062f\u0648\u0628\u0627\u0631\u0647 \u0627\u0645\u062a\u062d\u0627\u0646 \u06a9\u0646\u06cc\u062f.",
   },
   "fi": {
+    cacheClearSummary: "{deleted} v\u00e4limuistiin tallennettua tallennetta poistettu; {remaining} j\u00e4ljell\u00e4.",
     allCamerasOffline: "Kaikki kamerat offline-tilassa",
     allCamerasOnline: "Kaikki kamerat verkossa",
-    allCaughtUp: "Kaikki kiinni",
+    allCaughtUp: "Ei odottavia tallenteita",
     back: "Takaisin",
     backgroundSyncControlsVisibility: "Taustan synkronointi ohjaa n\u00e4kyvyytt\u00e4",
     cached: "V\u00e4limuistissa",
@@ -550,7 +561,7 @@ const TRANSLATIONS = {
     refresh: "P\u00e4ivit\u00e4",
     selectRecordingToPlay: "Valitse toistettava tallenne",
     storageUsed: "S\u00e4ilytys k\u00e4ytetty",
-    stillSyncing: "{count} synkronoidaan edelleen",
+    stillSyncing: "Ei v\u00e4limuistissa: {count}",
     couldNotLoadHlsPlayer: "HLS-soitinta ei voitu ladata",
     date: "P\u00e4iv\u00e4m\u00e4\u00e4r\u00e4",
     cacheCleared: "Tallennusv\u00e4limuisti tyhjennetty",
@@ -563,15 +574,16 @@ const TRANSLATIONS = {
     recordingInUse: "T\u00e4t\u00e4 tallennetta toistetaan parhaillaan. Sulje se ja yrit\u00e4 uudelleen.",
   },
   "fr": {
+    cacheClearSummary: "{deleted} enregistrements en cache supprim\u00e9s ; {remaining} restants.",
     allCamerasOffline: "Toutes les cam\u00e9ras hors ligne",
     allCamerasOnline: "Toutes les cam\u00e9ras en ligne",
-    allCaughtUp: "Tous rattrap\u00e9s",
+    allCaughtUp: "Aucun enregistrement en attente",
     back: "Retour",
     backgroundSyncControlsVisibility: "La synchronisation en arri\u00e8re-plan contr\u00f4le la visibilit\u00e9",
     cached: "En cache",
-    camera: "Appareil photo",
+    camera: "Cam\u00e9ra",
     camerasOnline: "Cam\u00e9ras en ligne",
-    genericCamera: "Appareil photo",
+    genericCamera: "Cam\u00e9ra",
     hlsPlaybackFailed: "\u00c9chec de la lecture de HLS",
     hlsPlaybackUnsupported: "La lecture HLS n'est pas prise en charge par ce navigateur",
     lazyCacheOnPlayback: "Proxy HLS \u00e0 la demande",
@@ -601,7 +613,7 @@ const TRANSLATIONS = {
     refresh: "Actualiser",
     selectRecordingToPlay: "S\u00e9lectionnez un enregistrement \u00e0 lire",
     storageUsed: "Stockage utilis\u00e9",
-    stillSyncing: "{count} est toujours en cours de synchronisation",
+    stillSyncing: "Non mis en cache : {count}",
     couldNotLoadHlsPlayer: "Impossible de charger le lecteur HLS",
     date: "Date",
     cacheCleared: "Cache d'enregistrement vid\u00e9",
@@ -614,9 +626,10 @@ const TRANSLATIONS = {
     recordingInUse: "Cet enregistrement est en cours de lecture. Fermez-le et r\u00e9essayez.",
   },
   "he": {
+    cacheClearSummary: "\u05e0\u05de\u05d7\u05e7\u05d5 {deleted} \u05d4\u05e7\u05dc\u05d8\u05d5\u05ea \u05de\u05d4\u05de\u05d8\u05de\u05d5\u05df; \u05e0\u05d5\u05ea\u05e8\u05d5 {remaining}.",
     allCamerasOffline: "\u05db\u05dc \u05d4\u05de\u05e6\u05dc\u05de\u05d5\u05ea \u05d1\u05de\u05e6\u05d1 \u05dc\u05d0 \u05de\u05e7\u05d5\u05d5\u05df",
     allCamerasOnline: "\u05db\u05dc \u05d4\u05de\u05e6\u05dc\u05de\u05d5\u05ea \u05d1\u05d0\u05d9\u05e0\u05d8\u05e8\u05e0\u05d8",
-    allCaughtUp: "\u05d4\u05db\u05dc \u05ea\u05e4\u05e1",
+    allCaughtUp: "\u05d0\u05d9\u05df \u05d4\u05e7\u05dc\u05d8\u05d5\u05ea \u05de\u05de\u05ea\u05d9\u05e0\u05d5\u05ea",
     back: "\u05d7\u05d6\u05e8\u05d4",
     backgroundSyncControlsVisibility: "\u05e1\u05e0\u05db\u05e8\u05d5\u05df \u05d1\u05e8\u05e7\u05e2 \u05e9\u05d5\u05dc\u05d8 \u05d1\u05e0\u05e8\u05d0\u05d5\u05ea",
     cached: "\u05e9\u05de\u05d5\u05e8 \u05d1\u05de\u05d8\u05de\u05d5\u05df",
@@ -652,7 +665,7 @@ const TRANSLATIONS = {
     refresh: "\u05e8\u05e2\u05e0\u05df",
     selectRecordingToPlay: "\u05d1\u05d7\u05e8 \u05d4\u05e7\u05dc\u05d8\u05d4 \u05dc\u05d4\u05e4\u05e2\u05dc\u05d4",
     storageUsed: "\u05d0\u05d7\u05e1\u05d5\u05df \u05d1\u05e9\u05d9\u05de\u05d5\u05e9",
-    stillSyncing: "{count} \u05e2\u05d3\u05d9\u05d9\u05df \u05de\u05e1\u05ea\u05e0\u05db\u05e8\u05df",
+    stillSyncing: "\u05dc\u05d0 \u05e0\u05e9\u05de\u05e8\u05d5 \u05d1\u05de\u05d8\u05de\u05d5\u05df: {count}",
     couldNotLoadHlsPlayer: "\u05dc\u05d0 \u05e0\u05d9\u05ea\u05df \u05dc\u05d8\u05e2\u05d5\u05df \u05d0\u05ea \u05e0\u05d2\u05df HLS",
     date: "\u05ea\u05d0\u05e8\u05d9\u05da",
     cacheCleared: "\u05de\u05d8\u05de\u05d5\u05df \u05d4\u05d4\u05e7\u05dc\u05d8\u05d4 \u05e0\u05d5\u05e7\u05d4",
@@ -665,9 +678,10 @@ const TRANSLATIONS = {
     recordingInUse: "\u05d4\u05d4\u05e7\u05dc\u05d8\u05d4 \u05d4\u05d6\u05d5 \u05e4\u05d5\u05e2\u05dc\u05ea \u05db\u05e2\u05ea. \u05e1\u05d2\u05d5\u05e8 \u05d0\u05d5\u05ea\u05d5 \u05d5\u05e0\u05e1\u05d4 \u05e9\u05d5\u05d1.",
   },
   "hi": {
+    cacheClearSummary: "\u0915\u0948\u0936 \u092e\u0947\u0902 \u0930\u0916\u0940 {deleted} \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0939\u091f\u093e\u0908 \u0917\u0908\u0902; {remaining} \u0936\u0947\u0937 \u0939\u0948\u0902\u0964",
     allCamerasOffline: "\u0938\u092d\u0940 \u0915\u0948\u092e\u0930\u0947 \u0911\u092b\u093c\u0932\u093e\u0907\u0928",
     allCamerasOnline: "\u0938\u092d\u0940 \u0915\u0948\u092e\u0930\u0947 \u0911\u0928\u0932\u093e\u0907\u0928",
-    allCaughtUp: "\u0938\u092d\u0940 \u0915\u094b \u092a\u0915\u0921\u093c \u0932\u093f\u092f\u093e \u0917\u092f\u093e",
+    allCaughtUp: "\u0915\u094b\u0908 \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0932\u0902\u092c\u093f\u0924 \u0928\u0939\u0940\u0902 \u0939\u0948",
     back: "\u0935\u093e\u092a\u0938",
     backgroundSyncControlsVisibility: "\u092c\u0948\u0915\u0917\u094d\u0930\u093e\u0909\u0902\u0921 \u0938\u093f\u0902\u0915 \u0926\u0943\u0936\u094d\u092f\u0924\u093e \u0915\u094b \u0928\u093f\u092f\u0902\u0924\u094d\u0930\u093f\u0924 \u0915\u0930\u0924\u093e \u0939\u0948",
     cached: "\u0915\u0948\u0936\u094d\u0921",
@@ -689,7 +703,7 @@ const TRANSLATIONS = {
     noneYet: "\u0905\u092d\u0940 \u0924\u0915 \u0915\u094b\u0908 \u0928\u0939\u0940\u0902",
     notCached: "\u0915\u0948\u0936 \u0928\u0939\u0940\u0902 \u0915\u093f\u092f\u093e \u0917\u092f\u093e",
     offline: "\u0911\u092b\u093c\u0932\u093e\u0907\u0928",
-    offlineCount: "\u0915\u093e\u0909\u0902\u091f\u092a\u094d\u0932\u0947\u0938\u0939\u094b\u0932\u094d\u0921\u0930 \u0911\u092b\u093c\u0932\u093e\u0907\u0928",
+    offlineCount: "{count} \u0911\u092b\u093c\u0932\u093e\u0907\u0928",
     online: "\u0911\u0928\u0932\u093e\u0907\u0928",
     preparing: "\u0924\u0948\u092f\u093e\u0930\u0940",
     preparingRecording: "\u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0924\u0948\u092f\u093e\u0930 \u0915\u0940 \u091c\u093e \u0930\u0939\u0940 \u0939\u0948...",
@@ -697,13 +711,13 @@ const TRANSLATIONS = {
     readyToWatch: "\u0926\u0947\u0916\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0924\u0948\u092f\u093e\u0930",
     recordingEmpty: "\u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0916\u093e\u0932\u0940 \u0939\u0948",
     recordingIsNotReady: "\u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0905\u092d\u0940 \u0924\u0948\u092f\u093e\u0930 \u0928\u0939\u0940\u0902 \u0939\u0948.",
-    recordingIsNotReadyStatus: "\u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0924\u0948\u092f\u093e\u0930 \u0928\u0939\u0940\u0902 \u0939\u0948 (\u0938\u094d\u091f\u0947\u091f\u0938\u092a\u094d\u0932\u0947\u0938\u0939\u094b\u0932\u094d\u0921\u0930)",
-    recordingsCountStatus: "\u091f\u094b\u091f\u0932\u092a\u094d\u0932\u0947\u0938\u0939\u094b\u0932\u094d\u0921\u0930 \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0915\u093e \u0926\u093f\u0916\u093e\u092f\u093e \u0917\u092f\u093e \u092a\u094d\u0932\u0947\u0938\u0939\u094b\u0932\u094d\u0921\u0930 - \u0938\u094d\u091f\u0947\u091f\u092a\u094d\u0932\u0947\u0938\u0939\u094b\u0932\u094d\u0921\u0930",
+    recordingIsNotReadyStatus: "\u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0924\u0948\u092f\u093e\u0930 \u0928\u0939\u0940\u0902 \u0939\u0948 ({status})",
+    recordingsCountStatus: "{total} \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u092e\u0947\u0902 \u0938\u0947 {shown} - {state}",
     recordingsReady: "\u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0924\u0948\u092f\u093e\u0930 \u0939\u0948\u0902",
     refresh: "\u0924\u093e\u091c\u093c\u093e \u0915\u0930\u0947\u0902",
     selectRecordingToPlay: "\u091a\u0932\u093e\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u090f\u0915 \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u091a\u0941\u0928\u0947\u0902",
     storageUsed: "\u0909\u092a\u092f\u094b\u0917 \u0915\u093f\u092f\u093e \u0917\u092f\u093e \u092d\u0902\u0921\u093e\u0930\u0923",
-    stillSyncing: "{count} \u0905\u092d\u0940 \u092d\u0940 \u0938\u093f\u0902\u0915 \u0939\u094b \u0930\u0939\u093e \u0939\u0948",
+    stillSyncing: "\u0915\u0948\u0936 \u092e\u0947\u0902 \u0928\u0939\u0940\u0902 \u0930\u0916\u0940 \u0917\u0908\u0902: {count}",
     couldNotLoadHlsPlayer: "HLS \u092a\u094d\u0932\u0947\u092f\u0930 \u0932\u094b\u0921 \u0928\u0939\u0940\u0902 \u0939\u094b \u0938\u0915\u093e",
     date: "\u0926\u093f\u0928\u093e\u0902\u0915",
     cacheCleared: "\u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0915\u0948\u0936 \u0938\u093e\u092b\u093c \u0915\u093f\u092f\u093e \u0917\u092f\u093e",
@@ -716,9 +730,10 @@ const TRANSLATIONS = {
     recordingInUse: "\u092f\u0939 \u0930\u093f\u0915\u0949\u0930\u094d\u0921\u093f\u0902\u0917 \u0905\u092d\u0940 \u091a\u0932 \u0930\u0939\u0940 \u0939\u0948. \u0907\u0938\u0947 \u092c\u0902\u0926 \u0915\u0930\u0947\u0902 \u0914\u0930 \u092a\u0941\u0928\u0903 \u092a\u094d\u0930\u092f\u093e\u0938 \u0915\u0930\u0947\u0902.",
   },
   "hr": {
+    cacheClearSummary: "Izbrisane snimke iz predmemorije: {deleted}; preostalo: {remaining}.",
     allCamerasOffline: "Sve kamere su izvan mre\u017ee",
     allCamerasOnline: "Sve kamere online",
-    allCaughtUp: "Sve je nadokna\u0111eno",
+    allCaughtUp: "Nema snimki na \u010dekanju",
     back: "natrag",
     backgroundSyncControlsVisibility: "Pozadinska sinkronizacija kontrolira vidljivost",
     cached: "Spremljeno u predmemoriju",
@@ -754,7 +769,7 @@ const TRANSLATIONS = {
     refresh: "Osvje\u017ei",
     selectRecordingToPlay: "Odaberite snimku za reprodukciju",
     storageUsed: "Iskori\u0161tena pohrana",
-    stillSyncing: "{count} i dalje se sinkronizira",
+    stillSyncing: "Nije u predmemoriji: {count}",
     couldNotLoadHlsPlayer: "Nije mogu\u0107e u\u010ditati HLS player",
     date: "Datum",
     cacheCleared: "Predmemorija snimanja je izbrisana",
@@ -767,15 +782,16 @@ const TRANSLATIONS = {
     recordingInUse: "Ova snimka se trenutno reproducira. Zatvorite ga i poku\u0161ajte ponovno.",
   },
   "hu": {
+    cacheClearSummary: "T\u00f6r\u00f6lt gyors\u00edt\u00f3t\u00e1razott felv\u00e9telek: {deleted}; h\u00e1tral\u00e9v\u0151: {remaining}.",
     allCamerasOffline: "Minden kamera offline",
     allCamerasOnline: "Minden kamera online",
-    allCaughtUp: "Mind felkapott",
+    allCaughtUp: "Nincsenek f\u00fcgg\u0151ben l\u00e9v\u0151 felv\u00e9telek",
     back: "Vissza",
     backgroundSyncControlsVisibility: "A h\u00e1tt\u00e9r szinkroniz\u00e1l\u00e1sa szab\u00e1lyozza a l\u00e1that\u00f3s\u00e1got",
     cached: "Gyors\u00edt\u00f3t\u00e1razott",
-    camera: "F\u00e9nyk\u00e9pez\u0151g\u00e9p",
+    camera: "Kamera",
     camerasOnline: "Kamer\u00e1k Online",
-    genericCamera: "F\u00e9nyk\u00e9pez\u0151g\u00e9p",
+    genericCamera: "Kamera",
     hlsPlaybackFailed: "A HLS lej\u00e1tsz\u00e1s nem siker\u00fclt",
     hlsPlaybackUnsupported: "Ez a b\u00f6ng\u00e9sz\u0151 nem t\u00e1mogatja a HLS lej\u00e1tsz\u00e1st",
     lazyCacheOnPlayback: "Ig\u00e9ny szerinti HLS proxy",
@@ -805,7 +821,7 @@ const TRANSLATIONS = {
     refresh: "Friss\u00edt\u00e9s",
     selectRecordingToPlay: "V\u00e1lassza ki a lej\u00e1tszani k\u00edv\u00e1nt felv\u00e9telt",
     storageUsed: "T\u00e1rol\u00e1s haszn\u00e1lt",
-    stillSyncing: "{count} m\u00e9g szinkroniz\u00e1lva",
+    stillSyncing: "Nincs gyors\u00edt\u00f3t\u00e1razva: {count}",
     couldNotLoadHlsPlayer: "Nem siker\u00fclt bet\u00f6lteni a HLS lej\u00e1tsz\u00f3t",
     date: "D\u00e1tum",
     cacheCleared: "A r\u00f6gz\u00edt\u00e9si gyors\u00edt\u00f3t\u00e1r t\u00f6r\u00f6lve",
@@ -818,9 +834,10 @@ const TRANSLATIONS = {
     recordingInUse: "Ez a felv\u00e9tel jelenleg lej\u00e1tsz\u00e1s alatt \u00e1ll. Z\u00e1rja be, \u00e9s pr\u00f3b\u00e1lja \u00fajra.",
   },
   "id": {
+    cacheClearSummary: "{deleted} rekaman dalam cache dihapus; {remaining} tersisa.",
     allCamerasOffline: "Semua kamera offline",
     allCamerasOnline: "Semua kamera online",
-    allCaughtUp: "Semua tertangkap",
+    allCaughtUp: "Tidak ada rekaman tertunda",
     back: "Kembali",
     backgroundSyncControlsVisibility: "Sinkronisasi latar belakang mengontrol visibilitas",
     cached: "Di-cache",
@@ -856,7 +873,7 @@ const TRANSLATIONS = {
     refresh: "Segarkan",
     selectRecordingToPlay: "Pilih rekaman untuk diputar",
     storageUsed: "Penyimpanan Digunakan",
-    stillSyncing: "{count} masih disinkronkan",
+    stillSyncing: "Tidak dalam cache: {count}",
     couldNotLoadHlsPlayer: "Tidak dapat memuat pemutar HLS",
     date: "Tanggal",
     cacheCleared: "Cache rekaman dibersihkan",
@@ -869,9 +886,10 @@ const TRANSLATIONS = {
     recordingInUse: "Rekaman ini sedang diputar. Tutup dan coba lagi.",
   },
   "it": {
+    cacheClearSummary: "{deleted} registrazioni nella cache eliminate; {remaining} rimanenti.",
     allCamerasOffline: "Tutte le telecamere offline",
     allCamerasOnline: "Tutte le telecamere online",
-    allCaughtUp: "Tutto preso",
+    allCaughtUp: "Nessuna registrazione in attesa",
     back: "Indietro",
     backgroundSyncControlsVisibility: "La sincronizzazione in background controlla la visibilit\u00e0",
     cached: "Memorizzato nella cache",
@@ -907,7 +925,7 @@ const TRANSLATIONS = {
     refresh: "Aggiorna",
     selectRecordingToPlay: "Seleziona una registrazione da riprodurre",
     storageUsed: "Spazio di archiviazione utilizzato",
-    stillSyncing: "{count} ancora in sincronizzazione",
+    stillSyncing: "Non nella cache: {count}",
     couldNotLoadHlsPlayer: "Impossibile caricare il lettore HLS",
     date: "Data",
     cacheCleared: "Cache di registrazione cancellata",
@@ -920,9 +938,10 @@ const TRANSLATIONS = {
     recordingInUse: "Questa registrazione \u00e8 attualmente in riproduzione. Chiudilo e riprova.",
   },
   "ja": {
+    cacheClearSummary: "\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f\u9332\u753b\u3092{deleted}\u4ef6\u524a\u9664\u3057\u307e\u3057\u305f\u3002\u6b8b\u308a{remaining}\u4ef6\u3002",
     allCamerasOffline: "\u3059\u3079\u3066\u306e\u30ab\u30e1\u30e9\u304c\u30aa\u30d5\u30e9\u30a4\u30f3",
     allCamerasOnline: "\u3059\u3079\u3066\u306e\u30ab\u30e1\u30e9\u304c\u30aa\u30f3\u30e9\u30a4\u30f3\u306b",
-    allCaughtUp: "\u5168\u90e8\u8ffd\u3044\u3064\u3044\u305f",
+    allCaughtUp: "\u4fdd\u7559\u4e2d\u306e\u9332\u753b\u306f\u3042\u308a\u307e\u305b\u3093",
     back: "\u623b\u308b",
     backgroundSyncControlsVisibility: "\u30d0\u30c3\u30af\u30b0\u30e9\u30a6\u30f3\u30c9\u540c\u671f\u3067\u53ef\u8996\u6027\u3092\u5236\u5fa1",
     cached: "\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f",
@@ -933,13 +952,13 @@ const TRANSLATIONS = {
     hlsPlaybackUnsupported: "HLS \u306e\u518d\u751f\u306f\u3053\u306e\u30d6\u30e9\u30a6\u30b6\u3067\u306f\u30b5\u30dd\u30fc\u30c8\u3055\u308c\u3066\u3044\u307e\u305b\u3093",
     lazyCacheOnPlayback: "\u30aa\u30f3\u30c7\u30de\u30f3\u30c9 HLS \u30d7\u30ed\u30ad\u30b7",
     loading: "\u8aad\u307f\u8fbc\u307f\u4e2d",
-    loadingRecordings: "\u9332\u97f3\u3092\u30ed\u30fc\u30c9\u4e2d...",
-    newestRecording: "\u6700\u65b0\u306e\u9332\u97f3",
+    loadingRecordings: "\u9332\u753b\u3092\u30ed\u30fc\u30c9\u4e2d...",
+    newestRecording: "\u6700\u65b0\u306e\u9332\u753b",
     noCameraSelected: "\u30ab\u30e1\u30e9\u304c\u9078\u629e\u3055\u308c\u3066\u3044\u307e\u305b\u3093",
     noCamerasFound: "\u30ab\u30e1\u30e9\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093",
     noCamerasFoundSentence: "\u30ab\u30e1\u30e9\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f\u3002",
     noRecordingsForDate: "\u3053\u306e\u65e5\u4ed8\u306e\u9332\u753b\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
-    noRecordingsReady: "\u9332\u97f3\u306e\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u307e\u305b\u3093",
+    noRecordingsReady: "\u9332\u753b\u306e\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u307e\u305b\u3093",
     noThumbnail: "\u30b5\u30e0\u30cd\u30a4\u30eb\u306a\u3057",
     noneYet: "\u307e\u3060\u3042\u308a\u307e\u305b\u3093",
     notCached: "\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u3066\u3044\u307e\u305b\u3093",
@@ -947,33 +966,34 @@ const TRANSLATIONS = {
     offlineCount: "{count} \u304c\u30aa\u30d5\u30e9\u30a4\u30f3\u3067\u3059",
     online: "\u30aa\u30f3\u30e9\u30a4\u30f3",
     preparing: "\u6e96\u5099\u4e2d",
-    preparingRecording: "\u9332\u97f3\u3092\u6e96\u5099\u3057\u3066\u3044\u307e\u3059...",
+    preparingRecording: "\u9332\u753b\u3092\u6e96\u5099\u3057\u3066\u3044\u307e\u3059...",
     ready: "\u6e96\u5099\u5b8c\u4e86",
     readyToWatch: "\u3059\u3050\u306b\u8996\u8074\u3067\u304d\u307e\u3059",
-    recordingEmpty: "\u9332\u97f3\u304c\u7a7a\u3067\u3059",
-    recordingIsNotReady: "\u307e\u3060\u9332\u97f3\u306e\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u307e\u305b\u3093\u3002",
-    recordingIsNotReadyStatus: "\u9332\u97f3\u306e\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u307e\u305b\u3093 ({status})",
-    recordingsCountStatus: "{total} \u9332\u97f3\u4e2d {shown} - {state}",
-    recordingsReady: "\u9332\u97f3\u306e\u6e96\u5099\u304c\u3067\u304d\u307e\u3057\u305f",
+    recordingEmpty: "\u9332\u753b\u304c\u7a7a\u3067\u3059",
+    recordingIsNotReady: "\u307e\u3060\u9332\u753b\u306e\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u307e\u305b\u3093\u3002",
+    recordingIsNotReadyStatus: "\u9332\u753b\u306e\u6e96\u5099\u304c\u3067\u304d\u3066\u3044\u307e\u305b\u3093 ({status})",
+    recordingsCountStatus: "{total} \u9332\u753b\u4e2d {shown} - {state}",
+    recordingsReady: "\u9332\u753b\u306e\u6e96\u5099\u304c\u3067\u304d\u307e\u3057\u305f",
     refresh: "\u30ea\u30d5\u30ec\u30c3\u30b7\u30e5",
-    selectRecordingToPlay: "\u518d\u751f\u3059\u308b\u9332\u97f3\u3092\u9078\u629e\u3057\u307e\u3059",
+    selectRecordingToPlay: "\u518d\u751f\u3059\u308b\u9332\u753b\u3092\u9078\u629e\u3057\u307e\u3059",
     storageUsed: "\u4f7f\u7528\u6e08\u307f\u30b9\u30c8\u30ec\u30fc\u30b8",
-    stillSyncing: "{count} \u306f\u307e\u3060\u540c\u671f\u4e2d\u3067\u3059",
+    stillSyncing: "\u672a\u30ad\u30e3\u30c3\u30b7\u30e5: {count}\u4ef6",
     couldNotLoadHlsPlayer: "HLS \u30d7\u30ec\u30fc\u30e4\u30fc\u3092\u30ed\u30fc\u30c9\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f",
     date: "\u65e5\u4ed8",
     cacheCleared: "\u9332\u753b\u30ad\u30e3\u30c3\u30b7\u30e5\u304c\u30af\u30ea\u30a2\u3055\u308c\u307e\u3057\u305f",
-    clearAllCache: "\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f\u9332\u97f3\u3092\u3059\u3079\u3066\u30af\u30ea\u30a2\u3059\u308b",
+    clearAllCache: "\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f\u9332\u753b\u3092\u3059\u3079\u3066\u30af\u30ea\u30a2\u3059\u308b",
     clearCameraCache: "\u3053\u306e\u30ab\u30e1\u30e9\u306e\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f\u9332\u753b\u3092\u30af\u30ea\u30a2\u3057\u307e\u3059",
     confirmClearAllCache: "\u30ed\u30fc\u30ab\u30eb\u306b\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f X-Sense \u8a18\u9332\u3092\u3059\u3079\u3066\u524a\u9664\u3057\u307e\u3059\u304b? X-Sense \u30b9\u30c8\u30ec\u30fc\u30b8\u4e0a\u306e\u9332\u753b\u306f\u5f71\u97ff\u3092\u53d7\u3051\u307e\u305b\u3093\u3002",
     confirmClearCameraCache: "\u3053\u306e\u30ab\u30e1\u30e9\u306e\u30ed\u30fc\u30ab\u30eb\u306b\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f\u9332\u753b\u3092\u3059\u3079\u3066\u524a\u9664\u3057\u307e\u3059\u304b?",
     confirmDeleteClipCache: "\u3053\u306e\u30ed\u30fc\u30ab\u30eb\u306b\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f\u9332\u753b\u3092\u524a\u9664\u3057\u307e\u3059\u304b?",
     deleteCachedRecording: "\u30ad\u30e3\u30c3\u30b7\u30e5\u3055\u308c\u305f\u9332\u753b\u3092\u524a\u9664\u3059\u308b",
-    recordingInUse: "\u3053\u306e\u9332\u97f3\u306f\u73fe\u5728\u518d\u751f\u4e2d\u3067\u3059\u3002\u9589\u3058\u3066\u3001\u3082\u3046\u4e00\u5ea6\u8a66\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
+    recordingInUse: "\u3053\u306e\u9332\u753b\u306f\u73fe\u5728\u518d\u751f\u4e2d\u3067\u3059\u3002\u9589\u3058\u3066\u3001\u3082\u3046\u4e00\u5ea6\u8a66\u3057\u3066\u304f\u3060\u3055\u3044\u3002",
   },
   "ko": {
+    cacheClearSummary: "\uce90\uc2dc\ub41c \ub179\ud654 {deleted}\uac1c \uc0ad\uc81c\ub428; {remaining}\uac1c \ub0a8\uc74c.",
     allCamerasOffline: "\ubaa8\ub4e0 \uce74\uba54\ub77c \uc624\ud504\ub77c\uc778",
     allCamerasOnline: "\ubaa8\ub4e0 \uce74\uba54\ub77c \uc628\ub77c\uc778",
-    allCaughtUp: "\ubaa8\ub450 \ub530\ub77c\uc7a1\uc558\uc5b4",
+    allCaughtUp: "\ub300\uae30 \uc911\uc778 \ub179\ud654 \uc5c6\uc74c",
     back: "\ub4a4\ub85c",
     backgroundSyncControlsVisibility: "\ubc31\uadf8\ub77c\uc6b4\ub4dc \ub3d9\uae30\ud654\uac00 \uac00\uc2dc\uc131\uc744 \uc81c\uc5b4\ud569\ub2c8\ub2e4.",
     cached: "\uce90\uc2dc\ub428",
@@ -984,13 +1004,13 @@ const TRANSLATIONS = {
     hlsPlaybackUnsupported: "\uc774 \ube0c\ub77c\uc6b0\uc800\uc5d0\uc11c\ub294 HLS \uc7ac\uc0dd\uc774 \uc9c0\uc6d0\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
     lazyCacheOnPlayback: "\uc8fc\ubb38\ud615 HLS \ud504\ub85d\uc2dc",
     loading: "\ub85c\ub4dc \uc911",
-    loadingRecordings: "\ub179\uc74c \ub85c\ub4dc \uc911...",
-    newestRecording: "\ucd5c\uc2e0 \ub179\uc74c",
+    loadingRecordings: "\ub179\ud654 \ub85c\ub4dc \uc911...",
+    newestRecording: "\ucd5c\uc2e0 \ub179\ud654",
     noCameraSelected: "\uc120\ud0dd\ud55c \uce74\uba54\ub77c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
     noCamerasFound: "\uce74\uba54\ub77c\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
     noCamerasFoundSentence: "\uce74\uba54\ub77c\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
-    noRecordingsForDate: "\ud574\ub2f9 \ub0a0\uc9dc\uc5d0 \ub300\ud55c \ub179\uc74c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
-    noRecordingsReady: "\uc900\ube44\ub41c \ub179\uc74c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
+    noRecordingsForDate: "\ud574\ub2f9 \ub0a0\uc9dc\uc5d0 \ub300\ud55c \ub179\ud654\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
+    noRecordingsReady: "\uc900\ube44\ub41c \ub179\ud654\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
     noThumbnail: "\ubbf8\ub9ac\ubcf4\uae30 \uc774\ubbf8\uc9c0 \uc5c6\uc74c",
     noneYet: "\uc544\uc9c1 \uc5c6\uc74c",
     notCached: "\uce90\uc2dc\ub418\uc9c0 \uc54a\uc74c",
@@ -998,39 +1018,40 @@ const TRANSLATIONS = {
     offlineCount: "{count} \uc624\ud504\ub77c\uc778",
     online: "\uc628\ub77c\uc778",
     preparing: "\uc900\ube44 \uc911",
-    preparingRecording: "\ub179\uc74c \uc900\ube44 \uc911...",
+    preparingRecording: "\ub179\ud654 \uc900\ube44 \uc911...",
     ready: "\uc900\ube44",
     readyToWatch: "\uc2dc\uccad \uc900\ube44 \uc644\ub8cc",
-    recordingEmpty: "\ub179\uc74c \ub0b4\uc6a9\uc774 \ube44\uc5b4 \uc788\uc2b5\ub2c8\ub2e4.",
-    recordingIsNotReady: "\uc544\uc9c1 \ub179\uc74c\uc774 \uc900\ube44\ub418\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.",
+    recordingEmpty: "\ub179\ud654 \ub0b4\uc6a9\uc774 \ube44\uc5b4 \uc788\uc2b5\ub2c8\ub2e4.",
+    recordingIsNotReady: "\uc544\uc9c1 \ub179\ud654\uc774 \uc900\ube44\ub418\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.",
     recordingIsNotReadyStatus: "\ub179\ud654\uac00 \uc900\ube44\ub418\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4({status}).",
-    recordingsCountStatus: "{total}\uac1c \ub179\uc74c \uc911 {shown}\uac1c - {state}",
-    recordingsReady: "\ub179\uc74c \uc900\ube44 \uc644\ub8cc",
+    recordingsCountStatus: "{total}\uac1c \ub179\ud654 \uc911 {shown}\uac1c - {state}",
+    recordingsReady: "\ub179\ud654 \uc900\ube44 \uc644\ub8cc",
     refresh: "\uc0c8\ub85c\uace0\uce68",
-    selectRecordingToPlay: "\uc7ac\uc0dd\ud560 \ub179\uc74c\uc744 \uc120\ud0dd\ud558\uc138\uc694",
+    selectRecordingToPlay: "\uc7ac\uc0dd\ud560 \ub179\ud654\uc744 \uc120\ud0dd\ud558\uc138\uc694",
     storageUsed: "\uc0ac\uc6a9\ub41c \uc800\uc7a5\uc18c",
-    stillSyncing: "{count}\uac00 \uc544\uc9c1 \ub3d9\uae30\ud654 \uc911\uc785\ub2c8\ub2e4.",
+    stillSyncing: "\uce90\uc2dc\ub418\uc9c0 \uc54a\uc74c: {count}\uac1c",
     couldNotLoadHlsPlayer: "HLS \ud50c\ub808\uc774\uc5b4\ub97c \ub85c\ub4dc\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
     date: "\ub0a0\uc9dc",
     cacheCleared: "\ub179\ud654 \uce90\uc2dc\uac00 \uc0ad\uc81c\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
-    clearAllCache: "\uce90\uc2dc\ub41c \ub179\uc74c \ubaa8\ub450 \uc9c0\uc6b0\uae30",
+    clearAllCache: "\uce90\uc2dc\ub41c \ub179\ud654 \ubaa8\ub450 \uc9c0\uc6b0\uae30",
     clearCameraCache: "\uc774 \uce74\uba54\ub77c\uc758 \uce90\uc2dc\ub41c \ub179\ud654\ubb3c \uc0ad\uc81c",
-    confirmClearAllCache: "\ub85c\uceec\uc5d0 \uce90\uc2dc\ub41c X-Sense \ub179\uc74c\uc744 \ubaa8\ub450 \uc0ad\uc81c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c? X-Sense \uc2a4\ud1a0\ub9ac\uc9c0\uc758 \ub179\ud654\ubb3c\uc740 \uc601\ud5a5\uc744 \ubc1b\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    confirmClearAllCache: "\ub85c\uceec\uc5d0 \uce90\uc2dc\ub41c X-Sense \ub179\ud654\uc744 \ubaa8\ub450 \uc0ad\uc81c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c? X-Sense \uc2a4\ud1a0\ub9ac\uc9c0\uc758 \ub179\ud654\ubb3c\uc740 \uc601\ud5a5\uc744 \ubc1b\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
     confirmClearCameraCache: "\uc774 \uce74\uba54\ub77c\uc758 \ub85c\uceec\ub85c \uce90\uc2dc\ub41c \ub179\ud654\ubb3c\uc744 \ubaa8\ub450 \uc0ad\uc81c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?",
-    confirmDeleteClipCache: "\ub85c\uceec\uc5d0 \uce90\uc2dc\ub41c \uc774 \ub179\uc74c \ud30c\uc77c\uc744 \uc0ad\uc81c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?",
-    deleteCachedRecording: "\uce90\uc2dc\ub41c \ub179\uc74c \uc0ad\uc81c",
-    recordingInUse: "\ud604\uc7ac \ub179\uc74c\uc774 \uc7ac\uc0dd \uc911\uc785\ub2c8\ub2e4. \ub2eb\uace0 \ub2e4\uc2dc \uc2dc\ub3c4\ud558\uc2ed\uc2dc\uc624.",
+    confirmDeleteClipCache: "\ub85c\uceec\uc5d0 \uce90\uc2dc\ub41c \uc774 \ub179\ud654 \ud30c\uc77c\uc744 \uc0ad\uc81c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?",
+    deleteCachedRecording: "\uce90\uc2dc\ub41c \ub179\ud654 \uc0ad\uc81c",
+    recordingInUse: "\ud604\uc7ac \ub179\ud654\uc774 \uc7ac\uc0dd \uc911\uc785\ub2c8\ub2e4. \ub2eb\uace0 \ub2e4\uc2dc \uc2dc\ub3c4\ud558\uc2ed\uc2dc\uc624.",
   },
   "lt": {
+    cacheClearSummary: "I\u0161trinti pod\u0117lyje saugoti \u012fra\u0161ai: {deleted}; liko: {remaining}.",
     allCamerasOffline: "Visos kameros neprisijungusios",
     allCamerasOnline: "Visos kameros internetu",
-    allCaughtUp: "Visi pasivijo",
+    allCaughtUp: "Laukian\u010di\u0173 \u012fra\u0161\u0173 n\u0117ra",
     back: "Atgal",
     backgroundSyncControlsVisibility: "Fono sinchronizavimas valdo matomum\u0105",
     cached: "Talpykloje",
-    camera: "Fotoaparatas",
+    camera: "Kamera",
     camerasOnline: "Kameros internete",
-    genericCamera: "Fotoaparatas",
+    genericCamera: "Kamera",
     hlsPlaybackFailed: "HLS atkurti nepavyko",
     hlsPlaybackUnsupported: "\u0160i nar\u0161ykl\u0117 nepalaiko HLS atk\u016brimo",
     lazyCacheOnPlayback: "Pagal pareikalavim\u0105 HLS tarpinis serveris",
@@ -1060,7 +1081,7 @@ const TRANSLATIONS = {
     refresh: "Atnaujinti",
     selectRecordingToPlay: "Pasirinkite \u012fra\u0161\u0105, kur\u012f norite leisti",
     storageUsed: "Naudota saugykla",
-    stillSyncing: "{count} vis dar sinchronizuojama",
+    stillSyncing: "Pod\u0117lyje nesaugoma: {count}",
     couldNotLoadHlsPlayer: "Nepavyko \u012fkelti HLS grotuvo",
     date: "Data",
     cacheCleared: "\u012era\u0161ymo talpykla i\u0161valyta",
@@ -1073,9 +1094,10 @@ const TRANSLATIONS = {
     recordingInUse: "\u0160iuo metu leid\u017eiamas \u0161is \u012fra\u0161as. U\u017edarykite j\u012f ir bandykite dar kart\u0105.",
   },
   "lv": {
+    cacheClearSummary: "Izdz\u0113sti ke\u0161atmi\u0146\u0101 saglab\u0101tie ieraksti: {deleted}; atliku\u0161i: {remaining}.",
     allCamerasOffline: "Visas kameras bezsaist\u0113",
     allCamerasOnline: "Visas kameras tie\u0161saist\u0113",
-    allCaughtUp: "Visi pan\u0101ca",
+    allCaughtUp: "Nav gaido\u0161u ierakstu",
     back: "Atpaka\u013c",
     backgroundSyncControlsVisibility: "Fona sinhroniz\u0101cija kontrol\u0113 redzam\u012bbu",
     cached: "Ke\u0161atmi\u0146\u0101 saglab\u0101ts",
@@ -1111,7 +1133,7 @@ const TRANSLATIONS = {
     refresh: "Atsvaidzin\u0101t",
     selectRecordingToPlay: "Atlasiet atska\u0146ojamo ierakstu",
     storageUsed: "Uzglab\u0101\u0161ana Lietota",
-    stillSyncing: "{count} joproj\u0101m sinhroniz\u0113",
+    stillSyncing: "Nav ke\u0161atmi\u0146\u0101: {count}",
     couldNotLoadHlsPlayer: "Nevar\u0113ja iel\u0101d\u0113t HLS atska\u0146ot\u0101ju",
     date: "Datums",
     cacheCleared: "Ieraksta ke\u0161atmi\u0146a ir not\u012br\u012bta",
@@ -1124,9 +1146,10 @@ const TRANSLATIONS = {
     recordingInUse: "\u0160is ieraksts pa\u0161laik tiek atska\u0146ots. Aizveriet to un m\u0113\u0123iniet v\u0113lreiz.",
   },
   "nl": {
+    cacheClearSummary: "{deleted} opnamen uit de cache verwijderd; {remaining} resterend.",
     allCamerasOffline: "Alle camera's offline",
     allCamerasOnline: "Alle camera's online",
-    allCaughtUp: "Allemaal ingehaald",
+    allCaughtUp: "Geen opnamen in behandeling",
     back: "Terug",
     backgroundSyncControlsVisibility: "Achtergrondsynchronisatie regelt de zichtbaarheid",
     cached: "In cache opgeslagen",
@@ -1162,7 +1185,7 @@ const TRANSLATIONS = {
     refresh: "Vernieuwen",
     selectRecordingToPlay: "Selecteer een opname om af te spelen",
     storageUsed: "Opslag gebruikt",
-    stillSyncing: "{count} wordt nog gesynchroniseerd",
+    stillSyncing: "Niet in de cache: {count}",
     couldNotLoadHlsPlayer: "Kan de HLS-speler niet laden",
     date: "Datum",
     cacheCleared: "Opnamecache gewist",
@@ -1175,9 +1198,10 @@ const TRANSLATIONS = {
     recordingInUse: "Deze opname wordt momenteel afgespeeld. Sluit het en probeer het opnieuw.",
   },
   "no": {
+    cacheClearSummary: "{deleted} hurtigbufrede opptak slettet; {remaining} gjenst\u00e5r.",
     allCamerasOffline: "Alle kameraer er offline",
     allCamerasOnline: "Alle kameraer p\u00e5 nett",
-    allCaughtUp: "Alle tok igjen",
+    allCaughtUp: "Ingen ventende opptak",
     back: "Tilbake",
     backgroundSyncControlsVisibility: "Bakgrunnssynkronisering kontrollerer synlighet",
     cached: "Bufret",
@@ -1207,13 +1231,13 @@ const TRANSLATIONS = {
     readyToWatch: "Klar til \u00e5 se",
     recordingEmpty: "Opptaket er tomt",
     recordingIsNotReady: "Opptaket er ikke klart enn\u00e5.",
-    recordingIsNotReadyStatus: "Opptaket er ikke klart (STATUSPLASSHOLDER)",
+    recordingIsNotReadyStatus: "Opptaket er ikke klart ({status})",
     recordingsCountStatus: "{shown} av {total}-opptak - {state}",
     recordingsReady: "Opptakene er klare",
     refresh: "Oppdater",
     selectRecordingToPlay: "Velg et opptak som skal spilles av",
     storageUsed: "Oppbevaring brukt",
-    stillSyncing: "{count} synkroniserer fortsatt",
+    stillSyncing: "Ikke hurtigbufret: {count}",
     couldNotLoadHlsPlayer: "Kunne ikke laste HLS-spilleren",
     date: "Dato",
     cacheCleared: "Opptaksbufferen er t\u00f8mt",
@@ -1226,9 +1250,10 @@ const TRANSLATIONS = {
     recordingInUse: "Dette opptaket spilles av. Lukk den og pr\u00f8v igjen.",
   },
   "pl": {
+    cacheClearSummary: "Usuni\u0119te nagrania z pami\u0119ci podr\u0119cznej: {deleted}; pozosta\u0142o: {remaining}.",
     allCamerasOffline: "Wszystkie kamery offline",
     allCamerasOnline: "Wszystkie kamery online",
-    allCaughtUp: "Wszystko z\u0142apane",
+    allCaughtUp: "Brak oczekuj\u0105cych nagra\u0144",
     back: "Powr\u00f3t",
     backgroundSyncControlsVisibility: "Synchronizacja w tle kontroluje widoczno\u015b\u0107",
     cached: "Buforowane",
@@ -1249,7 +1274,7 @@ const TRANSLATIONS = {
     noThumbnail: "Brak miniatury",
     noneYet: "Jeszcze \u017caden",
     notCached: "Nie buforowane",
-    offline: "nieaktywny",
+    offline: "offline",
     offlineCount: "{count} offline",
     online: "w Internecie",
     preparing: "Przygotowanie",
@@ -1264,7 +1289,7 @@ const TRANSLATIONS = {
     refresh: "Od\u015bwie\u017c",
     selectRecordingToPlay: "Wybierz nagranie do odtworzenia",
     storageUsed: "Pami\u0119\u0107 u\u017cywana",
-    stillSyncing: "{count} nadal si\u0119 synchronizuje",
+    stillSyncing: "Nie w pami\u0119ci podr\u0119cznej: {count}",
     couldNotLoadHlsPlayer: "Nie mo\u017cna za\u0142adowa\u0107 odtwarzacza HLS",
     date: "Data",
     cacheCleared: "Pami\u0119\u0107 podr\u0119czna nagra\u0144 zosta\u0142a wyczyszczona",
@@ -1277,9 +1302,10 @@ const TRANSLATIONS = {
     recordingInUse: "To nagranie jest obecnie odtwarzane. Zamknij i spr\u00f3buj ponownie.",
   },
   "pt": {
+    cacheClearSummary: "{deleted} grava\u00e7\u00f5es em cache eliminadas; {remaining} restantes.",
     allCamerasOffline: "Todas as c\u00e2meras off-line",
     allCamerasOnline: "Todas as c\u00e2meras on-line",
-    allCaughtUp: "Todos apanhados",
+    allCaughtUp: "N\u00e3o h\u00e1 grava\u00e7\u00f5es pendentes",
     back: "Voltar",
     backgroundSyncControlsVisibility: "A sincroniza\u00e7\u00e3o em segundo plano controla a visibilidade",
     cached: "Em cache",
@@ -1315,7 +1341,7 @@ const TRANSLATIONS = {
     refresh: "Atualizar",
     selectRecordingToPlay: "Selecione uma grava\u00e7\u00e3o para reproduzir",
     storageUsed: "Armazenamento usado",
-    stillSyncing: "{count} ainda sincronizando",
+    stillSyncing: "N\u00e3o armazenadas em cache: {count}",
     couldNotLoadHlsPlayer: "N\u00e3o foi poss\u00edvel carregar o player HLS",
     date: "Data",
     cacheCleared: "Cache de grava\u00e7\u00e3o limpo",
@@ -1328,9 +1354,10 @@ const TRANSLATIONS = {
     recordingInUse: "Esta grava\u00e7\u00e3o est\u00e1 sendo reproduzida no momento. Feche-o e tente novamente.",
   },
   "pt-BR": {
+    cacheClearSummary: "{deleted} grava\u00e7\u00f5es em cache exclu\u00eddas; {remaining} restantes.",
     allCamerasOffline: "Todas as c\u00e2meras off-line",
     allCamerasOnline: "Todas as c\u00e2meras on-line",
-    allCaughtUp: "Todos apanhados",
+    allCaughtUp: "Nenhuma grava\u00e7\u00e3o pendente",
     back: "Voltar",
     backgroundSyncControlsVisibility: "A sincroniza\u00e7\u00e3o em segundo plano controla a visibilidade",
     cached: "Em cache",
@@ -1366,7 +1393,7 @@ const TRANSLATIONS = {
     refresh: "Atualizar",
     selectRecordingToPlay: "Selecione uma grava\u00e7\u00e3o para reproduzir",
     storageUsed: "Armazenamento usado",
-    stillSyncing: "{count} ainda sincronizando",
+    stillSyncing: "N\u00e3o armazenadas em cache: {count}",
     couldNotLoadHlsPlayer: "N\u00e3o foi poss\u00edvel carregar o player HLS",
     date: "Data",
     cacheCleared: "Cache de grava\u00e7\u00e3o limpo",
@@ -1379,15 +1406,16 @@ const TRANSLATIONS = {
     recordingInUse: "Esta grava\u00e7\u00e3o est\u00e1 sendo reproduzida no momento. Feche-o e tente novamente.",
   },
   "ro": {
+    cacheClearSummary: "{deleted} \u00eenregistr\u0103ri din cache \u0219terse; {remaining} r\u0103mase.",
     allCamerasOffline: "Toate camerele offline",
     allCamerasOnline: "Toate camerele online",
-    allCaughtUp: "Toate prinse din urm\u0103",
+    allCaughtUp: "Nu exist\u0103 \u00eenregistr\u0103ri \u00een a\u0219teptare",
     back: "\u00cenapoi",
     backgroundSyncControlsVisibility: "Sincronizarea \u00een fundal controleaz\u0103 vizibilitatea",
     cached: "\u00cen cache",
-    camera: "Camera foto",
+    camera: "Camer\u0103 video",
     camerasOnline: "Camere online",
-    genericCamera: "Camera foto",
+    genericCamera: "Camer\u0103 video",
     hlsPlaybackFailed: "Redarea HLS a e\u0219uat",
     hlsPlaybackUnsupported: "Redarea HLS nu este acceptat\u0103 de acest browser",
     lazyCacheOnPlayback: "Proxy HLS la cerere",
@@ -1417,7 +1445,7 @@ const TRANSLATIONS = {
     refresh: "Re\u00eemprosp\u0103ta\u021bi",
     selectRecordingToPlay: "Selecta\u021bi o \u00eenregistrare pentru redare",
     storageUsed: "Depozitare folosit\u0103",
-    stillSyncing: "{count} \u00eenc\u0103 se sincronizeaz\u0103",
+    stillSyncing: "Nu sunt \u00een cache: {count}",
     couldNotLoadHlsPlayer: "Playerul HLS nu a putut fi \u00eenc\u0103rcat",
     date: "Data",
     cacheCleared: "Cache-ul de \u00eenregistrare a fost golit",
@@ -1430,9 +1458,10 @@ const TRANSLATIONS = {
     recordingInUse: "Aceast\u0103 \u00eenregistrare este \u00een curs de redare. \u00cenchide\u021bi-l \u0219i \u00eencerca\u021bi din nou.",
   },
   "ru": {
+    cacheClearSummary: "\u0423\u0434\u0430\u043b\u0435\u043d\u043e \u0437\u0430\u043f\u0438\u0441\u0435\u0439 \u0438\u0437 \u043a\u044d\u0448\u0430: {deleted}; \u043e\u0441\u0442\u0430\u043b\u043e\u0441\u044c: {remaining}.",
     allCamerasOffline: "\u0412\u0441\u0435 \u043a\u0430\u043c\u0435\u0440\u044b \u043e\u0444\u0444\u043b\u0430\u0439\u043d",
     allCamerasOnline: "\u0412\u0441\u0435 \u043a\u0430\u043c\u0435\u0440\u044b \u043e\u043d\u043b\u0430\u0439\u043d",
-    allCaughtUp: "\u0412\u0441\u0435 \u0434\u043e\u0433\u043d\u0430\u043b\u0438",
+    allCaughtUp: "\u041d\u0435\u0442 \u043e\u0436\u0438\u0434\u0430\u044e\u0449\u0438\u0445 \u0437\u0430\u043f\u0438\u0441\u0435\u0439",
     back: "\u041d\u0430\u0437\u0430\u0434",
     backgroundSyncControlsVisibility: "\u0424\u043e\u043d\u043e\u0432\u0430\u044f \u0441\u0438\u043d\u0445\u0440\u043e\u043d\u0438\u0437\u0430\u0446\u0438\u044f \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u0438\u0440\u0443\u0435\u0442 \u0432\u0438\u0434\u0438\u043c\u043e\u0441\u0442\u044c",
     cached: "\u041a\u044d\u0448\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u0439",
@@ -1452,7 +1481,7 @@ const TRANSLATIONS = {
     noRecordingsReady: "\u041d\u0435\u0442 \u0433\u043e\u0442\u043e\u0432\u044b\u0445 \u0437\u0430\u043f\u0438\u0441\u0435\u0439",
     noThumbnail: "\u041d\u0435\u0442 \u043c\u0438\u043d\u0438\u0430\u0442\u044e\u0440\u044b",
     noneYet: "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442",
-    notCached: "\u041d\u0435 \u043a\u044d\u0448\u0438\u0440\u0443\u0435\u0442\u0441\u044f",
+    notCached: "\u041d\u0435 \u0432 \u043a\u044d\u0448\u0435",
     offline: "\u043e\u0444\u043b\u0430\u0439\u043d",
     offlineCount: "{count} \u043e\u0444\u043b\u0430\u0439\u043d",
     online: "\u043e\u043d\u043b\u0430\u0439\u043d",
@@ -1468,7 +1497,7 @@ const TRANSLATIONS = {
     refresh: "\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c",
     selectRecordingToPlay: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0437\u0430\u043f\u0438\u0441\u044c \u0434\u043b\u044f \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u0435\u0434\u0435\u043d\u0438\u044f",
     storageUsed: "\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u043c\u043e\u0435 \u0445\u0440\u0430\u043d\u0438\u043b\u0438\u0449\u0435",
-    stillSyncing: "{count} \u0432\u0441\u0435 \u0435\u0449\u0435 \u0441\u0438\u043d\u0445\u0440\u043e\u043d\u0438\u0437\u0438\u0440\u0443\u0435\u0442\u0441\u044f",
+    stillSyncing: "\u041d\u0435 \u0432 \u043a\u044d\u0448\u0435: {count}",
     couldNotLoadHlsPlayer: "\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043f\u0440\u043e\u0438\u0433\u0440\u044b\u0432\u0430\u0442\u0435\u043b\u044c HLS.",
     date: "\u0414\u0430\u0442\u0430",
     cacheCleared: "\u041a\u044d\u0448 \u0437\u0430\u043f\u0438\u0441\u0438 \u043e\u0447\u0438\u0449\u0435\u043d.",
@@ -1481,15 +1510,16 @@ const TRANSLATIONS = {
     recordingInUse: "\u042d\u0442\u0430 \u0437\u0430\u043f\u0438\u0441\u044c \u0441\u0435\u0439\u0447\u0430\u0441 \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u0442\u0441\u044f. \u0417\u0430\u043a\u0440\u043e\u0439\u0442\u0435 \u0435\u0433\u043e \u0438 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0435 \u0440\u0430\u0437.",
   },
   "sk": {
+    cacheClearSummary: "Vymazan\u00e9 z\u00e1znamy z vyrovn\u00e1vacej pam\u00e4te: {deleted}; zost\u00e1va: {remaining}.",
     allCamerasOffline: "V\u0161etky kamery s\u00fa offline",
     allCamerasOnline: "V\u0161etky kamery online",
-    allCaughtUp: "V\u0161etko dohnan\u00e9",
+    allCaughtUp: "\u017diadne \u010dakaj\u00face z\u00e1znamy",
     back: "Sp\u00e4\u0165",
     backgroundSyncControlsVisibility: "Synchroniz\u00e1cia na pozad\u00ed ovl\u00e1da vidite\u013enos\u0165",
     cached: "Vo vyrovn\u00e1vacej pam\u00e4ti",
-    camera: "Fotoapar\u00e1t",
+    camera: "Kamera",
     camerasOnline: "Kamery online",
-    genericCamera: "Fotoapar\u00e1t",
+    genericCamera: "Kamera",
     hlsPlaybackFailed: "Prehr\u00e1vanie HLS zlyhalo",
     hlsPlaybackUnsupported: "Prehr\u00e1vanie HLS tento prehliada\u010d nepodporuje",
     lazyCacheOnPlayback: "Proxy HLS na po\u017eiadanie",
@@ -1519,7 +1549,7 @@ const TRANSLATIONS = {
     refresh: "Obnovi\u0165",
     selectRecordingToPlay: "Vyberte nahr\u00e1vku, ktor\u00fa chcete prehra\u0165",
     storageUsed: "Pou\u017eit\u00e9 \u00falo\u017eisko",
-    stillSyncing: "{count} sa st\u00e1le synchronizuje",
+    stillSyncing: "Nie je vo vyrovn\u00e1vacej pam\u00e4ti: {count}",
     couldNotLoadHlsPlayer: "Prehr\u00e1va\u010d HLS sa nepodarilo na\u010d\u00edta\u0165",
     date: "D\u00e1tum",
     cacheCleared: "Vyrovn\u00e1vacia pam\u00e4\u0165 z\u00e1znamu bola vymazan\u00e1",
@@ -1532,9 +1562,10 @@ const TRANSLATIONS = {
     recordingInUse: "T\u00e1to nahr\u00e1vka sa pr\u00e1ve prehr\u00e1va. Zatvorte ho a sk\u00faste to znova.",
   },
   "sl": {
+    cacheClearSummary: "Izbrisani posnetki iz predpomnilnika: {deleted}; preostalo: {remaining}.",
     allCamerasOffline: "Vse kamere brez povezave",
     allCamerasOnline: "Vse kamere na spletu",
-    allCaughtUp: "Vse dohitelo",
+    allCaughtUp: "Ni \u010dakajo\u010dih posnetkov",
     back: "Nazaj",
     backgroundSyncControlsVisibility: "Sinhronizacija v ozadju nadzira vidnost",
     cached: "Predpomnjeno",
@@ -1570,7 +1601,7 @@ const TRANSLATIONS = {
     refresh: "Osve\u017ei",
     selectRecordingToPlay: "Izberite posnetek za predvajanje",
     storageUsed: "Uporabljen prostor za shranjevanje",
-    stillSyncing: "{count} se \u0161e vedno sinhronizira",
+    stillSyncing: "Ni v predpomnilniku: {count}",
     couldNotLoadHlsPlayer: "Predvajalnika HLS ni bilo mogo\u010de nalo\u017eiti",
     date: "Datum",
     cacheCleared: "Predpomnilnik snemanja je po\u010di\u0161\u010den",
@@ -1583,9 +1614,10 @@ const TRANSLATIONS = {
     recordingInUse: "Ta posnetek se trenutno predvaja. Zaprite in poskusite znova.",
   },
   "sv": {
+    cacheClearSummary: "{deleted} cachelagrade inspelningar raderade; {remaining} \u00e5terst\u00e5r.",
     allCamerasOffline: "Alla kameror offline",
     allCamerasOnline: "Alla kameror online",
-    allCaughtUp: "Alla kom ikapp",
+    allCaughtUp: "Inga v\u00e4ntande inspelningar",
     back: "Tillbaka",
     backgroundSyncControlsVisibility: "Bakgrundssynkronisering styr synligheten",
     cached: "Cachad",
@@ -1621,7 +1653,7 @@ const TRANSLATIONS = {
     refresh: "Uppdatera",
     selectRecordingToPlay: "V\u00e4lj en inspelning att spela upp",
     storageUsed: "F\u00f6rvaring anv\u00e4nds",
-    stillSyncing: "{count} synkroniserar fortfarande",
+    stillSyncing: "Inte cachelagrat: {count}",
     couldNotLoadHlsPlayer: "Det gick inte att ladda HLS-spelaren",
     date: "Datum",
     cacheCleared: "Inspelningscache rensades",
@@ -1634,9 +1666,10 @@ const TRANSLATIONS = {
     recordingInUse: "Den h\u00e4r inspelningen spelas f\u00f6r n\u00e4rvarande. St\u00e4ng den och f\u00f6rs\u00f6k igen.",
   },
   "th": {
+    cacheClearSummary: "\u0e25\u0e1a\u0e01\u0e32\u0e23\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e17\u0e35\u0e48\u0e41\u0e04\u0e0a\u0e44\u0e27\u0e49 {deleted} \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23; \u0e40\u0e2b\u0e25\u0e37\u0e2d {remaining} \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23",
     allCamerasOffline: "\u0e01\u0e25\u0e49\u0e2d\u0e07\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14\u0e2d\u0e2d\u0e1f\u0e44\u0e25\u0e19\u0e4c",
     allCamerasOnline: "\u0e01\u0e25\u0e49\u0e2d\u0e07\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14\u0e2d\u0e2d\u0e19\u0e44\u0e25\u0e19\u0e4c",
-    allCaughtUp: "\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14\u0e15\u0e32\u0e21\u0e17\u0e31\u0e19",
+    allCaughtUp: "\u0e44\u0e21\u0e48\u0e21\u0e35\u0e01\u0e32\u0e23\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e17\u0e35\u0e48\u0e23\u0e2d\u0e14\u0e33\u0e40\u0e19\u0e34\u0e19\u0e01\u0e32\u0e23",
     back: "\u0e01\u0e25\u0e31\u0e1a",
     backgroundSyncControlsVisibility: "\u0e01\u0e32\u0e23\u0e0b\u0e34\u0e07\u0e04\u0e4c\u0e1e\u0e37\u0e49\u0e19\u0e2b\u0e25\u0e31\u0e07\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e01\u0e32\u0e23\u0e21\u0e2d\u0e07\u0e40\u0e2b\u0e47\u0e19",
     cached: "\u0e41\u0e04\u0e0a",
@@ -1672,7 +1705,7 @@ const TRANSLATIONS = {
     refresh: "\u0e23\u0e35\u0e40\u0e1f\u0e23\u0e0a",
     selectRecordingToPlay: "\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e01\u0e32\u0e23\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e17\u0e35\u0e48\u0e08\u0e30\u0e40\u0e25\u0e48\u0e19",
     storageUsed: "\u0e1e\u0e37\u0e49\u0e19\u0e17\u0e35\u0e48\u0e40\u0e01\u0e47\u0e1a\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e17\u0e35\u0e48\u0e43\u0e0a\u0e49",
-    stillSyncing: "{count} \u0e22\u0e31\u0e07\u0e04\u0e07\u0e0b\u0e34\u0e07\u0e04\u0e4c\u0e2d\u0e22\u0e39\u0e48",
+    stillSyncing: "\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e41\u0e04\u0e0a: {count} \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23",
     couldNotLoadHlsPlayer: "\u0e44\u0e21\u0e48\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e42\u0e2b\u0e25\u0e14\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e40\u0e25\u0e48\u0e19 HLS",
     date: "\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48",
     cacheCleared: "\u0e25\u0e49\u0e32\u0e07\u0e41\u0e04\u0e0a\u0e01\u0e32\u0e23\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e41\u0e25\u0e49\u0e27",
@@ -1685,9 +1718,10 @@ const TRANSLATIONS = {
     recordingInUse: "\u0e01\u0e33\u0e25\u0e31\u0e07\u0e40\u0e25\u0e48\u0e19\u0e01\u0e32\u0e23\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e19\u0e35\u0e49\u0e2d\u0e22\u0e39\u0e48 \u0e1b\u0e34\u0e14\u0e41\u0e25\u0e49\u0e27\u0e25\u0e2d\u0e07\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07",
   },
   "tr": {
+    cacheClearSummary: "\u00d6nbellekteki {deleted} kay\u0131t silindi; {remaining} kay\u0131t kald\u0131.",
     allCamerasOffline: "T\u00fcm kameralar \u00e7evrimd\u0131\u015f\u0131",
     allCamerasOnline: "T\u00fcm kameralar \u00e7evrimi\u00e7i",
-    allCaughtUp: "Hepsi yakaland\u0131",
+    allCaughtUp: "Bekleyen kay\u0131t yok",
     back: "Geri",
     backgroundSyncControlsVisibility: "Arka planda senkronizasyon g\u00f6r\u00fcn\u00fcrl\u00fc\u011f\u00fc kontrol eder",
     cached: "\u00d6nbelle\u011fe al\u0131nd\u0131",
@@ -1723,7 +1757,7 @@ const TRANSLATIONS = {
     refresh: "Yenile",
     selectRecordingToPlay: "Oynat\u0131lacak bir kay\u0131t se\u00e7in",
     storageUsed: "Kullan\u0131lan Depolama",
-    stillSyncing: "{count} h\u00e2l\u00e2 senkronize ediliyor",
+    stillSyncing: "\u00d6nbelle\u011fe al\u0131nmam\u0131\u015f: {count}",
     couldNotLoadHlsPlayer: "HLS oynat\u0131c\u0131s\u0131 y\u00fcklenemedi",
     date: "Tarih",
     cacheCleared: "Kay\u0131t \u00f6nbelle\u011fi temizlendi",
@@ -1736,9 +1770,10 @@ const TRANSLATIONS = {
     recordingInUse: "Bu kay\u0131t \u015fu anda oynat\u0131l\u0131yor. Kapat\u0131p tekrar deneyin.",
   },
   "uk": {
+    cacheClearSummary: "\u0412\u0438\u0434\u0430\u043b\u0435\u043d\u043e \u0437\u0430\u043f\u0438\u0441\u0456\u0432 \u0456\u0437 \u043a\u0435\u0448\u0443: {deleted}; \u0437\u0430\u043b\u0438\u0448\u0438\u043b\u043e\u0441\u044f: {remaining}.",
     allCamerasOffline: "\u0423\u0441\u0456 \u043a\u0430\u043c\u0435\u0440\u0438 \u043e\u0444\u043b\u0430\u0439\u043d",
     allCamerasOnline: "\u0412\u0441\u0456 \u043a\u0430\u043c\u0435\u0440\u0438 \u043e\u043d\u043b\u0430\u0439\u043d",
-    allCaughtUp: "\u0412\u0441\u0435 \u043d\u0430\u0437\u0434\u043e\u0433\u043d\u0430\u043b\u0438",
+    allCaughtUp: "\u041d\u0435\u043c\u0430\u0454 \u0437\u0430\u043f\u0438\u0441\u0456\u0432 \u0432 \u043e\u0447\u0456\u043a\u0443\u0432\u0430\u043d\u043d\u0456",
     back: "\u041d\u0430\u0437\u0430\u0434",
     backgroundSyncControlsVisibility: "\u0424\u043e\u043d\u043e\u0432\u0430 \u0441\u0438\u043d\u0445\u0440\u043e\u043d\u0456\u0437\u0430\u0446\u0456\u044f \u043a\u0435\u0440\u0443\u0454 \u0432\u0438\u0434\u0438\u043c\u0456\u0441\u0442\u044e",
     cached: "\u041a\u0435\u0448\u043e\u0432\u0430\u043d\u043e",
@@ -1758,7 +1793,7 @@ const TRANSLATIONS = {
     noRecordingsReady: "\u041d\u0435\u043c\u0430\u0454 \u0433\u043e\u0442\u043e\u0432\u0438\u0445 \u0437\u0430\u043f\u0438\u0441\u0456\u0432",
     noThumbnail: "\u0411\u0435\u0437 \u043c\u0456\u043d\u0456\u0430\u0442\u044e\u0440\u0438",
     noneYet: "\u041f\u043e\u043a\u0438 \u043d\u0435\u043c\u0430\u0454",
-    notCached: "\u041d\u0435 \u043a\u0435\u0448\u0443\u0454\u0442\u044c\u0441\u044f",
+    notCached: "\u041d\u0435 \u0432 \u043a\u0435\u0448\u0456",
     offline: "\u043e\u0444\u043b\u0430\u0439\u043d",
     offlineCount: "{count} \u043e\u0444\u043b\u0430\u0439\u043d",
     online: "\u043e\u043d\u043b\u0430\u0439\u043d",
@@ -1774,7 +1809,7 @@ const TRANSLATIONS = {
     refresh: "\u041e\u043d\u043e\u0432\u0438\u0442\u0438",
     selectRecordingToPlay: "\u0412\u0438\u0431\u0435\u0440\u0456\u0442\u044c \u0437\u0430\u043f\u0438\u0441 \u0434\u043b\u044f \u0432\u0456\u0434\u0442\u0432\u043e\u0440\u0435\u043d\u043d\u044f",
     storageUsed: "\u041f\u0430\u043c'\u044f\u0442\u044c \u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043e",
-    stillSyncing: "{count} \u0432\u0441\u0435 \u0449\u0435 \u0441\u0438\u043d\u0445\u0440\u043e\u043d\u0456\u0437\u0443\u0454\u0442\u044c\u0441\u044f",
+    stillSyncing: "\u041d\u0435 \u0432 \u043a\u0435\u0448\u0456: {count}",
     couldNotLoadHlsPlayer: "\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u043f\u043b\u0435\u0454\u0440 HLS",
     date: "\u0414\u0430\u0442\u0430",
     cacheCleared: "\u041a\u0435\u0448 \u0437\u0430\u043f\u0438\u0441\u0456\u0432 \u043e\u0447\u0438\u0449\u0435\u043d\u043e",
@@ -1787,21 +1822,22 @@ const TRANSLATIONS = {
     recordingInUse: "\u0426\u0435\u0439 \u0437\u0430\u043f\u0438\u0441 \u0437\u0430\u0440\u0430\u0437 \u0432\u0456\u0434\u0442\u0432\u043e\u0440\u044e\u0454\u0442\u044c\u0441\u044f. \u0417\u0430\u043a\u0440\u0438\u0439\u0442\u0435 \u0439\u043e\u0433\u043e \u0442\u0430 \u043f\u043e\u0432\u0442\u043e\u0440\u0456\u0442\u044c \u0441\u043f\u0440\u043e\u0431\u0443.",
   },
   "vi": {
+    cacheClearSummary: "\u0110\u00e3 x\u00f3a {deleted} b\u1ea3n ghi trong b\u1ed9 nh\u1edb \u0111\u1ec7m; c\u00f2n l\u1ea1i {remaining}.",
     allCamerasOffline: "T\u1ea5t c\u1ea3 camera ngo\u1ea1i tuy\u1ebfn",
     allCamerasOnline: "T\u1ea5t c\u1ea3 c\u00e1c m\u00e1y \u1ea3nh tr\u1ef1c tuy\u1ebfn",
-    allCaughtUp: "T\u1ea5t c\u1ea3 \u0111\u00e3 b\u1eaft k\u1ecbp",
+    allCaughtUp: "Kh\u00f4ng c\u00f3 b\u1ea3n ghi \u0111ang ch\u1edd",
     back: "Quay l\u1ea1i",
     backgroundSyncControlsVisibility: "\u0110\u1ed3ng b\u1ed9 h\u00f3a n\u1ec1n ki\u1ec3m so\u00e1t kh\u1ea3 n\u0103ng hi\u1ec3n th\u1ecb",
     cached: "\u0110\u00e3 l\u01b0u v\u00e0o b\u1ed9 nh\u1edb \u0111\u1ec7m",
-    camera: "M\u00e1y \u1ea3nh",
+    camera: "Camera",
     camerasOnline: "M\u00e1y \u1ea3nh tr\u1ef1c tuy\u1ebfn",
-    genericCamera: "M\u00e1y \u1ea3nh",
+    genericCamera: "Camera",
     hlsPlaybackFailed: "Ph\u00e1t l\u1ea1i HLS kh\u00f4ng th\u00e0nh c\u00f4ng",
     hlsPlaybackUnsupported: "Tr\u00ecnh duy\u1ec7t n\u00e0y kh\u00f4ng h\u1ed7 tr\u1ee3 ph\u00e1t l\u1ea1i HLS",
     lazyCacheOnPlayback: "Proxy HLS theo y\u00eau c\u1ea7u",
     loading: "\u0110ang t\u1ea3i",
     loadingRecordings: "\u0110ang t\u1ea3i b\u1ea3n ghi...",
-    newestRecording: "Ghi \u00e2m m\u1edbi nh\u1ea5t",
+    newestRecording: "B\u1ea3n ghi video m\u1edbi nh\u1ea5t",
     noCameraSelected: "Kh\u00f4ng c\u00f3 m\u00e1y \u1ea3nh n\u00e0o \u0111\u01b0\u1ee3c ch\u1ecdn",
     noCamerasFound: "Kh\u00f4ng t\u00ecm th\u1ea5y m\u00e1y \u1ea3nh n\u00e0o",
     noCamerasFoundSentence: "Kh\u00f4ng t\u00ecm th\u1ea5y m\u00e1y \u1ea3nh.",
@@ -1814,21 +1850,21 @@ const TRANSLATIONS = {
     offlineCount: "{count} ngo\u1ea1i tuy\u1ebfn",
     online: "tr\u1ef1c tuy\u1ebfn",
     preparing: "chu\u1ea9n b\u1ecb",
-    preparingRecording: "\u0110ang chu\u1ea9n b\u1ecb ghi \u00e2m...",
+    preparingRecording: "\u0110ang chu\u1ea9n b\u1ecb b\u1ea3n ghi video...",
     ready: "S\u1eb5n s\u00e0ng",
     readyToWatch: "S\u1eb5n s\u00e0ng \u0111\u1ec3 xem",
     recordingEmpty: "B\u1ea3n ghi tr\u1ed1ng",
-    recordingIsNotReady: "Vi\u1ec7c ghi \u00e2m v\u1eabn ch\u01b0a s\u1eb5n s\u00e0ng.",
+    recordingIsNotReady: "B\u1ea3n ghi video ch\u01b0a s\u1eb5n s\u00e0ng.",
     recordingIsNotReadyStatus: "Qu\u00e1 tr\u00ecnh ghi ch\u01b0a s\u1eb5n s\u00e0ng ({status})",
     recordingsCountStatus: "{shown} c\u1ee7a b\u1ea3n ghi {total} - {state}",
     recordingsReady: "B\u1ea3n ghi \u0111\u00e3 s\u1eb5n s\u00e0ng",
     refresh: "L\u00e0m m\u1edbi",
     selectRecordingToPlay: "Ch\u1ecdn b\u1ea3n ghi \u0111\u1ec3 ph\u00e1t",
     storageUsed: "B\u1ed9 nh\u1edb \u0111\u00e3 s\u1eed d\u1ee5ng",
-    stillSyncing: "{count} v\u1eabn \u0111ang \u0111\u1ed3ng b\u1ed9 h\u00f3a",
+    stillSyncing: "Ch\u01b0a l\u01b0u v\u00e0o b\u1ed9 nh\u1edb \u0111\u1ec7m: {count}",
     couldNotLoadHlsPlayer: "Kh\u00f4ng th\u1ec3 t\u1ea3i tr\u00ecnh ph\u00e1t HLS",
     date: "Ng\u00e0y",
-    cacheCleared: "\u0110\u00e3 x\u00f3a b\u1ed9 nh\u1edb \u0111\u1ec7m ghi \u00e2m",
+    cacheCleared: "\u0110\u00e3 x\u00f3a b\u1ed9 nh\u1edb \u0111\u1ec7m b\u1ea3n ghi video",
     clearAllCache: "X\u00f3a t\u1ea5t c\u1ea3 c\u00e1c b\u1ea3n ghi \u0111\u01b0\u1ee3c l\u01b0u trong b\u1ed9 nh\u1edb \u0111\u1ec7m",
     clearCameraCache: "X\u00f3a c\u00e1c b\u1ea3n ghi \u0111\u00e3 l\u01b0u trong b\u1ed9 nh\u1edb \u0111\u1ec7m c\u1ee7a m\u00e1y \u1ea3nh n\u00e0y",
     confirmClearAllCache: "X\u00f3a t\u1ea5t c\u1ea3 b\u1ea3n ghi X-Sense \u0111\u01b0\u1ee3c l\u01b0u v\u00e0o b\u1ed9 nh\u1edb \u0111\u1ec7m c\u1ee5c b\u1ed9? C\u00e1c b\u1ea3n ghi tr\u00ean b\u1ed9 l\u01b0u tr\u1eef X-Sense kh\u00f4ng b\u1ecb \u1ea3nh h\u01b0\u1edfng.",
@@ -1838,9 +1874,10 @@ const TRANSLATIONS = {
     recordingInUse: "B\u1ea3n ghi n\u00e0y hi\u1ec7n \u0111ang ph\u00e1t. H\u00e3y \u0111\u00f3ng n\u00f3 l\u1ea1i v\u00e0 th\u1eed l\u1ea1i.",
   },
   "zh-CN": {
+    cacheClearSummary: "\u5df2\u5220\u9664 {deleted} \u6761\u7f13\u5b58\u5f55\u50cf\uff1b\u5269\u4f59 {remaining} \u6761\u3002",
     allCamerasOffline: "\u6240\u6709\u6444\u50cf\u673a\u79bb\u7ebf",
     allCamerasOnline: "\u6240\u6709\u6444\u50cf\u673a\u5728\u7ebf",
-    allCaughtUp: "\u5168\u90e8\u90fd\u8ffd\u4e0a\u4e86",
+    allCaughtUp: "\u6ca1\u6709\u5f85\u5904\u7406\u7684\u5f55\u50cf",
     back: "\u8fd4\u56de",
     backgroundSyncControlsVisibility: "\u540e\u53f0\u540c\u6b65\u63a7\u5236\u53ef\u89c1\u6027",
     cached: "\u7f13\u5b58",
@@ -1851,13 +1888,13 @@ const TRANSLATIONS = {
     hlsPlaybackUnsupported: "\u8be5\u6d4f\u89c8\u5668\u4e0d\u652f\u6301 HLS \u64ad\u653e",
     lazyCacheOnPlayback: "\u6309\u9700 HLS \u4ee3\u7406",
     loading: "\u52a0\u8f7d\u4e2d",
-    loadingRecordings: "\u6b63\u5728\u52a0\u8f7d\u5f55\u97f3...",
-    newestRecording: "\u6700\u65b0\u5f55\u97f3",
+    loadingRecordings: "\u6b63\u5728\u52a0\u8f7d\u5f55\u50cf...",
+    newestRecording: "\u6700\u65b0\u5f55\u50cf",
     noCameraSelected: "\u672a\u9009\u62e9\u76f8\u673a",
     noCamerasFound: "\u6ca1\u6709\u627e\u5230\u76f8\u673a",
     noCamerasFoundSentence: "\u6ca1\u6709\u627e\u5230\u76f8\u673a\u3002",
-    noRecordingsForDate: "\u8be5\u65e5\u671f\u6ca1\u6709\u5f55\u97f3\u3002",
-    noRecordingsReady: "\u6ca1\u6709\u51c6\u5907\u597d\u5f55\u97f3",
+    noRecordingsForDate: "\u8be5\u65e5\u671f\u6ca1\u6709\u5f55\u50cf\u3002",
+    noRecordingsReady: "\u6ca1\u6709\u51c6\u5907\u597d\u5f55\u50cf",
     noThumbnail: "\u65e0\u7f29\u7565\u56fe",
     noneYet: "\u8fd8\u6ca1\u6709",
     notCached: "\u672a\u7f13\u5b58",
@@ -1865,33 +1902,34 @@ const TRANSLATIONS = {
     offlineCount: "{count} \u79bb\u7ebf",
     online: "\u5728\u7ebf",
     preparing: "\u51c6\u5907\u4e2d",
-    preparingRecording: "\u51c6\u5907\u5f55\u97f3...",
+    preparingRecording: "\u51c6\u5907\u5f55\u50cf...",
     ready: "\u51c6\u5907\u597d",
     readyToWatch: "\u51c6\u5907\u89c2\u770b",
-    recordingEmpty: "\u5f55\u97f3\u4e3a\u7a7a",
-    recordingIsNotReady: "\u5f55\u97f3\u5c1a\u672a\u51c6\u5907\u597d\u3002",
-    recordingIsNotReadyStatus: "\u5f55\u97f3\u5c1a\u672a\u51c6\u5907\u597d ({status})",
-    recordingsCountStatus: "{total} \u5f55\u97f3\u4e2d\u7684 {shown} - {state}",
-    recordingsReady: "\u5f55\u97f3\u5df2\u51c6\u5907\u597d",
+    recordingEmpty: "\u5f55\u50cf\u4e3a\u7a7a",
+    recordingIsNotReady: "\u5f55\u50cf\u5c1a\u672a\u51c6\u5907\u597d\u3002",
+    recordingIsNotReadyStatus: "\u5f55\u50cf\u5c1a\u672a\u51c6\u5907\u597d ({status})",
+    recordingsCountStatus: "{total} \u5f55\u50cf\u4e2d\u7684 {shown} - {state}",
+    recordingsReady: "\u5f55\u50cf\u5df2\u51c6\u5907\u597d",
     refresh: "\u5237\u65b0",
-    selectRecordingToPlay: "\u9009\u62e9\u8981\u64ad\u653e\u7684\u5f55\u97f3",
+    selectRecordingToPlay: "\u9009\u62e9\u8981\u64ad\u653e\u7684\u5f55\u50cf",
     storageUsed: "\u5df2\u7528\u5b58\u50a8\u7a7a\u95f4",
-    stillSyncing: "{count} \u4ecd\u5728\u540c\u6b65",
+    stillSyncing: "\u672a\u7f13\u5b58\uff1a{count} \u6761",
     couldNotLoadHlsPlayer: "\u65e0\u6cd5\u52a0\u8f7d HLS \u64ad\u653e\u5668",
     date: "\u65e5\u671f",
-    cacheCleared: "\u5f55\u97f3\u7f13\u5b58\u5df2\u6e05\u9664",
-    clearAllCache: "\u6e05\u9664\u6240\u6709\u7f13\u5b58\u7684\u5f55\u97f3",
+    cacheCleared: "\u5f55\u50cf\u7f13\u5b58\u5df2\u6e05\u9664",
+    clearAllCache: "\u6e05\u9664\u6240\u6709\u7f13\u5b58\u7684\u5f55\u50cf",
     clearCameraCache: "\u6e05\u9664\u8be5\u6444\u50cf\u673a\u7684\u7f13\u5b58\u5f55\u50cf",
-    confirmClearAllCache: "\u5220\u9664\u6240\u6709\u672c\u5730\u7f13\u5b58\u7684 X-Sense \u5f55\u97f3\uff1f X-Sense \u5b58\u50a8\u4e0a\u7684\u5f55\u97f3\u4e0d\u53d7\u5f71\u54cd\u3002",
+    confirmClearAllCache: "\u5220\u9664\u6240\u6709\u672c\u5730\u7f13\u5b58\u7684 X-Sense \u5f55\u50cf\uff1f X-Sense \u5b58\u50a8\u4e0a\u7684\u5f55\u50cf\u4e0d\u53d7\u5f71\u54cd\u3002",
     confirmClearCameraCache: "\u5220\u9664\u8be5\u6444\u50cf\u673a\u7684\u6240\u6709\u672c\u5730\u7f13\u5b58\u5f55\u50cf\uff1f",
-    confirmDeleteClipCache: "\u5220\u9664\u672c\u5730\u7f13\u5b58\u7684\u5f55\u97f3\u5417\uff1f",
-    deleteCachedRecording: "\u5220\u9664\u7f13\u5b58\u7684\u5f55\u97f3",
-    recordingInUse: "\u8be5\u5f55\u97f3\u5f53\u524d\u6b63\u5728\u64ad\u653e\u3002\u5173\u95ed\u5b83\u5e76\u91cd\u8bd5\u3002",
+    confirmDeleteClipCache: "\u5220\u9664\u672c\u5730\u7f13\u5b58\u7684\u5f55\u50cf\u5417\uff1f",
+    deleteCachedRecording: "\u5220\u9664\u7f13\u5b58\u7684\u5f55\u50cf",
+    recordingInUse: "\u8be5\u5f55\u50cf\u5f53\u524d\u6b63\u5728\u64ad\u653e\u3002\u5173\u95ed\u5b83\u5e76\u91cd\u8bd5\u3002",
   },
   "zh-TW": {
+    cacheClearSummary: "\u5df2\u522a\u9664 {deleted} \u7b46\u5feb\u53d6\u9304\u5f71\uff1b\u5269\u9918 {remaining} \u7b46\u3002",
     allCamerasOffline: "\u6240\u6709\u651d\u5f71\u6a5f\u96e2\u7dda",
     allCamerasOnline: "\u6240\u6709\u651d\u5f71\u6a5f\u5728\u7dda",
-    allCaughtUp: "\u5168\u90e8\u90fd\u8ffd\u4e0a\u4e86",
+    allCaughtUp: "\u6c92\u6709\u5f85\u8655\u7406\u7684\u9304\u5f71",
     back: "\u8fd4\u56de",
     backgroundSyncControlsVisibility: "\u5f8c\u53f0\u540c\u6b65\u63a7\u5236\u53ef\u898b\u6027",
     cached: "\u5feb\u53d6",
@@ -1902,42 +1940,42 @@ const TRANSLATIONS = {
     hlsPlaybackUnsupported: "\u6b64\u700f\u89bd\u5668\u4e0d\u652f\u63f4 HLS \u64ad\u653e",
     lazyCacheOnPlayback: "\u6309\u9700 HLS \u4ee3\u7406",
     loading: "\u8f09\u5165\u4e2d",
-    loadingRecordings: "\u6b63\u5728\u8f09\u5165\u9304\u97f3...",
-    newestRecording: "\u6700\u65b0\u9304\u97f3",
+    loadingRecordings: "\u6b63\u5728\u8f09\u5165\u9304\u5f71...",
+    newestRecording: "\u6700\u65b0\u9304\u5f71",
     noCameraSelected: "\u672a\u9078\u64c7\u76f8\u6a5f",
     noCamerasFound: "\u6c92\u6709\u627e\u5230\u76f8\u6a5f",
     noCamerasFoundSentence: "\u6c92\u6709\u627e\u5230\u76f8\u6a5f\u3002",
-    noRecordingsForDate: "\u8a72\u65e5\u671f\u6c92\u6709\u9304\u97f3\u3002",
-    noRecordingsReady: "\u6c92\u6709\u6e96\u5099\u597d\u9304\u97f3",
+    noRecordingsForDate: "\u8a72\u65e5\u671f\u6c92\u6709\u9304\u5f71\u3002",
+    noRecordingsReady: "\u6c92\u6709\u6e96\u5099\u597d\u9304\u5f71",
     noThumbnail: "\u7121\u7e2e\u5716",
     noneYet: "\u9084\u6c92\u6709",
     notCached: "\u672a\u5feb\u53d6",
     offline: "\u96e2\u7dda",
     offlineCount: "{count} \u96e2\u7dda",
-    online: "\u7db2\u8def",
+    online: "\u5df2\u9023\u7dda",
     preparing: "\u6e96\u5099\u4e2d",
-    preparingRecording: "\u6e96\u5099\u9304\u97f3...",
+    preparingRecording: "\u6e96\u5099\u9304\u5f71...",
     ready: "\u6e96\u5099\u597d",
     readyToWatch: "\u6e96\u5099\u89c0\u770b",
-    recordingEmpty: "\u9304\u97f3\u70ba\u7a7a",
-    recordingIsNotReady: "\u9304\u97f3\u5c1a\u672a\u6e96\u5099\u597d\u3002",
-    recordingIsNotReadyStatus: "\u9304\u97f3\u5c1a\u672a\u6e96\u5099\u597d ({status})",
-    recordingsCountStatus: "{total} \u9304\u97f3\u4e2d\u7684 {shown} - {state}",
-    recordingsReady: "\u9304\u97f3\u5df2\u6e96\u5099\u597d",
+    recordingEmpty: "\u9304\u5f71\u70ba\u7a7a",
+    recordingIsNotReady: "\u9304\u5f71\u5c1a\u672a\u6e96\u5099\u597d\u3002",
+    recordingIsNotReadyStatus: "\u9304\u5f71\u5c1a\u672a\u6e96\u5099\u597d ({status})",
+    recordingsCountStatus: "{total} \u9304\u5f71\u4e2d\u7684 {shown} - {state}",
+    recordingsReady: "\u9304\u5f71\u5df2\u6e96\u5099\u597d",
     refresh: "\u91cd\u65b0\u6574\u7406",
-    selectRecordingToPlay: "\u9078\u64c7\u8981\u64ad\u653e\u7684\u9304\u97f3",
+    selectRecordingToPlay: "\u9078\u64c7\u8981\u64ad\u653e\u7684\u9304\u5f71",
     storageUsed: "\u5df2\u7528\u5132\u5b58\u7a7a\u9593",
-    stillSyncing: "{count} \u4ecd\u5728\u540c\u6b65",
+    stillSyncing: "\u672a\u5feb\u53d6\uff1a{count} \u7b46",
     couldNotLoadHlsPlayer: "\u7121\u6cd5\u8f09\u5165 HLS \u64ad\u653e\u5668",
     date: "\u65e5\u671f",
-    cacheCleared: "\u9304\u97f3\u5feb\u53d6\u5df2\u6e05\u9664",
-    clearAllCache: "\u6e05\u9664\u6240\u6709\u5feb\u53d6\u7684\u9304\u97f3",
+    cacheCleared: "\u9304\u5f71\u5feb\u53d6\u5df2\u6e05\u9664",
+    clearAllCache: "\u6e05\u9664\u6240\u6709\u5feb\u53d6\u7684\u9304\u5f71",
     clearCameraCache: "\u6e05\u9664\u8a72\u651d\u5f71\u6a5f\u7684\u5feb\u53d6\u9304\u5f71",
-    confirmClearAllCache: "\u522a\u9664\u6240\u6709\u672c\u6a5f\u5feb\u53d6\u7684 X-Sense \u9304\u97f3\uff1f X-Sense \u5132\u5b58\u4e0a\u7684\u9304\u97f3\u4e0d\u53d7\u5f71\u97ff\u3002",
+    confirmClearAllCache: "\u522a\u9664\u6240\u6709\u672c\u6a5f\u5feb\u53d6\u7684 X-Sense \u9304\u5f71\uff1f X-Sense \u5132\u5b58\u4e0a\u7684\u9304\u5f71\u4e0d\u53d7\u5f71\u97ff\u3002",
     confirmClearCameraCache: "\u522a\u9664\u8a72\u651d\u5f71\u6a5f\u7684\u6240\u6709\u672c\u6a5f\u5feb\u53d6\u9304\u5f71\uff1f",
-    confirmDeleteClipCache: "\u522a\u9664\u672c\u6a5f\u5feb\u53d6\u7684\u9304\u97f3\u55ce\uff1f",
-    deleteCachedRecording: "\u522a\u9664\u5feb\u53d6\u7684\u9304\u97f3",
-    recordingInUse: "\u8a72\u9304\u97f3\u76ee\u524d\u6b63\u5728\u64ad\u653e\u3002\u95dc\u9589\u5b83\u4e26\u91cd\u8a66\u3002",
+    confirmDeleteClipCache: "\u522a\u9664\u672c\u6a5f\u5feb\u53d6\u7684\u9304\u5f71\u55ce\uff1f",
+    deleteCachedRecording: "\u522a\u9664\u5feb\u53d6\u7684\u9304\u5f71",
+    recordingInUse: "\u8a72\u9304\u5f71\u76ee\u524d\u6b63\u5728\u64ad\u653e\u3002\u95dc\u9589\u5b83\u4e26\u91cd\u8a66\u3002",
   },
 };
 
@@ -1964,6 +2002,10 @@ class XSenseRecordingsPanel extends HTMLElement {
     this.loading = false;
     this.error = "";
     this.notice = "";
+    this.routeError = "";
+    this.loadGeneration = 0;
+    this.detached = false;
+    this.deleting = false;
     this.signedPaths = new Map();
     this.playbackUrls = new Map();
     this.playbackRequests = new Map();
@@ -1975,6 +2017,13 @@ class XSenseRecordingsPanel extends HTMLElement {
     this.hlsInstances = new Map();
     this.hlsLibraryPromise = null;
     this.handleRouteChange = async () => {
+      if (this.deleting) {
+        this.selectedClip = null;
+        this.routeError = "";
+        window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+        this.render();
+        return;
+      }
       const previous = this.selectedClip && this.playbackKey(this.selectedClip);
       this.syncRouteFromHash();
       const current = this.selectedClip && this.playbackKey(this.selectedClip);
@@ -1982,25 +2031,45 @@ class XSenseRecordingsPanel extends HTMLElement {
       if (this.selectedClip) {
         await this.prepareClipPlayback(this.selectedClip);
       }
-      this.render();
+      this.renderPlaybackUpdate();
     };
   }
 
   set hass(value) {
+    const previousTimeZone = this.timeZone();
+    const previousLocale = this._displayLocaleKey ?? this.displayLocaleKey();
     this._hass = value;
-    if (!this.data && !this.loading) {
+    this._displayLocaleKey = this.displayLocaleKey();
+    if (this.detached) return;
+    if (this.data && previousTimeZone !== this.timeZone()) {
+      this.data = this.groupPanelDates(this.data);
+      this.selectedDate = this.camera?.dates?.[0] || "";
+      this.syncRouteFromHash();
+      void this.signVisibleThumbnails().then(() => {
+        if (!this.detached) this.renderTimezoneChange();
+      }).catch(() => undefined);
+      this.renderTimezoneChange();
+    }
+    if (this.data && previousLocale !== this._displayLocaleKey) this.renderLocaleChange();
+    if (!this.data && !this.loading && !this.deleting) {
       this.loadData();
     }
   }
 
   connectedCallback() {
+    const reconnecting = this.detached;
+    this.detached = false;
     window.addEventListener("hashchange", this.handleRouteChange);
     window.addEventListener("popstate", this.handleRouteChange);
     this.syncRouteFromHash();
     this.render();
+    if (reconnecting && this._hass) void this.loadData();
   }
 
   disconnectedCallback() {
+    this.detached = true;
+    this.loadGeneration += 1;
+    this.loading = false;
     window.removeEventListener("hashchange", this.handleRouteChange);
     window.removeEventListener("popstate", this.handleRouteChange);
     const clip = this.selectedClip;
@@ -2008,16 +2077,19 @@ class XSenseRecordingsPanel extends HTMLElement {
     if (clip) void this.releaseTemporaryPlayback(clip);
   }
 
-  async loadData() {
-    if (!this._hass) return;
+  async loadData({ afterDelete = false } = {}) {
+    if (!this._hass || this.detached || (this.deleting && !afterDelete)) return false;
+    const generation = ++this.loadGeneration;
+    const isCurrent = () => !this.detached && generation === this.loadGeneration;
     this.loading = true;
     this.error = "";
     this.notice = "";
-    this.render();
+    this.renderPlaybackUpdate();
     try {
       const data = await this._hass.callApi("GET", "xsense/recordings/panel");
-      this.data = data;
-      const cameras = data.cameras || [];
+      if (!isCurrent()) return false;
+      this.data = this.groupPanelDates(data);
+      const cameras = this.data.cameras || [];
       if (!this.selectedCameraKey || !cameras.some((camera) => this.cameraKey(camera) === this.selectedCameraKey)) {
         this.selectedCameraKey = cameras[0] ? this.cameraKey(cameras[0]) : "";
       }
@@ -2025,16 +2097,24 @@ class XSenseRecordingsPanel extends HTMLElement {
       if (!this.selectedDate || !camera?.dates?.includes(this.selectedDate)) {
         this.selectedDate = camera?.dates?.[0] || "";
       }
+      const previousPlaybackKey = this.selectedClip && this.playbackKey(this.selectedClip);
       this.syncRouteFromHash();
+      const currentPlaybackKey = this.selectedClip && this.playbackKey(this.selectedClip);
+      if (previousPlaybackKey !== currentPlaybackKey) this.disposePlaybackResources();
       await this.signVisibleThumbnails();
-      if (this.selectedClip) {
+      if (!isCurrent()) return false;
+      if (this.selectedClip && !this.deleting) {
         await this.prepareClipPlayback(this.selectedClip);
       }
+      return isCurrent();
     } catch (err) {
-      this.error = err?.message || String(err);
+      if (isCurrent()) this.error = err?.message || String(err);
+      return false;
     } finally {
-      this.loading = false;
-      this.render();
+      if (isCurrent()) {
+        this.loading = false;
+        this.renderPlaybackUpdate();
+      }
     }
   }
 
@@ -2049,6 +2129,7 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   render() {
+    if (this.detached) return;
     const cameras = this.data?.cameras || [];
     const camera = this.camera;
     const clips = this.clips;
@@ -2092,7 +2173,7 @@ class XSenseRecordingsPanel extends HTMLElement {
           color: var(--primary-text-color);
           font: inherit;
         }
-        select { padding: 0 10px; }
+        select { padding: 0 10px; min-width: 0; max-width: 100%; }
         button {
           display: inline-flex;
           align-items: center;
@@ -2225,6 +2306,8 @@ class XSenseRecordingsPanel extends HTMLElement {
         }
         .viewer {
           display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          min-width: 0;
           gap: 12px;
           max-width: 1100px;
           margin: 0 auto;
@@ -2262,11 +2345,15 @@ class XSenseRecordingsPanel extends HTMLElement {
         }
         .no-video {
           width: 100%;
+          min-width: 0;
           aspect-ratio: 16 / 9;
           display: grid;
           place-items: center;
           background: #000;
           color: #fff;
+          padding: 12px;
+          overflow-wrap: anywhere;
+          text-align: center;
         }
         .empty, .error, .notice {
           border: 1px solid var(--divider-color);
@@ -2315,39 +2402,93 @@ class XSenseRecordingsPanel extends HTMLElement {
           .viewer-details {
             padding-bottom: 10px;
           }
-          video, .no-video {
-            min-height: min(58vw, 360px);
-          }
         }
       </style>
       <div class="page">
         ${useViewerPage ? "" : `${this.renderStats(this.data?.stats)}<div class="toolbar">
           <label>
             ${this.escape(this.t("camera"))}
-            <select id="camera" ${cameras.length === 0 ? "disabled" : ""}>
+            <select id="camera" ${cameras.length === 0 || this.deleting ? "disabled" : ""}>
               ${cameras.map((item) => `<option value="${this.escape(this.cameraKey(item))}" ${this.cameraKey(item) === this.selectedCameraKey ? "selected" : ""}>${this.escape(item.name)}</option>`).join("")}
             </select>
           </label>
           <label>
             ${this.escape(this.t("date"))}
-            <select id="date" ${!camera?.dates?.length ? "disabled" : ""}>
+            <select id="date" ${!camera?.dates?.length || this.deleting ? "disabled" : ""}>
               ${(camera?.dates || []).map((date) => `<option value="${this.escape(date)}" ${date === this.selectedDate ? "selected" : ""}>${this.escape(date)}</option>`).join("")}
             </select>
           </label>
           <div class="status">${this.escape(this.statusText(camera, clipCount))}</div>
           <div class="toolbar-actions">
-            <button id="clear-camera" class="icon-button" type="button" title="${this.escape(this.t("clearCameraCache"))}" aria-label="${this.escape(this.t("clearCameraCache"))}" ${!camera ? "disabled" : ""}><ha-icon icon="mdi:delete-sweep-outline"></ha-icon></button>
-            <button id="clear-all" class="icon-button" type="button" title="${this.escape(this.t("clearAllCache"))}" aria-label="${this.escape(this.t("clearAllCache"))}"><ha-icon icon="mdi:delete-empty-outline"></ha-icon></button>
-            <button id="refresh" type="button">${this.escape(this.loading ? this.t("loading") : this.t("refresh"))}</button>
+            <button id="clear-camera" class="icon-button" type="button" title="${this.escape(this.t("clearCameraCache"))}" aria-label="${this.escape(this.t("clearCameraCache"))}" ${!camera || this.loading || this.deleting ? "disabled" : ""}><ha-icon icon="mdi:delete-sweep-outline"></ha-icon></button>
+            <button id="clear-all" class="icon-button" type="button" title="${this.escape(this.t("clearAllCache"))}" aria-label="${this.escape(this.t("clearAllCache"))}" ${this.loading || this.deleting ? "disabled" : ""}><ha-icon icon="mdi:delete-empty-outline"></ha-icon></button>
+            <button id="refresh" type="button" ${this.loading || this.deleting ? "disabled" : ""}>${this.escape(this.loading ? this.t("loading") : this.t("refresh"))}</button>
           </div>
         </div>`}
-        ${this.error ? `<div class="error">${this.escape(this.error)}</div>` : ""}
-        ${this.notice ? `<div class="notice" role="status">${this.escape(this.notice)}</div>` : ""}
-        ${!this.error ? (useViewerPage ? this.renderViewer(viewerClip) : this.renderBody(clips)) : ""}
+        <div id="messages">${this.renderMessages()}</div>
+        ${useViewerPage ? this.renderViewer(viewerClip) : this.renderBody(clips)}
       </div>
     `;
     this.bindEvents();
     this.afterRender();
+  }
+
+  renderMessages() {
+    return `${this.error || this.routeError ? `<div class="error" role="alert">${this.escape(this.error || this.routeError)}</div>` : ""}
+      ${this.data?.warning ? `<div class="notice" role="status">${this.escape(this.data.warning)}</div>` : ""}
+      ${this.notice ? `<div class="notice" role="status">${this.escape(this.notice)}</div>` : ""}`;
+  }
+
+  renderPlaybackUpdate() {
+    const video = this.shadowRoot.getElementById("viewer-video");
+    const key = this.selectedClip && this.playbackKey(this.selectedClip);
+    if (key && video?.dataset?.playbackKey === key &&
+        (video.dataset.hlsUrl || video.getAttribute("src")) === this.playbackUrls.get(key)) {
+      this.shadowRoot.getElementById("messages").innerHTML = this.renderMessages();
+      this.renderLocaleChange();
+      return;
+    }
+    this.render();
+  }
+
+  localizedPlaybackError(key, params = {}) {
+    const error = new Error(this.t(key, params));
+    error.translation = { key, params };
+    return error;
+  }
+
+  playbackErrorValue(error) {
+    return error?.translation || error?.message || String(error);
+  }
+
+  renderTimezoneChange() {
+    const clip = this.selectedClip;
+    const title = this.shadowRoot.getElementById("viewer-time");
+    if (clip && title && this.shadowRoot.getElementById("viewer-video")) {
+      title.textContent = `${this.cameraName(clip.entry_id, clip.serial)} - ${this.formatClipTime(clip)}`;
+      return;
+    }
+    this.render();
+  }
+
+  displayLocaleKey() {
+    return JSON.stringify([this.language(), this._hass?.locale?.language, this._hass?.locale?.time_format]);
+  }
+
+  renderLocaleChange() {
+    if (!this.selectedClip || !this.shadowRoot.getElementById("viewer-video")) {
+      this.render();
+      return;
+    }
+    const clip = this.findClip(this.selectedClip.entry_id, this.selectedClip.serial,
+      this.selectedClip.start, this.selectedClip.end) || this.selectedClip;
+    const template = document.createElement("template");
+    template.innerHTML = this.renderViewer(clip);
+    // Replace only metadata and controls; detaching the video resets native playback.
+    for (const selector of [".viewer-bar", ".viewer-details"]) {
+      this.shadowRoot.querySelector(selector).replaceWith(template.content.querySelector(selector));
+    }
+    this.bindEvents();
   }
 
   renderBody(clips) {
@@ -2401,22 +2542,24 @@ class XSenseRecordingsPanel extends HTMLElement {
     const clipKey = this.playbackKey(clip);
     const playbackUrl = this.playbackUrls.get(clipKey) || "";
     const playbackType = this.playbackTypes.get(clipKey) || "";
-    const playbackError = this.playbackErrors.get(clipKey) || "";
+    const storedError = this.playbackErrors.get(clipKey);
+    const playbackError = storedError?.key ? this.t(storedError.key, storedError.params) : storedError || "";
     const preparing = this.playbackLoadingKey === clipKey;
     const videoSourceAttrs = playbackType === "hls"
       ? `data-hls-url="${this.escape(playbackUrl)}" data-playback-key="${this.escape(clipKey)}"`
-      : `src="${this.escape(playbackUrl)}"`;
+      : `src="${this.escape(playbackUrl)}" data-playback-key="${this.escape(clipKey)}"`;
     return `
         <div class="viewer">
         <div class="viewer-bar">
           <button id="back" type="button">${this.escape(this.t("back"))}</button>
+          ${playbackError ? `<button id="retry-viewer" type="button" ${preparing ? "disabled" : ""}>${this.escape(this.t("refresh"))}</button>` : ""}
           <button id="delete-viewer" class="icon-button" type="button" title="${this.escape(this.t("deleteCachedRecording"))}" aria-label="${this.escape(this.t("deleteCachedRecording"))}" ${clip.cached ? "" : "disabled"}><ha-icon icon="mdi:delete-outline"></ha-icon></button>
         </div>
         <div class="viewer-frame">
           ${playbackUrl ? `<video id="viewer-video" controls autoplay playsinline disablepictureinpicture disableremoteplayback controlsList="nodownload noplaybackrate noremoteplayback" preload="auto" ${videoSourceAttrs}></video>` : `<div class="no-video">${this.escape(playbackError || (preparing ? this.t("preparingRecording") : this.t("selectRecordingToPlay")))}</div>`}
         </div>
         <div class="viewer-details">
-          <div class="title">${this.escape(this.cameraName(clip.entry_id, clip.serial))} - ${this.escape(this.formatClipTime(clip))}</div>
+          <div id="viewer-time" class="title">${this.escape(this.cameraName(clip.entry_id, clip.serial))} - ${this.escape(this.formatClipTime(clip))}</div>
           <div class="sub">${this.escape(this.formatDuration(clip.duration))} - ${this.escape(playbackUrl ? this.t("ready") : preparing ? this.t("preparing") : clip.cached ? this.t("cached") : clip.retained ? this.t("notCached") : this.t("ready"))}${clip.cache_bytes ? ` - ${this.escape(this.formatBytes(clip.cache_bytes))}` : ""}</div>
         </div>
       </div>
@@ -2456,6 +2599,7 @@ class XSenseRecordingsPanel extends HTMLElement {
     this.shadowRoot.getElementById("clear-all")?.addEventListener("click", () => this.clearAllCache());
     this.shadowRoot.getElementById("clear-camera")?.addEventListener("click", () => this.clearCameraCache());
     this.shadowRoot.getElementById("back")?.addEventListener("click", () => this.closeViewer());
+    this.shadowRoot.getElementById("retry-viewer")?.addEventListener("click", () => this.retryClipPlayback());
     this.shadowRoot.getElementById("delete-viewer")?.addEventListener("click", () => this.deleteClipCache(this.selectedClip));
     this.shadowRoot.querySelectorAll(".clip").forEach((button) => {
       const open = async (event) => {
@@ -2472,6 +2616,7 @@ class XSenseRecordingsPanel extends HTMLElement {
       };
       button.addEventListener("click", open);
       button.addEventListener("keydown", (event) => {
+        if (event.target !== button) return;
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
         open(event);
@@ -2490,7 +2635,7 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   async deleteClipCache(clip) {
-    if (!clip?.cached || !window.confirm(this.t("confirmDeleteClipCache"))) return;
+    if (this.deleting || !clip?.cached || !window.confirm(this.t("confirmDeleteClipCache"))) return;
     const key = this.playbackKey(clip);
     this.clearPlaybackUrl(key);
     if (this.selectedClip && this.playbackKey(this.selectedClip) === key) {
@@ -2506,18 +2651,21 @@ class XSenseRecordingsPanel extends HTMLElement {
 
   async clearCameraCache() {
     const camera = this.camera;
-    if (!camera || !window.confirm(this.t("confirmClearCameraCache"))) return;
+    if (this.deleting || !camera || !window.confirm(this.t("confirmClearCameraCache"))) return;
     this.disposePlaybackResources();
     await this.deleteCache("camera", camera.entry_id, { serial: camera.serial });
   }
 
   async clearAllCache() {
-    if (!window.confirm(this.t("confirmClearAllCache"))) return;
+    if (this.deleting || !window.confirm(this.t("confirmClearAllCache"))) return;
     this.disposePlaybackResources();
     await this.deleteCache("all", "all");
   }
 
   async deleteCache(scope, entryId, query = {}) {
+    if (this.deleting || this.detached) return;
+    this.deleting = true;
+    this.loadGeneration += 1;
     this.loading = true;
     this.error = "";
     this.notice = "";
@@ -2525,19 +2673,26 @@ class XSenseRecordingsPanel extends HTMLElement {
     try {
       const params = new URLSearchParams(query);
       const queryString = params.toString();
-      await this._hass.callApi(
+      const result = await this._hass.callApi(
         "DELETE",
         `xsense/recordings/cache/${encodeURIComponent(scope)}/${encodeURIComponent(entryId)}${queryString ? `?${queryString}` : ""}`,
       );
-      await this.loadData();
-      this.notice = this.t("cacheCleared");
+      if (!await this.loadData({ afterDelete: true })) return;
+      this.notice = result?.remaining_items || result?.skipped_active
+        ? this.t("cacheClearSummary", {
+          deleted: this.formatNumber(result.deleted_items),
+          remaining: this.formatNumber(result.remaining_items),
+        })
+        : this.t("cacheCleared");
     } catch (err) {
-      this.error = String(err?.message || err).includes("409")
+      if (this.detached) return;
+      this.error = err?.status_code === 409 || err?.status === 409 || String(err?.message || err).includes("409")
         ? this.t("recordingInUse")
         : err?.message || String(err);
     } finally {
+      this.deleting = false;
       this.loading = false;
-      this.render();
+      if (!this.detached) this.render();
     }
   }
 
@@ -2545,7 +2700,17 @@ class XSenseRecordingsPanel extends HTMLElement {
     const video = this.shadowRoot.getElementById("viewer-video");
     if (!video) return;
     this.bindVideoDiagnostics(video);
-    this.attachVideoSource(video).then(() => video.play?.()).catch((err) => {
+    this.attachVideoSource(video).catch((err) => {
+      if (this.detached || this.shadowRoot.getElementById("viewer-video") !== video) return;
+      const key = video.dataset.playbackKey;
+      if (key) {
+        this.clearPlaybackUrl(key);
+        this.playbackErrors.set(key, this.playbackErrorValue(err));
+        this.render();
+      }
+    }).then(() => {
+      if (!this.detached && this.shadowRoot.getElementById("viewer-video") === video) return video.play?.();
+    }).catch((err) => {
       if (this.selectedClip) {
         this.logPanelEvent("video_autoplay_error", this.clipDebugPayload(this.selectedClip, {
           message: err?.message || String(err),
@@ -2580,6 +2745,8 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   async openClip(clip) {
+    if (this.deleting || this.detached) return;
+    this.routeError = "";
     const previousClip = this.selectedClip;
     if (previousClip && this.playbackKey(previousClip) !== this.playbackKey(clip)) {
       this.disposePlaybackResources();
@@ -2596,6 +2763,14 @@ class XSenseRecordingsPanel extends HTMLElement {
     this.render();
     await this.prepareClipPlayback(clip);
     this.render();
+  }
+
+  async retryClipPlayback() {
+    const clip = this.selectedClip;
+    if (!clip || this.detached || this.deleting) return;
+    this.clearPlaybackUrl(this.playbackKey(clip));
+    await this.prepareClipPlayback(clip);
+    if (!this.detached) this.render();
   }
 
   async closeViewer() {
@@ -2630,6 +2805,7 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   syncRouteFromHash() {
+    this.routeError = "";
     const hash = window.location.hash.replace(/^#/, "");
     const params = new URLSearchParams(hash);
     const entryId = params.get("entry_id");
@@ -2645,7 +2821,7 @@ class XSenseRecordingsPanel extends HTMLElement {
     const clip = this.findClip(entryId, serial, start, end);
     if (!clip) {
       this.selectedClip = null;
-      this.error = this.t("recordingIsNotReady");
+      this.routeError = this.t("recordingIsNotReady");
       this.logPanelEvent("route_clip_missing", { entry_id: entryId, serial, start, end });
       return;
     }
@@ -2668,6 +2844,7 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   async prepareClipPlayback(clip) {
+    if (this.detached || this.deleting) return;
     if (!clip?.playback_url) {
       this.logPanelEvent("playback_skipped_missing_url", this.clipDebugPayload(clip));
       return;
@@ -2722,7 +2899,7 @@ class XSenseRecordingsPanel extends HTMLElement {
         elapsed_ms: Math.round(performance.now() - startedAt),
       }));
       if (!response.ok) {
-        throw new Error(this.t("recordingIsNotReadyStatus", { status: response.status }));
+        throw this.localizedPlaybackError("recordingIsNotReadyStatus", { status: response.status });
       }
       const contentType = response.headers.get("content-type") || "";
       if (this.isHlsResponse(contentType, response.url || signedPath)) {
@@ -2746,7 +2923,7 @@ class XSenseRecordingsPanel extends HTMLElement {
       const blob = await response.blob();
       if (!isCurrent()) return;
       if (!blob.size) {
-        throw new Error(this.t("recordingEmpty"));
+        throw this.localizedPlaybackError("recordingEmpty");
       }
       this.setPlaybackUrl(key, URL.createObjectURL(blob), "blob");
       this.logPanelEvent("playback_blob_ready", this.clipDebugPayload(clip, {
@@ -2758,7 +2935,7 @@ class XSenseRecordingsPanel extends HTMLElement {
     } catch (err) {
       if (!isCurrent()) return;
       this.clearPlaybackUrl(key);
-      this.playbackErrors.set(key, err?.message || String(err));
+      this.playbackErrors.set(key, this.playbackErrorValue(err));
       this.logPanelEvent("playback_error", this.clipDebugPayload(clip, {
         playback_url: playbackPath,
         message: err?.message || String(err),
@@ -2791,6 +2968,9 @@ class XSenseRecordingsPanel extends HTMLElement {
   }
 
   clearPlaybackUrl(key) {
+    this.playbackRequests.get(key)?.abort();
+    this.playbackRequests.delete(key);
+    if (this.playbackLoadingKey === key) this.playbackLoadingKey = "";
     const session = this.playbackTokens.get(key);
     this.playbackTokens.delete(key);
     if (session) void this.releaseTemporaryPlayback(session.clip, session.token);
@@ -2864,7 +3044,7 @@ class XSenseRecordingsPanel extends HTMLElement {
     const Hls = await this.loadHlsLibrary();
     if (this.shadowRoot.getElementById("viewer-video") !== video || this.playbackUrls.get(key) !== hlsUrl) return;
     if (!Hls?.isSupported?.()) {
-      throw new Error(this.t("hlsPlaybackUnsupported"));
+      throw this.localizedPlaybackError("hlsPlaybackUnsupported");
     }
     for (const [instanceKey, instance] of this.hlsInstances.entries()) {
       if (instanceKey !== key) {
@@ -2891,7 +3071,7 @@ class XSenseRecordingsPanel extends HTMLElement {
       }));
       if (data?.fatal) {
         this.clearPlaybackUrl(key);
-        this.playbackErrors.set(key, data?.details || this.t("hlsPlaybackFailed"));
+        this.playbackErrors.set(key, data?.details || { key: "hlsPlaybackFailed" });
         this.render();
       }
     });
@@ -2912,8 +3092,15 @@ class XSenseRecordingsPanel extends HTMLElement {
         const script = document.createElement("script");
         script.src = HLS_JS_URL;
         script.async = true;
-        script.onload = () => resolve(window.Hls);
-        script.onerror = () => reject(new Error(this.t("couldNotLoadHlsPlayer")));
+        script.onload = () => {
+          if (window.Hls) resolve(window.Hls);
+          else script.onerror();
+        };
+        script.onerror = () => {
+          this.hlsLibraryPromise = null;
+          script.remove();
+          reject(this.localizedPlaybackError("couldNotLoadHlsPlayer"));
+        };
         document.head.appendChild(script);
       });
     }
@@ -2954,6 +3141,12 @@ class XSenseRecordingsPanel extends HTMLElement {
           error_code: mediaError?.code || null,
           message: mediaError?.message || "",
         }));
+        if (eventName === "error" && !this.detached && this.shadowRoot.getElementById("viewer-video") === video) {
+          const key = this.playbackKey(clip);
+          this.clearPlaybackUrl(key);
+          this.playbackErrors.set(key, mediaError?.message || { key: "hlsPlaybackFailed" });
+          this.render();
+        }
       }, { once: true });
     }
   }
@@ -2991,13 +3184,36 @@ class XSenseRecordingsPanel extends HTMLElement {
 
   formatTime(epochSeconds) {
     const locale = this._hass?.locale || {};
-    const options = { hour: "numeric", minute: "2-digit", second: "2-digit" };
+    const options = { hour: "numeric", minute: "2-digit", second: "2-digit", timeZone: this.timeZone() };
     if (locale.time_format === "12") {
       options.hour12 = true;
     } else if (locale.time_format === "24") {
       options.hour12 = false;
     }
-    return new Date(Number(epochSeconds) * 1000).toLocaleTimeString(locale.language || undefined, options);
+    return new Date(Number(epochSeconds) * 1000).toLocaleTimeString(locale.time_format === "system" ? undefined : locale.language || undefined, options);
+  }
+
+  timeZone() {
+    return this._hass?.locale?.time_zone === "local"
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone || this._hass?.config?.time_zone
+      : this._hass?.config?.time_zone;
+  }
+
+  groupPanelDates(data) {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric", month: "2-digit", day: "2-digit", timeZone: this.timeZone(),
+      calendar: "gregory", numberingSystem: "latn",
+    });
+    return { ...data, cameras: (data.cameras || []).map((camera) => {
+      const clips = (camera.clips || []).map((clip) => {
+        const parts = Object.fromEntries(formatter.formatToParts(new Date(Number(clip.start) * 1000))
+          .map(({ type, value }) => [type, value]));
+        return { ...clip, date: `${parts.year}-${parts.month}-${parts.day}` };
+      });
+      const dates = [...new Set(clips.map((clip) => clip.date))].sort();
+      if (camera.days_descending !== false) dates.reverse();
+      return { ...camera, clips, dates };
+    }) };
   }
 
   formatDuration(seconds) {
@@ -3055,7 +3271,7 @@ class XSenseRecordingsPanel extends HTMLElement {
 
   syncText(stats) {
     if (stats?.cache_only) return this.t("backgroundSyncControlsVisibility");
-    if ((Number(stats?.pending_clips) || 0) > 0) return this.t("lazyCacheOnPlayback");
+    if ((Number(stats?.pending_clips) || 0) > 0) return this.readyDetail(Number(stats.pending_clips));
     return this.t("recordingsReady");
   }
 

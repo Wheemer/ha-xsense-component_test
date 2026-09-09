@@ -172,6 +172,8 @@ async def _async_build_panel_data_from_index(
             if ready:
                 stats["ready_clips"] += 1
                 camera_stats["ready_clips"] += 1
+            elif playable:
+                camera_stats["pending_clips"] += 1
             if not playable:
                 continue
             if sync_enabled and not clip_cached and not cache_suppressed:
@@ -220,10 +222,6 @@ async def _async_build_panel_data_from_index(
                     ),
                 }
             )
-        camera_stats["pending_clips"] = max(
-            0,
-            len(clips) - camera_stats["ready_clips"],
-        )
         stats["pending_clips"] += camera_stats["pending_clips"]
         stats["video_bytes"] += camera_stats["video_bytes"]
         stats["thumbnail_bytes"] += camera_stats["thumbnail_bytes"]
@@ -243,6 +241,10 @@ async def _async_build_panel_data_from_index(
                 "serial": serial,
                 "name": str(camera.get("name") or serial),
                 "online": bool(camera.get("online")),
+                "days_descending": _sort_descending(
+                    hass, entry_id, CONF_RECORDING_MEDIA_DAYS_ORDER,
+                    DEFAULT_RECORDING_MEDIA_DAYS_ORDER,
+                ),
                 "dates": sorted(
                     dates,
                     reverse=_sort_descending(
@@ -341,6 +343,8 @@ def build_panel_data(hass: HomeAssistant, index: dict[str, Any]) -> dict[str, An
             if ready:
                 stats["ready_clips"] += 1
                 camera_stats["ready_clips"] += 1
+            elif playable:
+                camera_stats["pending_clips"] += 1
             if not playable:
                 continue
             if sync_enabled and not clip_cached and not cache_suppressed:
@@ -382,10 +386,6 @@ def build_panel_data(hass: HomeAssistant, index: dict[str, Any]) -> dict[str, An
                     ),
                 }
             )
-        camera_stats["pending_clips"] = max(
-            0,
-            len(clips) - camera_stats["ready_clips"],
-        )
         stats["pending_clips"] += camera_stats["pending_clips"]
         stats["video_bytes"] += camera_stats["video_bytes"]
         stats["thumbnail_bytes"] += camera_stats["thumbnail_bytes"]
@@ -405,6 +405,10 @@ def build_panel_data(hass: HomeAssistant, index: dict[str, Any]) -> dict[str, An
                 "serial": serial,
                 "name": str(camera.get("name") or serial),
                 "online": bool(camera.get("online")),
+                "days_descending": _sort_descending(
+                    hass, entry_id, CONF_RECORDING_MEDIA_DAYS_ORDER,
+                    DEFAULT_RECORDING_MEDIA_DAYS_ORDER,
+                ),
                 "dates": sorted(
                     dates,
                     reverse=_sort_descending(

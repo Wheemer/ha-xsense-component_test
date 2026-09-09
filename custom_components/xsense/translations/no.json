@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Enheten er allerede konfigurert",
       "reauth_successful": "Re-autentisering var vellykket",
-      "reconfigure_successful": "Rekonfigureringen var vellykket"
+      "reconfigure_successful": "Rekonfigureringen var vellykket",
+      "unique_id_mismatch": "Logg inn med samme X-Sense-konto som denne oppføringen."
     },
     "error": {
       "cannot_connect": "Kunne ikke koble til",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Feil ved kommunikasjon med MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Kunne ikke mellomlagre {failed} opptak. {downloaded} opptak ble lastet ned."
+    },
+    "force_arm_invalid_link": {
+      "message": "Denne X-Sense-lenken for tvangsaktivering er ugyldig."
+    },
+    "force_arm_request_failed": {
+      "message": "Forespørselen om tvangsaktivering av X-Sense mislyktes."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Bare avspilling",
         "retained": "Behold lokale opptak"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Hjemme",
+        "away": "Borte"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Aktiveringsmodus"
+        }
+      },
+      "name": "Tvangsaktiver alarm",
+      "description": "Bekreft en ventende forespørsel om aktivering i Hjemme- eller Borte-modus som er blokkert av åpne sensorer. Åpne sensorer forbikobles."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Aktiveringsmodus"
+        }
+      },
+      "name": "Tvangsaktiver alarm nå",
+      "description": "Aktiver alarmen i Hjemme- eller Borte-modus umiddelbart, og forbikoble åpne sensorer uten å be om bekreftelse."
+    },
+    "trigger_sos": {
+      "name": "Utløs SOS-alarm",
+      "description": "Utløs SOS-alarmen på SBS50 umiddelbart."
+    },
+    "cancel_sos": {
+      "name": "Avbryt SOS-alarm",
+      "description": "Avbryt en aktiv SOS-alarm på SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Avbryt aktiv alarm",
+      "description": "Avbryt en aktiv sensoralarm på SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Hørbar SOS-alarm"
+        }
+      },
+      "name": "Angi SOS-lyd",
+      "description": "Velg om SOS bare bruker blinkende lys eller også aktiverer summeren."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID for konfigurasjonsoppføring",
+          "description": "La stå tomt for å bruke på alle X-Sense-kontoer."
+        }
+      },
+      "name": "Oppdater opptak",
+      "description": "Oppdater indeksen over kameraopptak som brukes av sidepanelet og medieleseren."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID for konfigurasjonsoppføring",
+          "description": "La stå tomt for å bruke på alle X-Sense-kontoer."
+        }
+      },
+      "name": "Mellomlagre opptak",
+      "description": "Last ned kameraopptak for lokal oppbevaring. Krever modusen Behold lokale opptak."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID for konfigurasjonsoppføring",
+          "description": "La stå tomt for å bruke på alle X-Sense-kontoer."
+        }
+      },
+      "name": "Tøm opptaksbuffer",
+      "description": "Slett lokale opptaksindekser, videoer og miniatyrbilder. Opptak i skyen og på SD-kort forblir uendret."
+    },
+    "query_light_schedules": {
+      "name": "Hent lysplaner",
+      "description": "Hent lysplaner. Velg lysbryteren på SBS50 som mål."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Visningsnavn"
+        },
+        "start_time": {
+          "name": "Starttid (HH:MM eller HHMM)"
+        },
+        "end_time": {
+          "name": "Sluttid (HH:MM eller HHMM)"
+        },
+        "week_days": {
+          "name": "Ukedager (1 = søndag, 7 = lørdag)"
+        },
+        "enabled": {
+          "name": "Aktivert tilstand"
+        },
+        "time_zone": {
+          "name": "Tidssone"
+        }
+      },
+      "name": "Opprett lysplan",
+      "description": "Opprett en lysplan. Velg lysbryteren på SBS50 som mål."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Planidentifikator"
+        },
+        "start_time": {
+          "name": "Starttid (HH:MM eller HHMM)"
+        },
+        "end_time": {
+          "name": "Sluttid (HH:MM eller HHMM)"
+        },
+        "week_days": {
+          "name": "Ukedager (1 = søndag, 7 = lørdag)"
+        },
+        "enabled": {
+          "name": "Aktivert tilstand"
+        },
+        "time_zone": {
+          "name": "Tidssone"
+        }
+      },
+      "name": "Oppdater lysplan",
+      "description": "Oppdater en lysplan. Velg lysbryteren på SBS50 som mål."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Planidentifikator"
+        },
+        "name": {
+          "name": "Visningsnavn"
+        }
+      },
+      "name": "Gi lysplan nytt navn",
+      "description": "Gi en lysplan nytt navn. Velg lysbryteren på SBS50 som mål."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Planidentifikator"
+        }
+      },
+      "name": "Slett lysplan",
+      "description": "Slett en lysplan. Velg lysbryteren på SBS50 som mål."
+    },
+    "query_light_groups": {
+      "name": "Hent lysgrupper",
+      "description": "Hent lysgrupper. Velg lysbryteren på SBS50 som mål."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Visningsnavn"
+        }
+      },
+      "name": "Opprett lysgruppe",
+      "description": "Opprett en lysgruppe. Velg lysbryteren på SBS50 som mål."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        },
+        "name": {
+          "name": "Visningsnavn"
+        }
+      },
+      "name": "Gi lysgruppe nytt navn",
+      "description": "Gi en lysgruppe nytt navn. Velg lysbryteren på SBS50 som mål."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        },
+        "timer": {
+          "name": "Type tidsur (pirTime eller appTime)"
+        },
+        "value": {
+          "name": "Tidsurverdi"
+        }
+      },
+      "name": "Oppdater tidsur for lysgruppe",
+      "description": "Oppdater tidsuret for en lysgruppe. Velg lysbryteren på SBS50 som mål."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Visningsnavn"
+        },
+        "device_ids": {
+          "name": "Enhetsidentifikatorer"
+        }
+      },
+      "name": "Koble lysgruppe",
+      "description": "Koble en lysgruppe. Velg lysbryteren på SBS50 som mål."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        }
+      },
+      "name": "Slett lysgruppe",
+      "description": "Slett en lysgruppe. Velg lysbryteren på SBS50 som mål."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Enhetsidentifikatorer"
+        }
+      },
+      "name": "Fjern enheter fra lysgruppe",
+      "description": "Fjern enheter fra en lysgruppe. Velg lysbryteren på SBS50 som mål."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Gruppeidentifikator"
+        },
+        "device_ids": {
+          "name": "Enhetenes serienumre"
+        },
+        "enabled": {
+          "name": "Aktivert tilstand"
+        }
+      },
+      "name": "Slå lysgruppe på eller av",
+      "description": "Slå en lysgruppe på eller av. Velg lysbryteren på SBS50 som mål."
+    }
+  },
+  "issues": {}
 }

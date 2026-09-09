@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Apparaat is al geconfigureerd",
       "reauth_successful": "Opnieuw verifiëren is gelukt",
-      "reconfigure_successful": "Herconfiguratie was succesvol"
+      "reconfigure_successful": "Herconfiguratie was succesvol",
+      "unique_id_mismatch": "Meld je aan met hetzelfde X-Sense-account als voor dit configuratie-item."
     },
     "error": {
       "cannot_connect": "Kan geen verbinding maken",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Fout bij communicatie met MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Kon {failed} opname(n) niet in de cache opslaan. Er zijn {downloaded} opname(n) gedownload."
+    },
+    "force_arm_invalid_link": {
+      "message": "Deze X-Sense-link voor geforceerd inschakelen is ongeldig."
+    },
+    "force_arm_request_failed": {
+      "message": "Het X-Sense-verzoek voor geforceerd inschakelen is mislukt."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Alleen afspelen",
         "retained": "Lokale opnamen bewaren"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Thuis",
+        "away": "Afwezig"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Inschakelmodus"
+        }
+      },
+      "name": "Geforceerd inschakelen",
+      "description": "Bevestig een openstaand inschakelverzoek voor Thuis of Afwezig dat door open sensoren is geblokkeerd. Open sensoren worden overbrugd."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Inschakelmodus"
+        }
+      },
+      "name": "Nu geforceerd inschakelen",
+      "description": "Schakel direct in de modus Thuis of Afwezig in en overbrug open sensoren zonder om bevestiging te vragen."
+    },
+    "trigger_sos": {
+      "name": "SOS-alarm activeren",
+      "description": "Activeer het SOS-alarm van de SBS50 onmiddellijk."
+    },
+    "cancel_sos": {
+      "name": "SOS-alarm annuleren",
+      "description": "Annuleer een actief SOS-alarm van de SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Actief alarm annuleren",
+      "description": "Annuleer een actief sensoralarm van de SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Hoorbaar SOS-alarm"
+        }
+      },
+      "name": "SOS-geluid instellen",
+      "description": "Kies of SOS alleen knipperlichten gebruikt of ook de zoemer laat klinken."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID van configuratie-item",
+          "description": "Laat leeg om dit op alle X-Sense-accounts toe te passen."
+        }
+      },
+      "name": "Opnamen vernieuwen",
+      "description": "Vernieuw de index van cameraopnamen die door de zijbalk en de mediabrowser wordt gebruikt."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID van configuratie-item",
+          "description": "Laat leeg om dit op alle X-Sense-accounts toe te passen."
+        }
+      },
+      "name": "Opnamen in cache opslaan",
+      "description": "Download cameraopnamen om ze lokaal te bewaren. Vereist de modus Lokale opnamen bewaren."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID van configuratie-item",
+          "description": "Laat leeg om dit op alle X-Sense-accounts toe te passen."
+        }
+      },
+      "name": "Opnamencache wissen",
+      "description": "Verwijder lokale opname-indexen, video's en miniaturen. Opnamen in de cloud en op de SD-kaart blijven ongewijzigd."
+    },
+    "query_light_schedules": {
+      "name": "Lichtschema's opvragen",
+      "description": "Vraag lichtschema's op. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Weergavenaam"
+        },
+        "start_time": {
+          "name": "Begintijd (HH:MM of HHMM)"
+        },
+        "end_time": {
+          "name": "Eindtijd (HH:MM of HHMM)"
+        },
+        "week_days": {
+          "name": "Weekdagen (1 = zondag, 7 = zaterdag)"
+        },
+        "enabled": {
+          "name": "Ingeschakelde status"
+        },
+        "time_zone": {
+          "name": "Tijdzone"
+        }
+      },
+      "name": "Lichtschema maken",
+      "description": "Maak een lichtschema. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Schema-ID"
+        },
+        "start_time": {
+          "name": "Begintijd (HH:MM of HHMM)"
+        },
+        "end_time": {
+          "name": "Eindtijd (HH:MM of HHMM)"
+        },
+        "week_days": {
+          "name": "Weekdagen (1 = zondag, 7 = zaterdag)"
+        },
+        "enabled": {
+          "name": "Ingeschakelde status"
+        },
+        "time_zone": {
+          "name": "Tijdzone"
+        }
+      },
+      "name": "Lichtschema bijwerken",
+      "description": "Werk een lichtschema bij. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Schema-ID"
+        },
+        "name": {
+          "name": "Weergavenaam"
+        }
+      },
+      "name": "Lichtschema hernoemen",
+      "description": "Hernoem een lichtschema. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Schema-ID"
+        }
+      },
+      "name": "Lichtschema verwijderen",
+      "description": "Verwijder een lichtschema. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "query_light_groups": {
+      "name": "Lichtgroepen opvragen",
+      "description": "Vraag lichtgroepen op. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Weergavenaam"
+        }
+      },
+      "name": "Lichtgroep maken",
+      "description": "Maak een lichtgroep. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Groeps-ID"
+        },
+        "name": {
+          "name": "Weergavenaam"
+        }
+      },
+      "name": "Lichtgroep hernoemen",
+      "description": "Hernoem een lichtgroep. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Groeps-ID"
+        },
+        "timer": {
+          "name": "Timertype (pirTime of appTime)"
+        },
+        "value": {
+          "name": "Timerwaarde"
+        }
+      },
+      "name": "Lichtgroeptimer bijwerken",
+      "description": "Werk de timer van een lichtgroep bij. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Weergavenaam"
+        },
+        "device_ids": {
+          "name": "Apparaat-ID's"
+        }
+      },
+      "name": "Lichtgroep koppelen",
+      "description": "Koppel een lichtgroep. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Groeps-ID"
+        }
+      },
+      "name": "Lichtgroep verwijderen",
+      "description": "Verwijder een lichtgroep. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Apparaat-ID's"
+        }
+      },
+      "name": "Apparaten uit lichtgroep verwijderen",
+      "description": "Verwijder apparaten uit een lichtgroep. Selecteer de lichtschakelaar van de SBS50 als doel."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Groeps-ID"
+        },
+        "device_ids": {
+          "name": "Serienummers van apparaten"
+        },
+        "enabled": {
+          "name": "Ingeschakelde status"
+        }
+      },
+      "name": "Lichtgroep in- of uitschakelen",
+      "description": "Schakel een lichtgroep in of uit. Selecteer de lichtschakelaar van de SBS50 als doel."
+    }
+  },
+  "issues": {}
 }

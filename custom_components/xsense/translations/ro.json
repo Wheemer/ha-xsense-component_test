@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Dispozitivul este deja configurat",
       "reauth_successful": "Re-autentificarea a avut succes",
-      "reconfigure_successful": "Reconfigurarea a avut succes"
+      "reconfigure_successful": "Reconfigurarea a avut succes",
+      "unique_id_mismatch": "Autentifică-te cu același cont X-Sense folosit pentru această intrare."
     },
     "error": {
       "cannot_connect": "Nu s-a putut conecta",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Eroare de comunicare cu MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Nu s-au putut stoca în cache {failed} înregistrări. Au fost descărcate {downloaded} înregistrări."
+    },
+    "force_arm_invalid_link": {
+      "message": "Acest link de armare forțată X-Sense este nevalid."
+    },
+    "force_arm_request_failed": {
+      "message": "Cererea de armare forțată X-Sense a eșuat."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Doar redare",
         "retained": "Păstrează înregistrările locale"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Acasă",
+        "away": "Plecat"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Mod de armare"
+        }
+      },
+      "name": "Armare forțată",
+      "description": "Confirmă o cerere de armare în așteptare în modul Acasă sau Plecat, blocată de senzori deschiși. Senzorii deschiși vor fi ocoliți."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Mod de armare"
+        }
+      },
+      "name": "Armare forțată acum",
+      "description": "Armează imediat în modul Acasă sau Plecat, ocolind senzorii deschiși fără a solicita confirmare."
+    },
+    "trigger_sos": {
+      "name": "Declanșează alarma SOS",
+      "description": "Declanșează imediat alarma SOS a dispozitivului SBS50."
+    },
+    "cancel_sos": {
+      "name": "Anulează alarma SOS",
+      "description": "Anulează o alarmă SOS activă a dispozitivului SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Anulează alarma activă",
+      "description": "Anulează o alarmă activă declanșată de un senzor al dispozitivului SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Alarmă SOS sonoră"
+        }
+      },
+      "name": "Setează sunetul SOS",
+      "description": "Alege dacă SOS folosește doar lumini intermitente sau activează și avertizorul sonor."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID-ul intrării de configurare",
+          "description": "Lasă necompletat pentru a aplica tuturor conturilor X-Sense."
+        }
+      },
+      "name": "Actualizează înregistrările",
+      "description": "Actualizează indexul înregistrărilor camerelor folosit de bara laterală și de navigatorul media."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID-ul intrării de configurare",
+          "description": "Lasă necompletat pentru a aplica tuturor conturilor X-Sense."
+        }
+      },
+      "name": "Stochează înregistrările în cache",
+      "description": "Descarcă înregistrările camerelor pentru păstrare locală. Necesită modul Păstrează înregistrările locale."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID-ul intrării de configurare",
+          "description": "Lasă necompletat pentru a aplica tuturor conturilor X-Sense."
+        }
+      },
+      "name": "Golește memoria cache a înregistrărilor",
+      "description": "Șterge indexurile locale de înregistrări, videoclipurile și miniaturile. Înregistrările din cloud și de pe cardul SD rămân neschimbate."
+    },
+    "query_light_schedules": {
+      "name": "Interoghează programele de iluminat",
+      "description": "Interoghează programele de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Nume afișat"
+        },
+        "start_time": {
+          "name": "Ora de început (HH:MM sau HHMM)"
+        },
+        "end_time": {
+          "name": "Ora de sfârșit (HH:MM sau HHMM)"
+        },
+        "week_days": {
+          "name": "Zilele săptămânii (1 = duminică, 7 = sâmbătă)"
+        },
+        "enabled": {
+          "name": "Stare de activare"
+        },
+        "time_zone": {
+          "name": "Fus orar"
+        }
+      },
+      "name": "Creează un program de iluminat",
+      "description": "Creează un program de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identificatorul programului"
+        },
+        "start_time": {
+          "name": "Ora de început (HH:MM sau HHMM)"
+        },
+        "end_time": {
+          "name": "Ora de sfârșit (HH:MM sau HHMM)"
+        },
+        "week_days": {
+          "name": "Zilele săptămânii (1 = duminică, 7 = sâmbătă)"
+        },
+        "enabled": {
+          "name": "Stare de activare"
+        },
+        "time_zone": {
+          "name": "Fus orar"
+        }
+      },
+      "name": "Actualizează programul de iluminat",
+      "description": "Actualizează un program de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identificatorul programului"
+        },
+        "name": {
+          "name": "Nume afișat"
+        }
+      },
+      "name": "Redenumește programul de iluminat",
+      "description": "Redenumește un program de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identificatorul programului"
+        }
+      },
+      "name": "Șterge programul de iluminat",
+      "description": "Șterge un program de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "query_light_groups": {
+      "name": "Interoghează grupurile de iluminat",
+      "description": "Interoghează grupurile de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Nume afișat"
+        }
+      },
+      "name": "Creează un grup de iluminat",
+      "description": "Creează un grup de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identificatorul grupului"
+        },
+        "name": {
+          "name": "Nume afișat"
+        }
+      },
+      "name": "Redenumește grupul de iluminat",
+      "description": "Redenumește un grup de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Identificatorul grupului"
+        },
+        "timer": {
+          "name": "Tip de temporizator (pirTime sau appTime)"
+        },
+        "value": {
+          "name": "Valoarea temporizatorului"
+        }
+      },
+      "name": "Actualizează temporizatorul grupului de iluminat",
+      "description": "Actualizează temporizatorul unui grup de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Nume afișat"
+        },
+        "device_ids": {
+          "name": "Identificatorii dispozitivelor"
+        }
+      },
+      "name": "Asociază grupul de iluminat",
+      "description": "Asociază un grup de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identificatorul grupului"
+        }
+      },
+      "name": "Șterge grupul de iluminat",
+      "description": "Șterge un grup de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Identificatorii dispozitivelor"
+        }
+      },
+      "name": "Elimină dispozitive din grupul de iluminat",
+      "description": "Elimină dispozitive dintr-un grup de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Identificatorul grupului"
+        },
+        "device_ids": {
+          "name": "Numerele de serie ale dispozitivelor"
+        },
+        "enabled": {
+          "name": "Stare de activare"
+        }
+      },
+      "name": "Pornește sau oprește grupul de iluminat",
+      "description": "Pornește sau oprește un grup de iluminat. Selectează ca țintă întrerupătorul de alimentare a iluminatului SBS50."
+    }
+  },
+  "issues": {}
 }

@@ -1,6 +1,236 @@
 {
+  "services": {
+    "force_arm": {
+      "name": "Confirmer l’armement forcé",
+      "description": "Confirmer une demande d’armement Présent ou Absent bloquée par des capteurs ouverts. Ces capteurs seront contournés.",
+      "fields": {
+        "mode": {
+          "name": "Mode d’armement"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "Forcer l’armement immédiatement",
+      "description": "Armer immédiatement en mode Présent ou Absent en contournant les capteurs ouverts, sans confirmation.",
+      "fields": {
+        "mode": {
+          "name": "Mode d’armement"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "Déclencher l’alarme SOS",
+      "description": "Déclencher immédiatement l’alarme SOS de la SBS50."
+    },
+    "cancel_sos": {
+      "name": "Annuler l’alarme SOS",
+      "description": "Annuler une alarme SOS active de la SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Annuler l’alarme active",
+      "description": "Annuler une alarme de capteur active de la SBS50."
+    },
+    "set_sos_sound": {
+      "name": "Régler le son SOS",
+      "description": "Choisir si SOS fait uniquement clignoter la lumière ou active aussi l’avertisseur sonore.",
+      "fields": {
+        "audible": {
+          "name": "Alarme SOS sonore"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "Actualiser les enregistrements",
+      "description": "Actualiser l’index des enregistrements de la barre latérale et du navigateur multimédia.",
+      "fields": {
+        "entry_id": {
+          "name": "Identifiant de configuration",
+          "description": "Laisser vide pour appliquer à tous les comptes X-Sense."
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "Mettre les enregistrements en cache",
+      "description": "Télécharger les enregistrements pour les conserver localement. Nécessite le mode de conservation locale.",
+      "fields": {
+        "entry_id": {
+          "name": "Identifiant de configuration",
+          "description": "Laisser vide pour appliquer à tous les comptes X-Sense."
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "Vider le cache des enregistrements",
+      "description": "Supprimer les index, vidéos et miniatures locaux. Les enregistrements cloud et SD restent inchangés.",
+      "fields": {
+        "entry_id": {
+          "name": "Identifiant de configuration",
+          "description": "Laisser vide pour appliquer à tous les comptes X-Sense."
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "Consulter les horaires d’éclairage",
+      "description": "Consulter les horaires d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50."
+    },
+    "create_light_schedule": {
+      "name": "Créer un horaire d’éclairage",
+      "description": "Créer un horaire d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "name": {
+          "name": "Nom affiché"
+        },
+        "start_time": {
+          "name": "Heure de début (HH:MM ou HHMM)"
+        },
+        "end_time": {
+          "name": "Heure de fin (HH:MM ou HHMM)"
+        },
+        "week_days": {
+          "name": "Jours (1 = dimanche, 7 = samedi)"
+        },
+        "enabled": {
+          "name": "État d’activation"
+        },
+        "time_zone": {
+          "name": "Fuseau horaire"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "Modifier un horaire d’éclairage",
+      "description": "Modifier un horaire d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identifiant de l’horaire"
+        },
+        "start_time": {
+          "name": "Heure de début (HH:MM ou HHMM)"
+        },
+        "end_time": {
+          "name": "Heure de fin (HH:MM ou HHMM)"
+        },
+        "week_days": {
+          "name": "Jours (1 = dimanche, 7 = samedi)"
+        },
+        "enabled": {
+          "name": "État d’activation"
+        },
+        "time_zone": {
+          "name": "Fuseau horaire"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "Renommer un horaire d’éclairage",
+      "description": "Renommer un horaire d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identifiant de l’horaire"
+        },
+        "name": {
+          "name": "Nom affiché"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "Supprimer un horaire d’éclairage",
+      "description": "Supprimer un horaire d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identifiant de l’horaire"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "Consulter les groupes d’éclairage",
+      "description": "Consulter les groupes d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50."
+    },
+    "create_light_group": {
+      "name": "Créer un groupe d’éclairage",
+      "description": "Créer un groupe d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "name": {
+          "name": "Nom affiché"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "Renommer un groupe d’éclairage",
+      "description": "Renommer un groupe d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifiant du groupe"
+        },
+        "name": {
+          "name": "Nom affiché"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "Modifier la minuterie du groupe",
+      "description": "Modifier la minuterie du groupe. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifiant du groupe"
+        },
+        "timer": {
+          "name": "Type de minuterie (pirTime ou appTime)"
+        },
+        "value": {
+          "name": "Valeur de minuterie"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "Associer des éclairages au groupe",
+      "description": "Associer des éclairages au groupe. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "name": {
+          "name": "Nom affiché"
+        },
+        "device_ids": {
+          "name": "Identifiants des appareils"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "Supprimer un groupe d’éclairage",
+      "description": "Supprimer un groupe d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifiant du groupe"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "Retirer des appareils du groupe",
+      "description": "Retirer des appareils du groupe. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "device_ids": {
+          "name": "Identifiants des appareils"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "Commander un groupe d’éclairage",
+      "description": "Commander un groupe d’éclairage. Cibler l’interrupteur d’éclairage de la SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifiant du groupe"
+        },
+        "device_ids": {
+          "name": "Numéros de série des appareils"
+        },
+        "enabled": {
+          "name": "État d’activation"
+        }
+      }
+    }
+  },
   "config": {
     "abort": {
+      "unique_id_mismatch": "Connectez-vous avec le même compte X-Sense que celui de cette configuration.",
       "already_configured": "L'appareil est déjà configuré",
       "reauth_successful": "La réauthentification a réussi",
       "reconfigure_successful": "La reconfiguration a réussi"
@@ -711,6 +941,15 @@
     }
   },
   "exceptions": {
+    "recording_cache_failed": {
+      "message": "Impossible de mettre {failed} enregistrement(s) en cache. {downloaded} enregistrement(s) ont été téléchargés."
+    },
+    "force_arm_invalid_link": {
+      "message": "Ce lien d’armement forcé X-Sense est invalide."
+    },
+    "force_arm_request_failed": {
+      "message": "La demande d’armement forcé X-Sense a échoué."
+    },
     "station_unavailable": {
       "message": "La station X-Sense n'est plus disponible"
     },
@@ -779,6 +1018,12 @@
     }
   },
   "selector": {
+    "force_arm_mode": {
+      "options": {
+        "home": "Présent",
+        "away": "Absent"
+      }
+    },
     "recording_notification_quality": {
       "options": {
         "hd": "HD",

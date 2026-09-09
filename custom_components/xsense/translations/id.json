@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Perangkat sudah dikonfigurasi",
       "reauth_successful": "Otentikasi ulang berhasil",
-      "reconfigure_successful": "Konfigurasi ulang berhasil"
+      "reconfigure_successful": "Konfigurasi ulang berhasil",
+      "unique_id_mismatch": "Masuk dengan akun X-Sense yang sama dengan entri ini."
     },
     "error": {
       "cannot_connect": "Gagal terhubung",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Kesalahan komunikasi dengan MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Tidak dapat menyimpan {failed} rekaman ke cache. {downloaded} rekaman telah diunduh."
+    },
+    "force_arm_invalid_link": {
+      "message": "Tautan pengaktifan paksa X-Sense ini tidak valid."
+    },
+    "force_arm_request_failed": {
+      "message": "Permintaan pengaktifan paksa X-Sense gagal."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Hanya pemutaran",
         "retained": "Simpan rekaman lokal"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Di rumah",
+        "away": "Pergi"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "name": "Aktifkan penjagaan secara paksa",
+      "description": "Konfirmasikan permintaan pengaktifan mode Di rumah atau Pergi yang tertunda karena sensor terbuka. Sensor terbuka akan dilewati.",
+      "fields": {
+        "mode": {
+          "name": "Mode penjagaan"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "Aktifkan penjagaan secara paksa sekarang",
+      "description": "Aktifkan mode Di rumah atau Pergi segera dengan melewati sensor terbuka tanpa meminta konfirmasi.",
+      "fields": {
+        "mode": {
+          "name": "Mode penjagaan"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "Picu alarm SOS",
+      "description": "Picu alarm SOS SBS50 segera."
+    },
+    "cancel_sos": {
+      "name": "Batalkan alarm SOS",
+      "description": "Batalkan alarm SOS SBS50 yang aktif."
+    },
+    "cancel_alarm": {
+      "name": "Batalkan alarm aktif",
+      "description": "Batalkan alarm sensor SBS50 yang aktif."
+    },
+    "set_sos_sound": {
+      "name": "Atur suara SOS",
+      "description": "Pilih apakah SOS hanya menggunakan lampu berkedip atau juga membunyikan bel.",
+      "fields": {
+        "audible": {
+          "name": "Alarm SOS bersuara"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "Segarkan rekaman",
+      "description": "Segarkan indeks rekaman kamera yang digunakan oleh bilah samping dan penjelajah media.",
+      "fields": {
+        "entry_id": {
+          "name": "ID entri konfigurasi",
+          "description": "Biarkan kosong untuk diterapkan ke semua akun X-Sense."
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "Simpan rekaman ke cache",
+      "description": "Unduh rekaman kamera untuk disimpan secara lokal. Memerlukan mode Simpan rekaman lokal.",
+      "fields": {
+        "entry_id": {
+          "name": "ID entri konfigurasi",
+          "description": "Biarkan kosong untuk diterapkan ke semua akun X-Sense."
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "Bersihkan cache rekaman",
+      "description": "Hapus indeks rekaman, video, dan gambar mini lokal. Rekaman cloud dan SD tidak berubah.",
+      "fields": {
+        "entry_id": {
+          "name": "ID entri konfigurasi",
+          "description": "Biarkan kosong untuk diterapkan ke semua akun X-Sense."
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "Ambil jadwal lampu",
+      "description": "Ambil jadwal lampu. Pilih sakelar daya lampu SBS50 sebagai target."
+    },
+    "create_light_schedule": {
+      "name": "Buat jadwal lampu",
+      "description": "Buat jadwal lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "name": {
+          "name": "Nama tampilan"
+        },
+        "start_time": {
+          "name": "Waktu mulai (HH:MM atau HHMM)"
+        },
+        "end_time": {
+          "name": "Waktu selesai (HH:MM atau HHMM)"
+        },
+        "week_days": {
+          "name": "Hari dalam seminggu (1 = Minggu, 7 = Sabtu)"
+        },
+        "enabled": {
+          "name": "Status diaktifkan"
+        },
+        "time_zone": {
+          "name": "Zona waktu"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "Perbarui jadwal lampu",
+      "description": "Perbarui jadwal lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "schedule_id": {
+          "name": "Pengenal jadwal"
+        },
+        "start_time": {
+          "name": "Waktu mulai (HH:MM atau HHMM)"
+        },
+        "end_time": {
+          "name": "Waktu selesai (HH:MM atau HHMM)"
+        },
+        "week_days": {
+          "name": "Hari dalam seminggu (1 = Minggu, 7 = Sabtu)"
+        },
+        "enabled": {
+          "name": "Status diaktifkan"
+        },
+        "time_zone": {
+          "name": "Zona waktu"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "Ubah nama jadwal lampu",
+      "description": "Ubah nama jadwal lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "schedule_id": {
+          "name": "Pengenal jadwal"
+        },
+        "name": {
+          "name": "Nama tampilan"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "Hapus jadwal lampu",
+      "description": "Hapus jadwal lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "schedule_id": {
+          "name": "Pengenal jadwal"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "Ambil grup lampu",
+      "description": "Ambil grup lampu. Pilih sakelar daya lampu SBS50 sebagai target."
+    },
+    "create_light_group": {
+      "name": "Buat grup lampu",
+      "description": "Buat grup lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "name": {
+          "name": "Nama tampilan"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "Ubah nama grup lampu",
+      "description": "Ubah nama grup lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "group_id": {
+          "name": "Pengenal grup"
+        },
+        "name": {
+          "name": "Nama tampilan"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "Perbarui pewaktu grup lampu",
+      "description": "Perbarui pewaktu grup lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "group_id": {
+          "name": "Pengenal grup"
+        },
+        "timer": {
+          "name": "Jenis pewaktu (pirTime atau appTime)"
+        },
+        "value": {
+          "name": "Nilai pewaktu"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "Tautkan grup lampu",
+      "description": "Tautkan grup lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "name": {
+          "name": "Nama tampilan"
+        },
+        "device_ids": {
+          "name": "Pengenal perangkat"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "Hapus grup lampu",
+      "description": "Hapus grup lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "group_id": {
+          "name": "Pengenal grup"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "Hapus perangkat dari grup lampu",
+      "description": "Hapus perangkat dari grup lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "device_ids": {
+          "name": "Pengenal perangkat"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "Atur daya grup lampu",
+      "description": "Atur daya grup lampu. Pilih sakelar daya lampu SBS50 sebagai target.",
+      "fields": {
+        "group_id": {
+          "name": "Pengenal grup"
+        },
+        "device_ids": {
+          "name": "Nomor seri perangkat"
+        },
+        "enabled": {
+          "name": "Status diaktifkan"
+        }
+      }
+    }
+  },
+  "issues": {}
 }
