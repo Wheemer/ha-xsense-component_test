@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Urządzenie jest już skonfigurowane",
       "reauth_successful": "Ponowne uwierzytelnienie powiodło się",
-      "reconfigure_successful": "Ponowna konfiguracja przebiegła pomyślnie"
+      "reconfigure_successful": "Ponowna konfiguracja przebiegła pomyślnie",
+      "unique_id_mismatch": "Zaloguj się na to samo konto X-Sense, którego użyto w tym wpisie."
     },
     "error": {
       "cannot_connect": "Nie udało się połączyć",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Błąd komunikacji z MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Nie udało się zapisać {failed} nagrań w pamięci podręcznej. Pobrano {downloaded} nagrań."
+    },
+    "force_arm_invalid_link": {
+      "message": "Ten link do wymuszonego uzbrojenia X-Sense jest nieprawidłowy."
+    },
+    "force_arm_request_failed": {
+      "message": "Żądanie wymuszonego uzbrojenia X-Sense nie powiodło się."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Tylko odtwarzanie",
         "retained": "Zachowuj nagrania lokalne"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "W domu",
+        "away": "Poza domem"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Tryb uzbrojenia"
+        }
+      },
+      "name": "Wymuś uzbrojenie",
+      "description": "Potwierdź oczekujące żądanie uzbrojenia w trybie W domu lub Poza domem zablokowane przez otwarte czujniki. Otwarte czujniki zostaną pominięte."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Tryb uzbrojenia"
+        }
+      },
+      "name": "Wymuś uzbrojenie teraz",
+      "description": "Uzbrój natychmiast w trybie W domu lub Poza domem, pomijając otwarte czujniki bez pytania o potwierdzenie."
+    },
+    "trigger_sos": {
+      "name": "Wywołaj alarm SOS",
+      "description": "Natychmiast wywołaj alarm SOS urządzenia SBS50."
+    },
+    "cancel_sos": {
+      "name": "Anuluj alarm SOS",
+      "description": "Anuluj aktywny alarm SOS urządzenia SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Anuluj aktywny alarm",
+      "description": "Anuluj aktywny alarm czujnika urządzenia SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Dźwiękowy alarm SOS"
+        }
+      },
+      "name": "Ustaw dźwięk SOS",
+      "description": "Wybierz, czy SOS ma używać tylko migających świateł, czy również sygnału dźwiękowego."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "Identyfikator wpisu konfiguracji",
+          "description": "Pozostaw puste, aby zastosować do wszystkich kont X-Sense."
+        }
+      },
+      "name": "Odśwież nagrania",
+      "description": "Odśwież indeks nagrań z kamer używany przez panel boczny i przeglądarkę multimediów."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "Identyfikator wpisu konfiguracji",
+          "description": "Pozostaw puste, aby zastosować do wszystkich kont X-Sense."
+        }
+      },
+      "name": "Zapisz nagrania w pamięci podręcznej",
+      "description": "Pobierz nagrania z kamer do przechowywania lokalnego. Wymaga trybu Zachowuj nagrania lokalne."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "Identyfikator wpisu konfiguracji",
+          "description": "Pozostaw puste, aby zastosować do wszystkich kont X-Sense."
+        }
+      },
+      "name": "Wyczyść pamięć podręczną nagrań",
+      "description": "Usuń lokalne indeksy nagrań, filmy i miniatury. Nagrania w chmurze i na karcie SD pozostaną bez zmian."
+    },
+    "query_light_schedules": {
+      "name": "Pobierz harmonogramy oświetlenia",
+      "description": "Pobierz harmonogramy oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Nazwa wyświetlana"
+        },
+        "start_time": {
+          "name": "Czas rozpoczęcia (HH:MM lub HHMM)"
+        },
+        "end_time": {
+          "name": "Czas zakończenia (HH:MM lub HHMM)"
+        },
+        "week_days": {
+          "name": "Dni tygodnia (1 = niedziela, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stan włączenia"
+        },
+        "time_zone": {
+          "name": "Strefa czasowa"
+        }
+      },
+      "name": "Utwórz harmonogram oświetlenia",
+      "description": "Utwórz harmonogram oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identyfikator harmonogramu"
+        },
+        "start_time": {
+          "name": "Czas rozpoczęcia (HH:MM lub HHMM)"
+        },
+        "end_time": {
+          "name": "Czas zakończenia (HH:MM lub HHMM)"
+        },
+        "week_days": {
+          "name": "Dni tygodnia (1 = niedziela, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stan włączenia"
+        },
+        "time_zone": {
+          "name": "Strefa czasowa"
+        }
+      },
+      "name": "Zaktualizuj harmonogram oświetlenia",
+      "description": "Zaktualizuj harmonogram oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identyfikator harmonogramu"
+        },
+        "name": {
+          "name": "Nazwa wyświetlana"
+        }
+      },
+      "name": "Zmień nazwę harmonogramu oświetlenia",
+      "description": "Zmień nazwę harmonogramu oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identyfikator harmonogramu"
+        }
+      },
+      "name": "Usuń harmonogram oświetlenia",
+      "description": "Usuń harmonogram oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "query_light_groups": {
+      "name": "Pobierz grupy oświetlenia",
+      "description": "Pobierz grupy oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Nazwa wyświetlana"
+        }
+      },
+      "name": "Utwórz grupę oświetlenia",
+      "description": "Utwórz grupę oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identyfikator grupy"
+        },
+        "name": {
+          "name": "Nazwa wyświetlana"
+        }
+      },
+      "name": "Zmień nazwę grupy oświetlenia",
+      "description": "Zmień nazwę grupy oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Identyfikator grupy"
+        },
+        "timer": {
+          "name": "Typ minutnika (pirTime lub appTime)"
+        },
+        "value": {
+          "name": "Wartość minutnika"
+        }
+      },
+      "name": "Zaktualizuj minutnik grupy oświetlenia",
+      "description": "Zaktualizuj minutnik grupy oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Nazwa wyświetlana"
+        },
+        "device_ids": {
+          "name": "Identyfikatory urządzeń"
+        }
+      },
+      "name": "Powiąż grupę oświetlenia",
+      "description": "Powiąż grupę oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identyfikator grupy"
+        }
+      },
+      "name": "Usuń grupę oświetlenia",
+      "description": "Usuń grupę oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Identyfikatory urządzeń"
+        }
+      },
+      "name": "Usuń urządzenia z grupy oświetlenia",
+      "description": "Usuń urządzenia z grupy oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Identyfikator grupy"
+        },
+        "device_ids": {
+          "name": "Numery seryjne urządzeń"
+        },
+        "enabled": {
+          "name": "Stan włączenia"
+        }
+      },
+      "name": "Włącz lub wyłącz grupę oświetlenia",
+      "description": "Włącz lub wyłącz grupę oświetlenia. Jako cel wybierz przełącznik zasilania oświetlenia SBS50."
+    }
+  },
+  "issues": {}
 }

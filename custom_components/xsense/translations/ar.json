@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "تم تكوين الجهاز بالفعل",
       "reauth_successful": "تمت إعادة المصادقة بنجاح",
-      "reconfigure_successful": "تمت إعادة التشكيل بنجاح"
+      "reconfigure_successful": "تمت إعادة التشكيل بنجاح",
+      "unique_id_mismatch": "سجّل الدخول باستخدام حساب X-Sense نفسه المرتبط بهذا الإدخال."
     },
     "error": {
       "cannot_connect": "فشل الاتصال",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "خطأ في الاتصال بـ MQTT: ‏{error}"
+    },
+    "recording_cache_failed": {
+      "message": "تعذر التخزين المؤقت لعدد {failed} من التسجيلات. تم تنزيل {downloaded} من التسجيلات."
+    },
+    "force_arm_invalid_link": {
+      "message": "رابط التسليح الإجباري هذا في X-Sense غير صالح."
+    },
+    "force_arm_request_failed": {
+      "message": "فشل طلب التسليح الإجباري في X-Sense."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "التشغيل فقط",
         "retained": "الاحتفاظ بالتسجيلات محليًا"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "المنزل",
+        "away": "الغياب"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "وضع التسليح"
+        }
+      },
+      "name": "التسليح الإجباري",
+      "description": "تأكيد طلب تسليح معلّق في وضع المنزل أو الغياب منعته مستشعرات مفتوحة. يتم تجاوز المستشعرات المفتوحة."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "وضع التسليح"
+        }
+      },
+      "name": "التسليح الإجباري الآن",
+      "description": "التسليح في وضع المنزل أو الغياب فورًا مع تجاوز المستشعرات المفتوحة دون طلب تأكيد."
+    },
+    "trigger_sos": {
+      "name": "تشغيل إنذار الاستغاثة",
+      "description": "تشغيل إنذار الاستغاثة في SBS50 فورًا."
+    },
+    "cancel_sos": {
+      "name": "إلغاء إنذار الاستغاثة",
+      "description": "إلغاء إنذار استغاثة نشط في SBS50."
+    },
+    "cancel_alarm": {
+      "name": "إلغاء الإنذار النشط",
+      "description": "إلغاء إنذار مستشعر نشط في SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "إنذار استغاثة مسموع"
+        }
+      },
+      "name": "ضبط صوت الاستغاثة",
+      "description": "اختر ما إذا كانت الاستغاثة تستخدم الأضواء الوامضة فقط أم تشغّل الصفارة أيضًا."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "معرّف إدخال التكوين",
+          "description": "اتركه فارغًا للتطبيق على جميع حسابات X-Sense."
+        }
+      },
+      "name": "تحديث التسجيلات",
+      "description": "تحديث فهرس تسجيلات الكاميرا المستخدم في الشريط الجانبي ومتصفح الوسائط."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "معرّف إدخال التكوين",
+          "description": "اتركه فارغًا للتطبيق على جميع حسابات X-Sense."
+        }
+      },
+      "name": "تخزين التسجيلات مؤقتًا",
+      "description": "تنزيل تسجيلات الكاميرا للاحتفاظ بها محليًا. يتطلب وضع الاحتفاظ بالتسجيلات محليًا."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "معرّف إدخال التكوين",
+          "description": "اتركه فارغًا للتطبيق على جميع حسابات X-Sense."
+        }
+      },
+      "name": "مسح ذاكرة التخزين المؤقت للتسجيلات",
+      "description": "حذف فهارس التسجيلات والفيديوهات والصور المصغرة المحلية. لا تتغير تسجيلات السحابة وبطاقة SD."
+    },
+    "query_light_schedules": {
+      "name": "الاستعلام عن جداول الإضاءة",
+      "description": "الاستعلام عن جداول الإضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "اسم العرض"
+        },
+        "start_time": {
+          "name": "وقت البدء (HH:MM أو HHMM)"
+        },
+        "end_time": {
+          "name": "وقت الانتهاء (HH:MM أو HHMM)"
+        },
+        "week_days": {
+          "name": "أيام الأسبوع (1 = الأحد، 7 = السبت)"
+        },
+        "enabled": {
+          "name": "حالة التفعيل"
+        },
+        "time_zone": {
+          "name": "المنطقة الزمنية"
+        }
+      },
+      "name": "إنشاء جدول إضاءة",
+      "description": "إنشاء جدول إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "معرّف الجدول"
+        },
+        "start_time": {
+          "name": "وقت البدء (HH:MM أو HHMM)"
+        },
+        "end_time": {
+          "name": "وقت الانتهاء (HH:MM أو HHMM)"
+        },
+        "week_days": {
+          "name": "أيام الأسبوع (1 = الأحد، 7 = السبت)"
+        },
+        "enabled": {
+          "name": "حالة التفعيل"
+        },
+        "time_zone": {
+          "name": "المنطقة الزمنية"
+        }
+      },
+      "name": "تحديث جدول إضاءة",
+      "description": "تحديث جدول إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "معرّف الجدول"
+        },
+        "name": {
+          "name": "اسم العرض"
+        }
+      },
+      "name": "إعادة تسمية جدول إضاءة",
+      "description": "إعادة تسمية جدول إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "معرّف الجدول"
+        }
+      },
+      "name": "حذف جدول إضاءة",
+      "description": "حذف جدول إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "query_light_groups": {
+      "name": "الاستعلام عن مجموعات الإضاءة",
+      "description": "الاستعلام عن مجموعات الإضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "اسم العرض"
+        }
+      },
+      "name": "إنشاء مجموعة إضاءة",
+      "description": "إنشاء مجموعة إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "معرّف المجموعة"
+        },
+        "name": {
+          "name": "اسم العرض"
+        }
+      },
+      "name": "إعادة تسمية مجموعة إضاءة",
+      "description": "إعادة تسمية مجموعة إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "معرّف المجموعة"
+        },
+        "timer": {
+          "name": "نوع المؤقت (pirTime أو appTime)"
+        },
+        "value": {
+          "name": "قيمة المؤقت"
+        }
+      },
+      "name": "تحديث مؤقت مجموعة إضاءة",
+      "description": "تحديث مؤقت مجموعة إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "اسم العرض"
+        },
+        "device_ids": {
+          "name": "معرّفات الأجهزة"
+        }
+      },
+      "name": "ربط مجموعة إضاءة",
+      "description": "ربط مجموعة إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "معرّف المجموعة"
+        }
+      },
+      "name": "حذف مجموعة إضاءة",
+      "description": "حذف مجموعة إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "معرّفات الأجهزة"
+        }
+      },
+      "name": "إزالة أجهزة من مجموعة إضاءة",
+      "description": "إزالة أجهزة من مجموعة إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "معرّف المجموعة"
+        },
+        "device_ids": {
+          "name": "الأرقام التسلسلية للأجهزة"
+        },
+        "enabled": {
+          "name": "حالة التفعيل"
+        }
+      },
+      "name": "ضبط تشغيل مجموعة إضاءة",
+      "description": "ضبط تشغيل مجموعة إضاءة. استهدف مفتاح تشغيل الإضاءة في SBS50."
+    }
+  },
+  "issues": {}
 }

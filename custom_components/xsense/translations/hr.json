@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Uređaj je već konfiguriran",
       "reauth_successful": "Ponovna provjera autentičnosti bila je uspješna",
-      "reconfigure_successful": "Rekonfiguracija je bila uspješna"
+      "reconfigure_successful": "Rekonfiguracija je bila uspješna",
+      "unique_id_mismatch": "Prijavite se istim X-Sense računom koji je povezan s ovim unosom."
     },
     "error": {
       "cannot_connect": "Povezivanje nije uspjelo",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Pogreška u komunikaciji s MQTT-om: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Nije moguće spremiti {failed} snimki u predmemoriju. Preuzeto je {downloaded} snimki."
+    },
+    "force_arm_invalid_link": {
+      "message": "Ova poveznica za prisilno uključivanje zaštite X-Sense nije valjana."
+    },
+    "force_arm_request_failed": {
+      "message": "Zahtjev za prisilno uključivanje zaštite X-Sense nije uspio."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Samo reprodukcija",
         "retained": "Čuvaj lokalne snimke"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Kod kuće",
+        "away": "Odsutan"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "name": "Prisilno uključi zaštitu",
+      "description": "Potvrdite zahtjev na čekanju za uključivanje zaštite u načinu Kod kuće ili Odsutan koji blokiraju otvoreni senzori. Otvoreni senzori se zaobilaze.",
+      "fields": {
+        "mode": {
+          "name": "Način uključivanja zaštite"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "Odmah prisilno uključi zaštitu",
+      "description": "Odmah uključite zaštitu u načinu Kod kuće ili Odsutan, zaobilazeći otvorene senzore bez traženja potvrde.",
+      "fields": {
+        "mode": {
+          "name": "Način uključivanja zaštite"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "Pokreni SOS alarm",
+      "description": "Odmah pokrenite SOS alarm stanice SBS50."
+    },
+    "cancel_sos": {
+      "name": "Zaustavi SOS alarm",
+      "description": "Zaustavite aktivni SOS alarm stanice SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Zaustavi aktivni alarm",
+      "description": "Zaustavite aktivni alarm senzora stanice SBS50."
+    },
+    "set_sos_sound": {
+      "name": "Postavi zvuk SOS alarma",
+      "description": "Odaberite koristi li SOS samo treptajuća svjetla ili i zvučni signal.",
+      "fields": {
+        "audible": {
+          "name": "Zvučni SOS alarm"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "Osvježi snimke",
+      "description": "Osvježite indeks snimki kamere koji koriste bočna traka i preglednik medija.",
+      "fields": {
+        "entry_id": {
+          "name": "ID konfiguracijskog unosa",
+          "description": "Ostavite prazno za primjenu na sve X-Sense račune."
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "Spremi snimke u predmemoriju",
+      "description": "Preuzmite snimke kamere za lokalno čuvanje. Potreban je način Čuvaj lokalne snimke.",
+      "fields": {
+        "entry_id": {
+          "name": "ID konfiguracijskog unosa",
+          "description": "Ostavite prazno za primjenu na sve X-Sense račune."
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "Očisti predmemoriju snimki",
+      "description": "Izbrišite lokalne indekse snimki, videozapise i sličice. Snimke u oblaku i na SD kartici ostaju nepromijenjene.",
+      "fields": {
+        "entry_id": {
+          "name": "ID konfiguracijskog unosa",
+          "description": "Ostavite prazno za primjenu na sve X-Sense račune."
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "Dohvati rasporede svjetla",
+      "description": "Dohvatite rasporede svjetla. Kao cilj odaberite prekidač napajanja svjetla SBS50."
+    },
+    "create_light_schedule": {
+      "name": "Stvori raspored svjetla",
+      "description": "Stvorite raspored svjetla. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "name": {
+          "name": "Prikazni naziv"
+        },
+        "start_time": {
+          "name": "Vrijeme početka (HH:MM ili HHMM)"
+        },
+        "end_time": {
+          "name": "Vrijeme završetka (HH:MM ili HHMM)"
+        },
+        "week_days": {
+          "name": "Dani u tjednu (1 = nedjelja, 7 = subota)"
+        },
+        "enabled": {
+          "name": "Omogućeno stanje"
+        },
+        "time_zone": {
+          "name": "Vremenska zona"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "Ažuriraj raspored svjetla",
+      "description": "Ažurirajte raspored svjetla. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikator rasporeda"
+        },
+        "start_time": {
+          "name": "Vrijeme početka (HH:MM ili HHMM)"
+        },
+        "end_time": {
+          "name": "Vrijeme završetka (HH:MM ili HHMM)"
+        },
+        "week_days": {
+          "name": "Dani u tjednu (1 = nedjelja, 7 = subota)"
+        },
+        "enabled": {
+          "name": "Omogućeno stanje"
+        },
+        "time_zone": {
+          "name": "Vremenska zona"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "Preimenuj raspored svjetla",
+      "description": "Preimenujte raspored svjetla. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikator rasporeda"
+        },
+        "name": {
+          "name": "Prikazni naziv"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "Izbriši raspored svjetla",
+      "description": "Izbrišite raspored svjetla. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikator rasporeda"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "Dohvati grupe svjetala",
+      "description": "Dohvatite grupe svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50."
+    },
+    "create_light_group": {
+      "name": "Stvori grupu svjetala",
+      "description": "Stvorite grupu svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "name": {
+          "name": "Prikazni naziv"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "Preimenuj grupu svjetala",
+      "description": "Preimenujte grupu svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifikator grupe"
+        },
+        "name": {
+          "name": "Prikazni naziv"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "Ažuriraj vremenski mjerač grupe svjetala",
+      "description": "Ažurirajte vremenski mjerač grupe svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifikator grupe"
+        },
+        "timer": {
+          "name": "Vrsta vremenskog mjerača (pirTime ili appTime)"
+        },
+        "value": {
+          "name": "Vrijednost vremenskog mjerača"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "Poveži grupu svjetala",
+      "description": "Povežite grupu svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "name": {
+          "name": "Prikazni naziv"
+        },
+        "device_ids": {
+          "name": "Identifikatori uređaja"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "Izbriši grupu svjetala",
+      "description": "Izbrišite grupu svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifikator grupe"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "Ukloni uređaje iz grupe svjetala",
+      "description": "Uklonite uređaje iz grupe svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "device_ids": {
+          "name": "Identifikatori uređaja"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "Postavi napajanje grupe svjetala",
+      "description": "Postavite napajanje grupe svjetala. Kao cilj odaberite prekidač napajanja svjetla SBS50.",
+      "fields": {
+        "group_id": {
+          "name": "Identifikator grupe"
+        },
+        "device_ids": {
+          "name": "Serijski brojevi uređaja"
+        },
+        "enabled": {
+          "name": "Omogućeno stanje"
+        }
+      }
+    }
+  },
+  "issues": {}
 }

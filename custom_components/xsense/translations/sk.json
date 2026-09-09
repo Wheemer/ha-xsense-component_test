@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Zariadenie je už nakonfigurované",
       "reauth_successful": "Opätovné overenie bolo úspešné",
-      "reconfigure_successful": "Rekonfigurácia bola úspešná"
+      "reconfigure_successful": "Rekonfigurácia bola úspešná",
+      "unique_id_mismatch": "Prihláste sa rovnakým účtom X-Sense, aký používa táto položka."
     },
     "error": {
       "cannot_connect": "Pripojenie zlyhalo",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Chyba komunikácie s MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Do vyrovnávacej pamäte sa nepodarilo uložiť {failed} nahrávok. Stiahnutých bolo {downloaded} nahrávok."
+    },
+    "force_arm_invalid_link": {
+      "message": "Tento odkaz na vynútené zabezpečenie X-Sense je neplatný."
+    },
+    "force_arm_request_failed": {
+      "message": "Požiadavka na vynútené zabezpečenie X-Sense zlyhala."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Iba prehrávanie",
         "retained": "Uchovávať miestne nahrávky"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Doma",
+        "away": "Mimo domu"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Režim zabezpečenia"
+        }
+      },
+      "name": "Vynútiť zabezpečenie",
+      "description": "Potvrďte čakajúcu požiadavku na zabezpečenie v režime Doma alebo Mimo domu zablokovanú otvorenými senzormi. Otvorené senzory sa obídu."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Režim zabezpečenia"
+        }
+      },
+      "name": "Vynútiť zabezpečenie teraz",
+      "description": "Okamžite zabezpečte systém v režime Doma alebo Mimo domu s obídením otvorených senzorov bez žiadosti o potvrdenie."
+    },
+    "trigger_sos": {
+      "name": "Spustiť alarm SOS",
+      "description": "Okamžite spustite alarm SOS zariadenia SBS50."
+    },
+    "cancel_sos": {
+      "name": "Zrušiť alarm SOS",
+      "description": "Zrušte aktívny alarm SOS zariadenia SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Zrušiť aktívny alarm",
+      "description": "Zrušte aktívny alarm senzora zariadenia SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Zvukový alarm SOS"
+        }
+      },
+      "name": "Nastaviť zvuk SOS",
+      "description": "Vyberte, či SOS používa iba blikajúce svetlá alebo spustí aj zvukovú signalizáciu."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID položky konfigurácie",
+          "description": "Nechajte prázdne, ak chcete použiť pre všetky účty X-Sense."
+        }
+      },
+      "name": "Obnoviť nahrávky",
+      "description": "Obnovte index nahrávok kamier používaný bočným panelom a prehliadačom médií."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID položky konfigurácie",
+          "description": "Nechajte prázdne, ak chcete použiť pre všetky účty X-Sense."
+        }
+      },
+      "name": "Uložiť nahrávky do vyrovnávacej pamäte",
+      "description": "Stiahnite nahrávky kamier na miestne uchovávanie. Vyžaduje režim Uchovávať miestne nahrávky."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID položky konfigurácie",
+          "description": "Nechajte prázdne, ak chcete použiť pre všetky účty X-Sense."
+        }
+      },
+      "name": "Vymazať vyrovnávaciu pamäť nahrávok",
+      "description": "Odstráňte miestne indexy nahrávok, videá a miniatúry. Nahrávky v cloude a na karte SD zostanú nezmenené."
+    },
+    "query_light_schedules": {
+      "name": "Načítať plány osvetlenia",
+      "description": "Načítajte plány osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Zobrazovaný názov"
+        },
+        "start_time": {
+          "name": "Čas začiatku (HH:MM alebo HHMM)"
+        },
+        "end_time": {
+          "name": "Čas konca (HH:MM alebo HHMM)"
+        },
+        "week_days": {
+          "name": "Dni v týždni (1 = nedeľa, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stav zapnutia"
+        },
+        "time_zone": {
+          "name": "Časové pásmo"
+        }
+      },
+      "name": "Vytvoriť plán osvetlenia",
+      "description": "Vytvorte plán osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikátor plánu"
+        },
+        "start_time": {
+          "name": "Čas začiatku (HH:MM alebo HHMM)"
+        },
+        "end_time": {
+          "name": "Čas konca (HH:MM alebo HHMM)"
+        },
+        "week_days": {
+          "name": "Dni v týždni (1 = nedeľa, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stav zapnutia"
+        },
+        "time_zone": {
+          "name": "Časové pásmo"
+        }
+      },
+      "name": "Aktualizovať plán osvetlenia",
+      "description": "Aktualizujte plán osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikátor plánu"
+        },
+        "name": {
+          "name": "Zobrazovaný názov"
+        }
+      },
+      "name": "Premenovať plán osvetlenia",
+      "description": "Premenujte plán osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikátor plánu"
+        }
+      },
+      "name": "Odstrániť plán osvetlenia",
+      "description": "Odstráňte plán osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "query_light_groups": {
+      "name": "Načítať skupiny osvetlenia",
+      "description": "Načítajte skupiny osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Zobrazovaný názov"
+        }
+      },
+      "name": "Vytvoriť skupinu osvetlenia",
+      "description": "Vytvorte skupinu osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        },
+        "name": {
+          "name": "Zobrazovaný názov"
+        }
+      },
+      "name": "Premenovať skupinu osvetlenia",
+      "description": "Premenujte skupinu osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        },
+        "timer": {
+          "name": "Typ časovača (pirTime alebo appTime)"
+        },
+        "value": {
+          "name": "Hodnota časovača"
+        }
+      },
+      "name": "Aktualizovať časovač skupiny osvetlenia",
+      "description": "Aktualizujte časovač skupiny osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Zobrazovaný názov"
+        },
+        "device_ids": {
+          "name": "Identifikátory zariadení"
+        }
+      },
+      "name": "Priradiť skupinu osvetlenia",
+      "description": "Priraďte skupinu osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        }
+      },
+      "name": "Odstrániť skupinu osvetlenia",
+      "description": "Odstráňte skupinu osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Identifikátory zariadení"
+        }
+      },
+      "name": "Odstrániť zariadenia zo skupiny osvetlenia",
+      "description": "Odstráňte zariadenia zo skupiny osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikátor skupiny"
+        },
+        "device_ids": {
+          "name": "Sériové čísla zariadení"
+        },
+        "enabled": {
+          "name": "Stav zapnutia"
+        }
+      },
+      "name": "Zapnúť alebo vypnúť skupinu osvetlenia",
+      "description": "Zapnite alebo vypnite skupinu osvetlenia. Ako cieľ vyberte vypínač napájania osvetlenia SBS50."
+    }
+  },
+  "issues": {}
 }

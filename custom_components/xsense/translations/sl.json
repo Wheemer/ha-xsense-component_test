@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "Naprava je že konfigurirana",
       "reauth_successful": "Ponovna avtentikacija je bila uspešna",
-      "reconfigure_successful": "Ponovna konfiguracija je bila uspešna"
+      "reconfigure_successful": "Ponovna konfiguracija je bila uspešna",
+      "unique_id_mismatch": "Prijavite se z istim računom X-Sense kot pri tem vnosu."
     },
     "error": {
       "cannot_connect": "Povezava ni uspela",
@@ -50,9 +51,9 @@
           "recording_cache_mode": "Način shranjevanja posnetkov"
         },
         "data_description": {
-          "recording_media_sync_enabled": "Samodejno predpomni nedavne posnetke. This uses storage space and may wake cameras more often.",
-          "recording_media_sync_hours": "How often the normal background catch-up sync should run. Nedavni posnetki se preverijo vsakih nekaj minut, ko je omogočena sinhronizacija.",
-          "recording_media_storage_path": "Uporabite mapo pod /media. New cached videos and thumbnails are stored here.",
+          "recording_media_sync_enabled": "Samodejno shranjujte nedavne posnetke v predpomnilnik. To porablja prostor za shranjevanje in lahko pogosteje prebudi kamere.",
+          "recording_media_sync_hours": "Kako pogosto naj se izvaja redna dopolnilna sinhronizacija v ozadju. Ko je sinhronizacija omogočena, se nedavni posnetki preverjajo vsakih nekaj minut.",
+          "recording_media_storage_path": "Uporabite mapo pod /media. Tukaj se shranjujejo novi predpomnjeni videoposnetki in sličice.",
           "recording_notification_quality": "HD daje prednost naslovom posnetkov z višjo ločljivostjo. SD daje prednost standardni ločljivosti, če jo X-Sense omogoča.",
           "recording_media_days_order": "Izberite, ali se v pregledovalniku posnetkov najprej prikažejo novejši ali starejši dnevi.",
           "recording_media_clips_order": "Izberite, ali se v posameznem dnevu najprej prikažejo novejši ali starejši posnetki.",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "Napaka pri komunikaciji z MQTT: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "Posnetkov ni bilo mogoče predpomniti: {failed}. Prenesenih posnetkov: {downloaded}."
+    },
+    "force_arm_invalid_link": {
+      "message": "Ta povezava za prisilni vklop varovanja X-Sense ni veljavna."
+    },
+    "force_arm_request_failed": {
+      "message": "Zahteva za prisilni vklop varovanja X-Sense ni uspela."
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "Samo predvajanje",
         "retained": "Hrani lokalne posnetke"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "Doma",
+        "away": "Odsoten"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "fields": {
+        "mode": {
+          "name": "Način varovanja"
+        }
+      },
+      "name": "Prisilni vklop varovanja",
+      "description": "Potrdite čakajočo zahtevo za vklop varovanja v načinu Doma ali Odsoten, ki jo blokirajo odprti senzorji. Odprti senzorji bodo prezrti."
+    },
+    "force_arm_now": {
+      "fields": {
+        "mode": {
+          "name": "Način varovanja"
+        }
+      },
+      "name": "Takojšnji prisilni vklop varovanja",
+      "description": "Takoj vklopite varovanje v načinu Doma ali Odsoten in prezrite odprte senzorje brez poziva za potrditev."
+    },
+    "trigger_sos": {
+      "name": "Sproži alarm SOS",
+      "description": "Takoj sprožite alarm SOS postaje SBS50."
+    },
+    "cancel_sos": {
+      "name": "Prekliči alarm SOS",
+      "description": "Prekličite aktivni alarm SOS postaje SBS50."
+    },
+    "cancel_alarm": {
+      "name": "Prekliči aktivni alarm",
+      "description": "Prekličite aktivni senzorski alarm postaje SBS50."
+    },
+    "set_sos_sound": {
+      "fields": {
+        "audible": {
+          "name": "Zvočni alarm SOS"
+        }
+      },
+      "name": "Nastavi zvok SOS",
+      "description": "Izberite, ali SOS uporablja samo utripajoče luči ali tudi zvočni signal."
+    },
+    "refresh_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID konfiguracijskega vnosa",
+          "description": "Pustite prazno, da velja za vse račune X-Sense."
+        }
+      },
+      "name": "Osveži posnetke",
+      "description": "Osvežite kazalo posnetkov kamere, ki ga uporabljata stranska vrstica in brskalnik predstavnosti."
+    },
+    "cache_recordings": {
+      "fields": {
+        "entry_id": {
+          "name": "ID konfiguracijskega vnosa",
+          "description": "Pustite prazno, da velja za vse račune X-Sense."
+        }
+      },
+      "name": "Predpomni posnetke",
+      "description": "Prenesite posnetke kamere za lokalno hrambo. Zahteva način Hrani lokalne posnetke."
+    },
+    "clear_recordings_cache": {
+      "fields": {
+        "entry_id": {
+          "name": "ID konfiguracijskega vnosa",
+          "description": "Pustite prazno, da velja za vse račune X-Sense."
+        }
+      },
+      "name": "Počisti predpomnilnik posnetkov",
+      "description": "Izbrišite lokalna kazala posnetkov, videoposnetke in sličice. Posnetki v oblaku in na kartici SD ostanejo nespremenjeni."
+    },
+    "query_light_schedules": {
+      "name": "Pridobi urnike luči",
+      "description": "Pridobite urnike luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "create_light_schedule": {
+      "fields": {
+        "name": {
+          "name": "Prikazno ime"
+        },
+        "start_time": {
+          "name": "Začetni čas (HH:MM ali HHMM)"
+        },
+        "end_time": {
+          "name": "Končni čas (HH:MM ali HHMM)"
+        },
+        "week_days": {
+          "name": "Dnevi v tednu (1 = nedelja, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stanje omogočenosti"
+        },
+        "time_zone": {
+          "name": "Časovni pas"
+        }
+      },
+      "name": "Ustvari urnik luči",
+      "description": "Ustvarite urnik luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "update_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikator urnika"
+        },
+        "start_time": {
+          "name": "Začetni čas (HH:MM ali HHMM)"
+        },
+        "end_time": {
+          "name": "Končni čas (HH:MM ali HHMM)"
+        },
+        "week_days": {
+          "name": "Dnevi v tednu (1 = nedelja, 7 = sobota)"
+        },
+        "enabled": {
+          "name": "Stanje omogočenosti"
+        },
+        "time_zone": {
+          "name": "Časovni pas"
+        }
+      },
+      "name": "Posodobi urnik luči",
+      "description": "Posodobite urnik luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "rename_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikator urnika"
+        },
+        "name": {
+          "name": "Prikazno ime"
+        }
+      },
+      "name": "Preimenuj urnik luči",
+      "description": "Preimenujte urnik luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "delete_light_schedule": {
+      "fields": {
+        "schedule_id": {
+          "name": "Identifikator urnika"
+        }
+      },
+      "name": "Izbriši urnik luči",
+      "description": "Izbrišite urnik luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "query_light_groups": {
+      "name": "Pridobi skupine luči",
+      "description": "Pridobite skupine luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "create_light_group": {
+      "fields": {
+        "name": {
+          "name": "Prikazno ime"
+        }
+      },
+      "name": "Ustvari skupino luči",
+      "description": "Ustvarite skupino luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "rename_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikator skupine"
+        },
+        "name": {
+          "name": "Prikazno ime"
+        }
+      },
+      "name": "Preimenuj skupino luči",
+      "description": "Preimenujte skupino luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "update_light_group_timer": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikator skupine"
+        },
+        "timer": {
+          "name": "Vrsta časovnika (pirTime ali appTime)"
+        },
+        "value": {
+          "name": "Vrednost časovnika"
+        }
+      },
+      "name": "Posodobi časovnik skupine luči",
+      "description": "Posodobite časovnik skupine luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "bind_light_group": {
+      "fields": {
+        "name": {
+          "name": "Prikazno ime"
+        },
+        "device_ids": {
+          "name": "Identifikatorji naprav"
+        }
+      },
+      "name": "Poveži skupino luči",
+      "description": "Povežite skupino luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "delete_light_group": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikator skupine"
+        }
+      },
+      "name": "Izbriši skupino luči",
+      "description": "Izbrišite skupino luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "remove_light_group_devices": {
+      "fields": {
+        "device_ids": {
+          "name": "Identifikatorji naprav"
+        }
+      },
+      "name": "Odstrani naprave iz skupine luči",
+      "description": "Odstranite naprave iz skupine luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    },
+    "set_light_group_power": {
+      "fields": {
+        "group_id": {
+          "name": "Identifikator skupine"
+        },
+        "device_ids": {
+          "name": "Serijske številke naprav"
+        },
+        "enabled": {
+          "name": "Stanje omogočenosti"
+        }
+      },
+      "name": "Nastavi napajanje skupine luči",
+      "description": "Nastavite napajanje skupine luči. Za cilj izberite stikalo za napajanje luči SBS50."
+    }
+  },
+  "issues": {}
 }

@@ -3,7 +3,8 @@
     "abort": {
       "already_configured": "デバイスはすでに構成されています",
       "reauth_successful": "再認証に成功しました",
-      "reconfigure_successful": "再構成は成功しました"
+      "reconfigure_successful": "再構成は成功しました",
+      "unique_id_mismatch": "このエントリーと同じX-Senseアカウントでサインインしてください。"
     },
     "error": {
       "cannot_connect": "接続に失敗しました",
@@ -50,7 +51,7 @@
           "recording_cache_mode": "録画の保存モード"
         },
         "data_description": {
-          "recording_media_sync_enabled": "最近の録音を自動的にキャッシュします。これによりストレージ容量が使用され、カメラがより頻繁にスリープ状態になる可能性があります。",
+          "recording_media_sync_enabled": "最近の録画を自動的にキャッシュします。ストレージ容量を使用し、カメラをスリープから復帰させる頻度が高くなる可能性があります。",
           "recording_media_sync_hours": "通常のバックグラウンドキャッチアップ同期を実行する頻度。同期が有効になっている場合、最近の録音は数分ごとにチェックされます。",
           "recording_media_storage_path": "/media の下のフォルダーを使用します。新しいキャッシュされたビデオとサムネイルはここに保存されます。",
           "recording_notification_quality": "HD は高解像度の録画 URL を優先します。SD は X-Sense が提供する場合に標準解像度の URL を優先します。",
@@ -776,6 +777,15 @@
     },
     "mqtt_error": {
       "message": "MQTTとの通信エラー: {error}"
+    },
+    "recording_cache_failed": {
+      "message": "{failed}件の録画をキャッシュできませんでした。{downloaded}件の録画をダウンロードしました。"
+    },
+    "force_arm_invalid_link": {
+      "message": "このX-Sense強制警戒設定リンクは無効です。"
+    },
+    "force_arm_request_failed": {
+      "message": "X-Senseの強制警戒設定要求に失敗しました。"
     }
   },
   "selector": {
@@ -802,6 +812,242 @@
         "playback_only": "再生のみ",
         "retained": "ローカル録画を保持"
       }
+    },
+    "force_arm_mode": {
+      "options": {
+        "home": "在宅",
+        "away": "外出"
+      }
     }
-  }
+  },
+  "services": {
+    "force_arm": {
+      "name": "強制警戒設定",
+      "description": "開いているセンサーによってブロックされた、保留中の在宅または外出モードの警戒設定要求を確認します。開いているセンサーは無視されます。",
+      "fields": {
+        "mode": {
+          "name": "警戒モード"
+        }
+      }
+    },
+    "force_arm_now": {
+      "name": "今すぐ強制警戒設定",
+      "description": "確認を求めずに開いているセンサーを無視し、在宅または外出モードで直ちに警戒を設定します。",
+      "fields": {
+        "mode": {
+          "name": "警戒モード"
+        }
+      }
+    },
+    "trigger_sos": {
+      "name": "SOSアラームを作動",
+      "description": "SBS50のSOSアラームを直ちに作動させます。"
+    },
+    "cancel_sos": {
+      "name": "SOSアラームを停止",
+      "description": "作動中のSBS50のSOSアラームを停止します。"
+    },
+    "cancel_alarm": {
+      "name": "作動中のアラームを停止",
+      "description": "作動中のSBS50のセンサーアラームを停止します。"
+    },
+    "set_sos_sound": {
+      "name": "SOS音を設定",
+      "description": "SOSでライトの点滅のみを使用するか、ブザーも鳴らすかを選択します。",
+      "fields": {
+        "audible": {
+          "name": "音が鳴るSOSアラーム"
+        }
+      }
+    },
+    "refresh_recordings": {
+      "name": "録画一覧を更新",
+      "description": "サイドバーとメディアブラウザーで使用するカメラの録画インデックスを更新します。",
+      "fields": {
+        "entry_id": {
+          "name": "設定エントリーID",
+          "description": "すべてのX-Senseアカウントに適用するには空欄にしてください。"
+        }
+      }
+    },
+    "cache_recordings": {
+      "name": "録画をキャッシュ",
+      "description": "ローカルに保持するためにカメラの録画をダウンロードします。「ローカル録画を保持」モードが必要です。",
+      "fields": {
+        "entry_id": {
+          "name": "設定エントリーID",
+          "description": "すべてのX-Senseアカウントに適用するには空欄にしてください。"
+        }
+      }
+    },
+    "clear_recordings_cache": {
+      "name": "録画キャッシュを消去",
+      "description": "ローカルの録画インデックス、動画、サムネイルを削除します。クラウドとSDカードの録画は変更されません。",
+      "fields": {
+        "entry_id": {
+          "name": "設定エントリーID",
+          "description": "すべてのX-Senseアカウントに適用するには空欄にしてください。"
+        }
+      }
+    },
+    "query_light_schedules": {
+      "name": "ライトのスケジュールを取得",
+      "description": "ライトのスケジュールを取得します。SBS50のライト電源スイッチを対象にしてください。"
+    },
+    "create_light_schedule": {
+      "name": "ライトのスケジュールを作成",
+      "description": "ライトのスケジュールを作成します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "name": {
+          "name": "表示名"
+        },
+        "start_time": {
+          "name": "開始時刻 (HH:MM または HHMM)"
+        },
+        "end_time": {
+          "name": "終了時刻 (HH:MM または HHMM)"
+        },
+        "week_days": {
+          "name": "曜日 (1 = 日曜日、7 = 土曜日)"
+        },
+        "enabled": {
+          "name": "有効状態"
+        },
+        "time_zone": {
+          "name": "タイムゾーン"
+        }
+      }
+    },
+    "update_light_schedule": {
+      "name": "ライトのスケジュールを更新",
+      "description": "ライトのスケジュールを更新します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "schedule_id": {
+          "name": "スケジュール識別子"
+        },
+        "start_time": {
+          "name": "開始時刻 (HH:MM または HHMM)"
+        },
+        "end_time": {
+          "name": "終了時刻 (HH:MM または HHMM)"
+        },
+        "week_days": {
+          "name": "曜日 (1 = 日曜日、7 = 土曜日)"
+        },
+        "enabled": {
+          "name": "有効状態"
+        },
+        "time_zone": {
+          "name": "タイムゾーン"
+        }
+      }
+    },
+    "rename_light_schedule": {
+      "name": "ライトのスケジュール名を変更",
+      "description": "ライトのスケジュール名を変更します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "schedule_id": {
+          "name": "スケジュール識別子"
+        },
+        "name": {
+          "name": "表示名"
+        }
+      }
+    },
+    "delete_light_schedule": {
+      "name": "ライトのスケジュールを削除",
+      "description": "ライトのスケジュールを削除します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "schedule_id": {
+          "name": "スケジュール識別子"
+        }
+      }
+    },
+    "query_light_groups": {
+      "name": "ライトグループを取得",
+      "description": "ライトグループを取得します。SBS50のライト電源スイッチを対象にしてください。"
+    },
+    "create_light_group": {
+      "name": "ライトグループを作成",
+      "description": "ライトグループを作成します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "name": {
+          "name": "表示名"
+        }
+      }
+    },
+    "rename_light_group": {
+      "name": "ライトグループ名を変更",
+      "description": "ライトグループ名を変更します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "group_id": {
+          "name": "グループ識別子"
+        },
+        "name": {
+          "name": "表示名"
+        }
+      }
+    },
+    "update_light_group_timer": {
+      "name": "ライトグループのタイマーを更新",
+      "description": "ライトグループのタイマーを更新します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "group_id": {
+          "name": "グループ識別子"
+        },
+        "timer": {
+          "name": "タイマーの種類 (pirTime または appTime)"
+        },
+        "value": {
+          "name": "タイマーの値"
+        }
+      }
+    },
+    "bind_light_group": {
+      "name": "ライトグループを関連付け",
+      "description": "ライトグループを関連付けます。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "name": {
+          "name": "表示名"
+        },
+        "device_ids": {
+          "name": "デバイス識別子"
+        }
+      }
+    },
+    "delete_light_group": {
+      "name": "ライトグループを削除",
+      "description": "ライトグループを削除します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "group_id": {
+          "name": "グループ識別子"
+        }
+      }
+    },
+    "remove_light_group_devices": {
+      "name": "ライトグループからデバイスを削除",
+      "description": "ライトグループからデバイスを削除します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "device_ids": {
+          "name": "デバイス識別子"
+        }
+      }
+    },
+    "set_light_group_power": {
+      "name": "ライトグループの電源を設定",
+      "description": "ライトグループの電源を設定します。SBS50のライト電源スイッチを対象にしてください。",
+      "fields": {
+        "group_id": {
+          "name": "グループ識別子"
+        },
+        "device_ids": {
+          "name": "デバイスのシリアル番号"
+        },
+        "enabled": {
+          "name": "有効状態"
+        }
+      }
+    }
+  },
+  "issues": {}
 }

@@ -2697,7 +2697,10 @@ def test_recordings_panel_video_uses_authenticated_blob_playback():
     assert "disposePlaybackResources()" in panel
     assert "releaseTemporaryPlayback(clip)" in panel
     assert "xsense/recordings/cache/playback/" in panel
-    assert 'this.notice = this.t("cacheCleared")' in panel
+    assert "this.notice = result?.remaining_items || result?.skipped_active" in panel
+    assert '? this.t("cacheClearSummary", {' in panel
+    assert ': this.t("cacheCleared");' in panel
+    assert "if (!await this.loadData({ afterDelete: true })) return;" in panel
     assert 'class="notice" role="status"' in panel
     assert 'video.removeAttribute("src")' in panel
     assert "this.playbackProfiles = new Map()" in panel

@@ -77,6 +77,7 @@ from .python_xsense.event_parser import (
     camera_library_records,
 )
 from .recordings_gate import has_any_camera_entities
+from .errors import xsense_error
 
 MIME_TYPE = "video/mp4"
 HLS_MIME_TYPE = "application/vnd.apple.mpegurl"
@@ -170,10 +171,16 @@ async def async_register_recording_services(hass: HomeAssistant) -> None:
         )
 
     async def _async_cache_recordings(call) -> None:
-        await async_cache_recording_media(
+        summary = await async_cache_recording_media(
             hass,
             entry_id=call.data.get("entry_id"),
         )
+        if summary.get("failed", 0):
+            raise xsense_error(
+                "recording_cache_failed",
+                failed=summary["failed"],
+                downloaded=summary.get("downloaded", 0),
+            )
 
     async def _async_clear_recordings_cache(call) -> None:
         await async_clear_recording_caches(
@@ -780,13 +787,18 @@ def async_start_recording_media_sync(
         hass, entry.entry_id
     ) and bool(entry.options.get(CONF_RECORDING_MEDIA_SYNC_ENABLED))
 
-    hours = int(
-        entry.options.get(
-            CONF_RECORDING_MEDIA_SYNC_HOURS,
-            DEFAULT_RECORDING_MEDIA_SYNC_HOURS,
+    try:
+        hours = int(
+            entry.options.get(
+                CONF_RECORDING_MEDIA_SYNC_HOURS,
+                DEFAULT_RECORDING_MEDIA_SYNC_HOURS,
+            )
         )
-    )
-    interval = timedelta(hours=max(1, hours))
+    except (TypeError, ValueError, OverflowError):
+        hours = DEFAULT_RECORDING_MEDIA_SYNC_HOURS
+    if not 1 <= hours <= 168:
+        hours = DEFAULT_RECORDING_MEDIA_SYNC_HOURS
+    interval = timedelta(hours=hours)
 
     async def _async_run_media_sync(now=None) -> None:
         try:
@@ -3730,7 +3742,7 @@ def _cache_policy_for_root(
 def _bounded_int_option(value: Any, default: int, minimum: int, maximum: int) -> int:
     try:
         result = int(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return default
     return result if minimum <= result <= maximum else default
 
