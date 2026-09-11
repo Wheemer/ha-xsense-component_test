@@ -468,6 +468,7 @@ class XSenseAlarmControlPanel(
     @callback
     def _async_clear_arm_request(self, station) -> None:
         """Clear local state for an APK-style mode request."""
+        had_pending_prompt = self._pending_force_arm_mode is not None
         self._async_cancel_arm_request_timeout()
         self._active_normal_arm_mode = None
         station.set_alarm_data(
@@ -481,6 +482,9 @@ class XSenseAlarmControlPanel(
         self._pending_force_arm_mode = None
         self._pending_force_arm_data = None
         self._async_clear_force_arm_notification()
+        if had_pending_prompt:
+            # Coordinator entities are not automatically refreshed after actions.
+            self.async_write_ha_state()
 
     @callback
     def _async_cancel_arm_request_timeout(self) -> None:
@@ -537,22 +541,16 @@ class XSenseAlarmControlPanel(
                     self._active_normal_arm_mode,
                 )
                 return
-            current_mode = getattr(station, "alarm_mode", None)
+            # Match the APK's current reported mode, not a prior alarm snapshot.
+            current_mode = getattr(station, "safe_mode", None)
+            if current_mode is None:
+                current_mode = station.data.get("safeMode")
             if current_mode == safe_mode:
                 self._async_clear_arm_request(station)
                 return
+            self._async_clear_arm_request(station)
             self._active_normal_arm_mode = safe_mode
-            station.set_alarm_data(
-                {
-                    "forceReason": None,
-                    "safeModeAim": None,
-                    "requestedSafeMode": safe_mode,
-                    "exitDelay": None,
-                }
-            )
-            self._pending_force_arm_mode = None
-            self._pending_force_arm_data = None
-            self._async_clear_force_arm_notification()
+            station.set_alarm_data({"requestedSafeMode": safe_mode})
             self._async_start_arm_request_timeout()
         elif safe_mode == "Disarmed":
             self._async_clear_arm_request(station)
