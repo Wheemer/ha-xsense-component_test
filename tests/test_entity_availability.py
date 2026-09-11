@@ -1183,6 +1183,153 @@ async def test_normal_arm_is_noop_when_station_already_reports_target_mode(
     assert station.alarm_data.get("requestedSafeMode") is None
 
 
+@pytest.mark.parametrize("target", ["Home", "Away"])
+@pytest.mark.parametrize("old_field", ["mode", "safeMode"])
+async def test_rearm_uses_current_report_not_old_alarm_snapshot(monkeypatch, target, old_field):
+    from unittest.mock import AsyncMock
+
+    station = _xs01_wx_from_real_shadow()
+    station.type = "SBS50"
+    station.set_alarm_data({old_field: target})
+    api = XSenseBase.__new__(XSenseBase)
+    api.parse_get_state(station, {"safeMode": "Disarmed"}, mode_result="mode")
+    api.set_station_mode = AsyncMock()
+    coordinator = Coordinator(station)
+    coordinator.xsense = api
+    panel = XSenseAlarmControlPanel(coordinator, station)
+    panel._async_clear_force_arm_notification = lambda: None
+    panel._async_start_arm_request_timeout = lambda: None
+
+    await panel._set_safe_mode(target, force_arm="0")
+
+    api.set_station_mode.assert_awaited_once_with(station, target, force_arm="0")
+    assert panel._active_normal_arm_mode == target
+
+
+@pytest.mark.parametrize("target", ["Home", "Away"])
+@pytest.mark.parametrize("reported", ["Home", "Away", "Disarmed"])
+def test_actual_mode_result_preserves_open_apk_confirmation(target, reported):
+    station = _xs01_wx_from_real_shadow()
+    station.type = "SBS50"
+    coordinator = Coordinator(station)
+    panel = XSenseAlarmControlPanel(coordinator, station)
+    dismissed = []
+    panel._async_clear_force_arm_notification = lambda: dismissed.append(True)
+    panel.async_write_ha_state = lambda: None
+    panel._pending_force_arm_mode = target
+    panel._pending_force_arm_data = {
+        "requestedSafeMode": target, "forceReason": [{"deviceSN": "door-sn"}]
+    }
+    station.set_alarm_data(panel._pending_force_arm_data)
+    _parse_mode(station, {"safeMode": reported})
+
+    panel._handle_coordinator_update()
+
+    assert panel._pending_force_arm_mode == target
+    assert panel._pending_force_arm_data is not None
+    assert station.alarm_data["requestedSafeMode"] == target
+    assert station.alarm_data["forceReason"] == [{"deviceSN": "door-sn"}]
+    assert not dismissed
+
+
+@pytest.mark.parametrize("target", ["Home", "Away"])
+async def test_repeated_normal_and_force_arm_cycles(target):
+    from unittest.mock import AsyncMock
+
+    station = _xs01_wx_from_real_shadow()
+    station.type = "SBS50"
+    api = XSenseBase.__new__(XSenseBase)
+    api.set_station_mode = AsyncMock()
+    coordinator = Coordinator(station)
+    coordinator.xsense = api
+    panel = XSenseAlarmControlPanel(coordinator, station)
+    prompts = []
+    panel._async_clear_force_arm_notification = lambda: None
+    panel._async_create_force_arm_notification = lambda station, mode: prompts.append(mode)
+    panel._async_start_arm_request_timeout = lambda: None
+    panel.async_write_ha_state = lambda: None
+
+    for _ in range(3):
+        _parse_mode(station, {"safeMode": "Disarmed"})
+        panel._handle_coordinator_update()
+        del station._xsense_mode_result
+        station.set_alarm_data({"safeMode": target})
+        await panel._set_safe_mode(target, force_arm="0")
+        _parse_confirmation(station, {"safeMode": target, "forceReason": []})
+        panel._handle_coordinator_update()
+        assert panel._pending_force_arm_mode is None
+        assert panel._active_normal_arm_mode == target
+        _parse_confirmation(station, {"forceReason": [{"deviceSN": "door-sn"}]})
+        panel._handle_coordinator_update()
+        assert panel._pending_force_arm_mode == target
+        del station._xsense_mode_result
+        await panel.async_force_arm(target)
+        assert panel._pending_force_arm_mode is None
+        _parse_confirmation(station, {"forceReason": [{"deviceSN": "door-sn"}]})
+        panel._handle_coordinator_update()
+        assert panel._pending_force_arm_mode is None
+        _parse_mode(station, {"safeMode": target})
+        panel._handle_coordinator_update()
+        assert panel._safemode == target
+        with pytest.raises(Exception):
+            await panel.async_force_arm(target)
+
+    assert prompts == [target] * 3
+    assert [call.kwargs["force_arm"] for call in api.set_station_mode.await_args_list] == ["0", "1"] * 3
+
+
+@pytest.mark.parametrize("action", ["Home", "Away", "Disarmed", "already_armed", "force"])
+@pytest.mark.parametrize("publish_fails", [False, True])
+async def test_arm_actions_publish_cleared_pending_attributes(action, publish_fails):
+    from homeassistant.exceptions import HomeAssistantError
+
+    station = _xs01_wx_from_real_shadow()
+    station.type = "SBS50"
+    station.safe_mode = "Home" if action == "already_armed" else "Disarmed"
+    writes = []
+    calls = []
+
+    class API:
+        async def set_station_mode(self, station, safe_mode, force_arm=None):
+            # HA must see prompt removal even while the network call is pending.
+            assert writes and writes[-1] is None
+            calls.append((safe_mode, force_arm))
+            if publish_fails:
+                raise RuntimeError("simulated publish failure")
+
+    coordinator = Coordinator(station)
+    coordinator.xsense = API()
+    panel = XSenseAlarmControlPanel(coordinator, station)
+    panel._safemode = station.safe_mode
+    panel._pending_force_arm_mode = "Away"
+    panel._pending_force_arm_data = {
+        "requestedSafeMode": "Away", "forceReason": [{"deviceSN": "door-sn"}]
+    }
+    station.set_alarm_data(panel._pending_force_arm_data)
+    panel._async_clear_force_arm_notification = lambda: None
+    panel._async_start_arm_request_timeout = lambda: None
+    panel.async_write_ha_state = lambda: writes.append(panel.extra_state_attributes)
+
+    async def invoke():
+        if action == "force":
+            await panel.async_force_arm("Away")
+        else:
+            await panel._set_safe_mode(
+                "Home" if action == "already_armed" else action, force_arm="0"
+            )
+
+    if publish_fails and action != "already_armed":
+        with pytest.raises(HomeAssistantError):
+            await invoke()
+    else:
+        await invoke()
+
+    assert writes and writes[-1] is None
+    assert panel.extra_state_attributes is None
+    assert panel._safemode == station.safe_mode
+    assert len(calls) == (0 if action == "already_armed" else 1)
+
+
 async def test_alarm_panel_unload_cancels_request_timeout(monkeypatch):
     station = _xs01_wx_from_real_shadow()
     station.type = "SBS50"
