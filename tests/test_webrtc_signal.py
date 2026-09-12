@@ -340,8 +340,8 @@ async def test_webrtc_signal_failed_offer_send_remains_retryable():
     assert session._offer_sent is False
 
 
-async def test_online_camera_preserves_confirmed_offer_answer_ice_order(monkeypatch):
-    """Lock v1.3.12.10 peer, offer, answer, and ICE ordering."""
+async def test_online_camera_sends_ice_after_peer_offer_before_answer(monkeypatch):
+    """Keep peer gating without withholding browser candidates until the answer."""
     websocket = FakeWebSocket()
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(),
@@ -373,8 +373,10 @@ async def test_online_camera_preserves_confirmed_offer_answer_ice_order(monkeypa
     )
     await session.add_candidate(candidate)
 
-    assert len(session._pending_remote_candidates) == 1
-    assert [message["messageType"] for message in websocket.messages] == ["SDP_OFFER"]
+    assert len(session._pending_remote_candidates) == 0
+    assert [message["messageType"] for message in websocket.messages] == [
+        "SDP_OFFER", "ICE_CANDIDATE",
+    ]
 
     answer_sdp = "v=0\r\n"
     await session._handle_signal_event(
@@ -393,7 +395,7 @@ async def test_online_camera_preserves_confirmed_offer_answer_ice_order(monkeypa
     ]
 
 
-async def test_webrtc_signal_flushes_trickled_ha_candidates_after_answer():
+async def test_webrtc_signal_flushes_trickled_ha_candidates_after_offer():
     fake_ws = FakeWebSocket()
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(),
@@ -425,8 +427,10 @@ async def test_webrtc_signal_flushes_trickled_ha_candidates_after_answer():
     await session._send_offer()
 
     assert not session._answer.done()
-    assert len(session._pending_remote_candidates) == 1
-    assert [message["messageType"] for message in fake_ws.messages] == ["SDP_OFFER"]
+    assert len(session._pending_remote_candidates) == 0
+    assert [message["messageType"] for message in fake_ws.messages] == [
+        "SDP_OFFER", "ICE_CANDIDATE",
+    ]
 
     session._answer.set_result("v=0\r\nanswer")
     await session._flush_pending_remote_candidates()
@@ -446,7 +450,8 @@ async def test_webrtc_signal_flushes_trickled_ha_candidates_after_answer():
     }
 
 
-async def test_webrtc_signal_queues_ha_candidates_until_answer():
+@pytest.mark.parametrize("before_offer", [True, False])
+async def test_webrtc_signal_sends_ha_candidates_after_offer_without_answer(before_offer):
     fake_ws = FakeWebSocket()
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(),
@@ -469,21 +474,16 @@ async def test_webrtc_signal_queues_ha_candidates_until_answer():
     session._ws = fake_ws
     session._recipient_client_id = "SSC0ATEST"
 
-    await session._send_offer()
-    assert [message["messageType"] for message in fake_ws.messages] == ["SDP_OFFER"]
-    assert len(session._pending_remote_candidates) == 0
-    assert not session._answer.done()
-
-    await session.add_candidate(candidate)
-
-    assert len(session._pending_remote_candidates) == 1
-    assert not session._answer.done()
-    assert [message["messageType"] for message in fake_ws.messages] == ["SDP_OFFER"]
-
-    session._answer.set_result("v=0\r\nanswer")
-    await session._flush_pending_remote_candidates()
+    if before_offer:
+        await session.add_candidate(candidate)
+        assert len(session._pending_remote_candidates) == 1
+        assert not fake_ws.messages
+    await session._handle_signal_event("PEER_IN", "SSC0ATEST")
+    if not before_offer:
+        await session.add_candidate(candidate)
 
     assert len(session._pending_remote_candidates) == 0
+    assert not session._answer.done()
     assert [message["messageType"] for message in fake_ws.messages] == [
         "SDP_OFFER",
         "ICE_CANDIDATE",
@@ -496,3 +496,28 @@ async def test_webrtc_signal_queues_ha_candidates_until_answer():
         "sdpMLineIndex": 1,
         "candidate": "candidate:2 1 udp 1 192.0.2.2 456 typ host",
     }
+
+
+async def test_webrtc_reoffer_resends_trickled_candidates_before_answer():
+    ws = FakeWebSocket()
+    session = webrtc_signal.XSenseWebRTCSignalSession(
+        session=object(), ticket=ticket(), offer_sdp="v=0\r\n",
+        resolution="1920x1080", camera_online=True,
+    )
+    session._ws = ws
+    for index in range(12):
+        await session.add_candidate(SimpleNamespace(
+            candidate=f"candidate:{index} 1 udp 1 192.0.2.2 {4000 + index} typ host",
+            sdp_mid="0", sdp_m_line_index=0,
+        ))
+    assert not ws.messages
+    await session._handle_signal_event("PEER_IN", "SSC0ATEST")
+    assert session._sent_candidate_count == 12
+    assert not session._pending_remote_candidates
+    await session._handle_signal_event("PEER_OUT", "SSC0ATEST")
+    await session._handle_signal_event("PEER_IN", "SSC0ATEST")
+    assert session._sent_candidate_count == 12
+    assert not session._answer.done()
+    assert [item["messageType"] for item in ws.messages] == (
+        ["SDP_OFFER"] + ["ICE_CANDIDATE"] * 12
+    ) * 2
