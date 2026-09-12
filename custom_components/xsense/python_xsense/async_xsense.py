@@ -1925,7 +1925,14 @@ class AsyncXSense(XSenseBase):
 
         data = None
         last_error: APIFailure | None = None
-        for serial in _camera_addx_serial_candidates(camera):
+        serials = _camera_addx_serial_candidates(camera)
+        # History APIs may prefer another alias; refresh tickets with their own
+        # previously accepted identity before trying the shared fallbacks.
+        ticket_serial = cached.get("serialNumber") if isinstance(cached, dict) else None
+        if ticket_serial not in (None, ""):
+            ticket_serial = str(ticket_serial)
+            serials = [ticket_serial, *(value for value in serials if value != ticket_serial)]
+        for serial in serials:
             try:
                 data = await self._camera_addx_call(
                     camera,
