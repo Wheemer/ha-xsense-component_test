@@ -137,6 +137,7 @@ class XSenseWebRTCSignalSession:
         self._ws: aiohttp.ClientWebSocketResponse | None = None
         self._answer: asyncio.Future[str] = asyncio.get_running_loop().create_future()
         self._closed = False
+        self._created_at = time.monotonic()
         self._offer_sent = False
         self._camera_peer_ready = False
         self._signal_event_counts: Counter[str] = Counter()
@@ -145,7 +146,6 @@ class XSenseWebRTCSignalSession:
         self._offer_attempt_count = 0
         self._signal_reconnect_count = 0
         self._pending_remote_candidates: list[Any] = []
-        self._ha_candidate_history: list[dict[str, Any]] = []
         self._pending_client_candidates: list[dict[str, Any]] = []
         self._remote_candidate_callback = remote_candidate_callback
         self._forward_client_candidates = False
@@ -158,6 +158,7 @@ class XSenseWebRTCSignalSession:
         context.update(
             {
                 "session": _short_id(self._session_id),
+                "session_age_s": round(time.monotonic() - self._created_at, 3),
                 "recipient": _short_id(self._recipient_client_id),
                 "resolution": self._resolution,
                 "camera_online": self._camera_online,
@@ -241,11 +242,11 @@ class XSenseWebRTCSignalSession:
                 self._debug_context(candidate_type=type(candidate).__name__),
             )
             return
-        self._ha_candidate_history.append(payload)
         if (
             self._ws is None
             or self._ws.closed
             or not self._offer_sent
+            or not _future_has_result(self._answer)
         ):
             self._pending_remote_candidates.append(payload)
             pending = len(self._pending_remote_candidates)
@@ -283,8 +284,9 @@ class XSenseWebRTCSignalSession:
 
     async def _read_loop(self) -> None:
         close_code: int | None = None
+        reader_exit = "socket_iteration_ended"
+        ws = self._ws
         try:
-            ws = self._ws
             assert ws is not None
             async for message in ws:
                 if message.type not in (
@@ -306,7 +308,11 @@ class XSenseWebRTCSignalSession:
                     )
                 await self._handle_signal_event(event, payload)
             close_code = ws.close_code
+        except asyncio.CancelledError:
+            reader_exit = "reader_cancelled"
+            raise
         except Exception as err:
+            reader_exit = "reader_error"
             if not self._answer.done():
                 self._answer.set_exception(err)
             LOGGER.debug(
@@ -316,7 +322,12 @@ class XSenseWebRTCSignalSession:
         finally:
             LOGGER.debug(
                 "X-Sense WebRTC signal relay websocket closed: %s",
-                self._debug_context(signal_close_code=close_code),
+                self._debug_context(
+                    signal_close_code=close_code,
+                    observed_socket_close_code=getattr(ws, "close_code", None),
+                    reader_exit=reader_exit,
+                    local_close_requested=self._closed,
+                ),
             )
             self._schedule_signal_reconnect(close_code)
 
@@ -511,14 +522,14 @@ class XSenseWebRTCSignalSession:
         )
         for candidate in candidates:
             await self._send_candidate(candidate)
-        await self._flush_pending_remote_candidates()
 
     async def _flush_pending_remote_candidates(self) -> None:
-        """Send queued HA candidates once the offer has been sent."""
+        """Send trickled HA candidates after the answer, as in 65984b9."""
         if (
             self._ws is None
             or self._ws.closed
             or not self._offer_sent
+            or not _future_has_result(self._answer)
         ):
             return
         pending = len(self._pending_remote_candidates)
@@ -564,8 +575,6 @@ class XSenseWebRTCSignalSession:
 
     def _reset_offer_attempt(self, reason: str) -> None:
         self._offer_sent = False
-        # A renewed offer still needs the browser's already-gathered candidates.
-        self._pending_remote_candidates = list(self._ha_candidate_history)
         self._local_candidate_count = 0
         self._sent_candidate_count = 0
         LOGGER.debug(
@@ -753,13 +762,16 @@ def _signal_peer_payload(payload: Any) -> Any:
 
 def _decode_signal_peer_payload(payload: str) -> Any:
     with suppress(Exception):
-        return json.loads(payload)
+        value = json.loads(payload)
+        # Peer IDs are text, even when they look like JSON numbers or literals.
+        return value if isinstance(value, (str, dict)) else payload
     if not _looks_like_encoded_peer_payload(payload):
         return payload
     decoded = _base64_decode_text(payload)
     if decoded:
         with suppress(Exception):
-            return json.loads(decoded)
+            value = json.loads(decoded)
+            return value if isinstance(value, (str, dict)) else decoded
         return decoded
     return payload
 
@@ -1215,6 +1227,8 @@ def _candidate_queue_reason(session: XSenseWebRTCSignalSession) -> str:
         return "signal_closed"
     if not session._offer_sent:
         return "waiting_for_peer_offer"
+    if not _future_has_result(session._answer):
+        return "waiting_for_sdp_answer"
     return "unknown"
 
 

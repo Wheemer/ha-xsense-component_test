@@ -1,0 +1,189 @@
+{
+  "commit": "65984b9126deb0646f8fd1b4f756f5430e4718e8",
+  "traces": {
+    "CAMERA_A": [
+      {
+        "step": "connect",
+        "url": "wss://signal.example/CAMERA_A/viewer/viewer123?traceId=trace123&time=123456&sign=test-sign&name=test-123",
+        "options": {
+          "url": "wss://192.0.2.10/CAMERA_A/viewer/viewer123?traceId=trace123&time=123456&sign=test-sign&name=test-123",
+          "headers": {
+            "Host": "signal.example"
+          },
+          "server_hostname": "signal.example"
+        }
+      },
+      {
+        "step": "early_trickle",
+        "messages": []
+      },
+      {
+        "step": "unrelated_peer",
+        "messages": []
+      },
+      {
+        "step": "owned_peer_offer_and_embedded_ice",
+        "messages": [
+          {
+            "messageType": "SDP_OFFER",
+            "messagePayload": "eyJ0eXBlIjoib2ZmZXIiLCJzZHAiOiJ2PTBcclxubT1hdWRpbyA5IFVEUC9UTFMvUlRQL1NBVlBGIDBcclxuYT1taWQ6MFxyXG5tPXZpZGVvIDkgVURQL1RMUy9SVFAvU0FWUEYgOTZcclxuYT1taWQ6MVxyXG5hPXJ0cG1hcDo5NiBIMjY0LzkwMDAwXHJcbiJ9",
+            "mode": "vicoo",
+            "recipientClientId": "CAMERA_A",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session",
+            "viewerType": "a4x_sdk",
+            "resolution": "1920x1080"
+          },
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIwIiwic2RwTUxpbmVJbmRleCI6MCwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjEgMSB1ZHAgMSAxOTIuMC4yLjEgNDAwMCB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_A",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          }
+        ]
+      },
+      {
+        "step": "trickle_while_waiting_for_answer",
+        "messages": []
+      },
+      {
+        "step": "rejoined_peer",
+        "messages": [
+          {
+            "messageType": "SDP_OFFER",
+            "messagePayload": "eyJ0eXBlIjoib2ZmZXIiLCJzZHAiOiJ2PTBcclxubT1hdWRpbyA5IFVEUC9UTFMvUlRQL1NBVlBGIDBcclxuYT1taWQ6MFxyXG5tPXZpZGVvIDkgVURQL1RMUy9SVFAvU0FWUEYgOTZcclxuYT1taWQ6MVxyXG5hPXJ0cG1hcDo5NiBIMjY0LzkwMDAwXHJcbiJ9",
+            "mode": "vicoo",
+            "recipientClientId": "CAMERA_A",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session",
+            "viewerType": "a4x_sdk",
+            "resolution": "1920x1080"
+          },
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIwIiwic2RwTUxpbmVJbmRleCI6MCwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjEgMSB1ZHAgMSAxOTIuMC4yLjEgNDAwMCB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_A",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          }
+        ]
+      },
+      {
+        "step": "answer_flushes_trickled_ice",
+        "messages": [
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIwIiwic2RwTUxpbmVJbmRleCI6MCwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjIgMSB1ZHAgMSAxOTIuMC4yLjIgNDAwMSB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_A",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          },
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIxIiwic2RwTUxpbmVJbmRleCI6MSwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjMgMSB1ZHAgMSAxOTIuMC4yLjMgNDAwMiB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_A",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          }
+        ]
+      },
+      {
+        "step": "closed",
+        "socket_closed": true
+      }
+    ],
+    "CAMERA_B": [
+      {
+        "step": "connect",
+        "url": "wss://signal.example/CAMERA_B/viewer/viewer123?traceId=trace123&time=123456&sign=test-sign&name=test-123",
+        "options": {
+          "url": "wss://192.0.2.10/CAMERA_B/viewer/viewer123?traceId=trace123&time=123456&sign=test-sign&name=test-123",
+          "headers": {
+            "Host": "signal.example"
+          },
+          "server_hostname": "signal.example"
+        }
+      },
+      {
+        "step": "early_trickle",
+        "messages": []
+      },
+      {
+        "step": "unrelated_peer",
+        "messages": []
+      },
+      {
+        "step": "owned_peer_offer_and_embedded_ice",
+        "messages": [
+          {
+            "messageType": "SDP_OFFER",
+            "messagePayload": "eyJ0eXBlIjoib2ZmZXIiLCJzZHAiOiJ2PTBcclxubT1hdWRpbyA5IFVEUC9UTFMvUlRQL1NBVlBGIDBcclxuYT1taWQ6MFxyXG5tPXZpZGVvIDkgVURQL1RMUy9SVFAvU0FWUEYgOTZcclxuYT1taWQ6MVxyXG5hPXJ0cG1hcDo5NiBIMjY0LzkwMDAwXHJcbiJ9",
+            "mode": "vicoo",
+            "recipientClientId": "CAMERA_B",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session",
+            "viewerType": "a4x_sdk",
+            "resolution": "1920x1080"
+          },
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIwIiwic2RwTUxpbmVJbmRleCI6MCwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjEgMSB1ZHAgMSAxOTIuMC4yLjEgNDAwMCB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_B",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          }
+        ]
+      },
+      {
+        "step": "trickle_while_waiting_for_answer",
+        "messages": []
+      },
+      {
+        "step": "rejoined_peer",
+        "messages": [
+          {
+            "messageType": "SDP_OFFER",
+            "messagePayload": "eyJ0eXBlIjoib2ZmZXIiLCJzZHAiOiJ2PTBcclxubT1hdWRpbyA5IFVEUC9UTFMvUlRQL1NBVlBGIDBcclxuYT1taWQ6MFxyXG5tPXZpZGVvIDkgVURQL1RMUy9SVFAvU0FWUEYgOTZcclxuYT1taWQ6MVxyXG5hPXJ0cG1hcDo5NiBIMjY0LzkwMDAwXHJcbiJ9",
+            "mode": "vicoo",
+            "recipientClientId": "CAMERA_B",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session",
+            "viewerType": "a4x_sdk",
+            "resolution": "1920x1080"
+          },
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIwIiwic2RwTUxpbmVJbmRleCI6MCwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjEgMSB1ZHAgMSAxOTIuMC4yLjEgNDAwMCB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_B",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          }
+        ]
+      },
+      {
+        "step": "answer_flushes_trickled_ice",
+        "messages": [
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIwIiwic2RwTUxpbmVJbmRleCI6MCwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjIgMSB1ZHAgMSAxOTIuMC4yLjIgNDAwMSB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_B",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          },
+          {
+            "messageType": "ICE_CANDIDATE",
+            "messagePayload": "eyJzZHBNaWQiOiIxIiwic2RwTUxpbmVJbmRleCI6MSwiY2FuZGlkYXRlIjoiY2FuZGlkYXRlOjMgMSB1ZHAgMSAxOTIuMC4yLjMgNDAwMiB0eXAgaG9zdCJ9",
+            "recipientClientId": "CAMERA_B",
+            "senderClientId": "viewer123",
+            "sessionId": "baseline-session"
+          }
+        ]
+      },
+      {
+        "step": "closed",
+        "socket_closed": true
+      }
+    ]
+  }
+}
