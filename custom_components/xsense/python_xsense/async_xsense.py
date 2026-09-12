@@ -244,6 +244,15 @@ def _camera_addx_serial_candidates(camera: Entity) -> list[str]:
     return list(camera_identifiers(camera)) or [""]
 
 
+def _camera_history_serial_candidates(camera: Entity, key: str) -> list[str]:
+    """Prefer this history endpoint's identity without changing live access."""
+    serials = _camera_addx_serial_candidates(camera)
+    preferred = camera.data.get(key)
+    if preferred in serials:
+        return [preferred, *(serial for serial in serials if serial != preferred)]
+    return serials
+
+
 def camera_addx_serial(camera: Entity) -> str:
     """Return the APK ADDX serial used for account-level camera APIs."""
     return _camera_addx_serial(camera)
@@ -731,7 +740,9 @@ class AsyncXSense(XSenseBase):
         successful_requests = 0
         seen_cameras: list[Entity] = []
         for camera in cameras:
-            serials = _camera_addx_serial_candidates(camera)
+            serials = _camera_history_serial_candidates(
+                camera, "cameraLibrarySerialNumber"
+            )
             if not serials:
                 continue
             if any(cameras_share_identity(camera, seen) for seen in seen_cameras):
@@ -785,8 +796,7 @@ class AsyncXSense(XSenseBase):
             if accepted_serial is not None:
                 camera.set_data(
                     {
-                        "addxAccessSerialNumber": accepted_serial,
-                        "addxSerialNumber": accepted_serial,
+                        "cameraLibrarySerialNumber": accepted_serial,
                     }
                 )
             if camera_request_succeeded:
@@ -855,7 +865,9 @@ class AsyncXSense(XSenseBase):
         successful_requests = 0
         seen_cameras: list[Entity] = []
         for camera in cameras:
-            serials = _camera_addx_serial_candidates(camera)
+            serials = _camera_history_serial_candidates(
+                camera, "cameraEventHistorySerialNumber"
+            )
             if not serials:
                 continue
             if any(cameras_share_identity(camera, seen) for seen in seen_cameras):
@@ -909,8 +921,7 @@ class AsyncXSense(XSenseBase):
             if accepted_serial is not None:
                 camera.set_data(
                     {
-                        "addxAccessSerialNumber": accepted_serial,
-                        "addxSerialNumber": accepted_serial,
+                        "cameraEventHistorySerialNumber": accepted_serial,
                     }
                 )
             if camera_request_succeeded:
@@ -1943,7 +1954,6 @@ class AsyncXSense(XSenseBase):
                 camera.set_data(
                     {
                         "addxAccessSerialNumber": serial,
-                        "addxSerialNumber": serial,
                     }
                 )
                 break
