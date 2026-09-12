@@ -145,6 +145,7 @@ class XSenseWebRTCSignalSession:
         self._offer_attempt_count = 0
         self._signal_reconnect_count = 0
         self._pending_remote_candidates: list[Any] = []
+        self._ha_candidate_history: list[dict[str, Any]] = []
         self._pending_client_candidates: list[dict[str, Any]] = []
         self._remote_candidate_callback = remote_candidate_callback
         self._forward_client_candidates = False
@@ -240,11 +241,11 @@ class XSenseWebRTCSignalSession:
                 self._debug_context(candidate_type=type(candidate).__name__),
             )
             return
+        self._ha_candidate_history.append(payload)
         if (
             self._ws is None
             or self._ws.closed
             or not self._offer_sent
-            or not _future_has_result(self._answer)
         ):
             self._pending_remote_candidates.append(payload)
             pending = len(self._pending_remote_candidates)
@@ -510,14 +511,14 @@ class XSenseWebRTCSignalSession:
         )
         for candidate in candidates:
             await self._send_candidate(candidate)
+        await self._flush_pending_remote_candidates()
 
     async def _flush_pending_remote_candidates(self) -> None:
-        """Send any HA candidates that arrived before the X-Sense answer."""
+        """Send queued HA candidates once the offer has been sent."""
         if (
             self._ws is None
             or self._ws.closed
             or not self._offer_sent
-            or not _future_has_result(self._answer)
         ):
             return
         pending = len(self._pending_remote_candidates)
@@ -563,6 +564,8 @@ class XSenseWebRTCSignalSession:
 
     def _reset_offer_attempt(self, reason: str) -> None:
         self._offer_sent = False
+        # A renewed offer still needs the browser's already-gathered candidates.
+        self._pending_remote_candidates = list(self._ha_candidate_history)
         self._local_candidate_count = 0
         self._sent_candidate_count = 0
         LOGGER.debug(
@@ -1212,8 +1215,6 @@ def _candidate_queue_reason(session: XSenseWebRTCSignalSession) -> str:
         return "signal_closed"
     if not session._offer_sent:
         return "waiting_for_peer_offer"
-    if not _future_has_result(session._answer):
-        return "waiting_for_sdp_answer"
     return "unknown"
 
 
