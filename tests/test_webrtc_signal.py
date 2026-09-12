@@ -45,6 +45,51 @@ def test_signal_module_does_not_require_local_aiortc_import():
     assert "aiortc" not in sys.modules
 
 
+@pytest.mark.parametrize("exit_kind", ["normal", "cancelled", "error", "local_close"])
+async def test_signal_reader_logs_exit_without_changing_cleanup(exit_kind, monkeypatch, caplog):
+    caplog.set_level("DEBUG", logger=webrtc_signal.__name__)
+    session = webrtc_signal.XSenseWebRTCSignalSession(
+        session=object(), ticket=ticket(), offer_sdp="v=0\r\n",
+        resolution="1920x1080", camera_online=True,
+    )
+
+    class Socket(FakeWebSocket):
+        close_code = 1000
+
+        async def __aiter__(self):
+            if exit_kind == "cancelled":
+                raise asyncio.CancelledError
+            if exit_kind == "error":
+                raise OSError("test reader failure")
+            if exit_kind == "local_close":
+                session._closed = True
+            return
+            yield  # Make this an async iterator without incoming messages.
+
+    session._ws = Socket()
+    reconnect_codes = []
+    monkeypatch.setattr(session, "_schedule_signal_reconnect", reconnect_codes.append)
+    if exit_kind == "cancelled":
+        with pytest.raises(asyncio.CancelledError):
+            await session._read_loop()
+    else:
+        await session._read_loop()
+    records = [r for r in caplog.records if "relay websocket closed" in r.message]
+    assert len(records) == 1
+    context = records[0].args
+    assert context["reader_exit"] == {
+        "cancelled": "reader_cancelled", "error": "reader_error",
+    }.get(exit_kind, "socket_iteration_ended")
+    assert context["local_close_requested"] == (exit_kind == "local_close")
+    assert context["observed_socket_close_code"] == 1000
+    assert context["session_age_s"] >= 0
+    assert reconnect_codes == [None if exit_kind in {"error", "cancelled"} else 1000]
+    if session._answer.done():
+        session._answer.exception()
+    else:
+        session._answer.cancel()
+
+
 def test_sdp_offer_payload_strips_candidates_and_keeps_resolution():
     sdp = (
         "v=0\r\n"
@@ -159,6 +204,53 @@ def test_parse_owned_sdp_answer_from_signal_envelope():
 
     assert event == "SDP_ANSWER"
     assert webrtc_signal._owned_answer_sdp(payload, ticket()) == answer_sdp
+
+
+def test_encoded_numeric_peer_remains_text():
+    peer_id = "1234567"
+    payload = base64.b64encode(peer_id.encode()).decode()
+    event, decoded = webrtc_signal.parse_signal_message(json.dumps(
+        {"messageType": "PEER_IN", "messagePayload": payload}
+    ))
+    assert event == "PEER_IN"
+    assert decoded == peer_id
+
+
+@pytest.mark.parametrize("peer_id", ["123456", "1e3", "true", "null", "SSC0ATEST"])
+@pytest.mark.parametrize("shape", ["raw", "json", "object"])
+async def test_signal_reader_preserves_text_peer_identity(peer_id, shape, monkeypatch):
+    """Exercise wire parsing before ownership checks, including JSON-like IDs."""
+    live_ticket = ticket()
+    live_ticket.serial_number = peer_id
+    session = webrtc_signal.XSenseWebRTCSignalSession(
+        session=object(), ticket=live_ticket, offer_sdp="v=0\r\n",
+        resolution="1920x1080", camera_online=True,
+    )
+    payload = {"raw": peer_id, "json": json.dumps(peer_id),
+               "object": {"id": peer_id}}[shape]
+    events = [
+        {"messageType": "PEER_IN", "messagePayload": "another-camera"},
+        {"messageType": "PEER_IN", "messagePayload": payload},
+        {"messageType": "PEER_OUT", "messagePayload": "another-camera"},
+    ]
+
+    class IncomingWebSocket(FakeWebSocket):
+        close_code = 1000
+
+        async def __aiter__(self):
+            for event in events:
+                yield SimpleNamespace(type=webrtc_signal.aiohttp.WSMsgType.TEXT,
+                                      data=json.dumps(event))
+
+    session._ws = IncomingWebSocket()
+    monkeypatch.setattr(session, "_schedule_signal_reconnect", lambda code: None)
+    await session._read_loop()
+
+    assert session._camera_peer_ready
+    assert session._offer_sent
+    assert len(session._ws.messages) == 1
+    assert session._ws.messages[0]["recipientClientId"] == peer_id
+    session._answer.cancel()
 
 
 def test_webrtc_signal_relay_path_is_locked_to_v1_3_12_10_success_shape():
@@ -340,8 +432,8 @@ async def test_webrtc_signal_failed_offer_send_remains_retryable():
     assert session._offer_sent is False
 
 
-async def test_online_camera_sends_ice_after_peer_offer_before_answer(monkeypatch):
-    """Keep peer gating without withholding browser candidates until the answer."""
+async def test_online_camera_holds_trickled_ice_until_answer(monkeypatch):
+    """Preserve 65984b9's distinction between embedded and trickled ICE."""
     websocket = FakeWebSocket()
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(),
@@ -373,9 +465,9 @@ async def test_online_camera_sends_ice_after_peer_offer_before_answer(monkeypatc
     )
     await session.add_candidate(candidate)
 
-    assert len(session._pending_remote_candidates) == 0
+    assert len(session._pending_remote_candidates) == 1
     assert [message["messageType"] for message in websocket.messages] == [
-        "SDP_OFFER", "ICE_CANDIDATE",
+        "SDP_OFFER",
     ]
 
     answer_sdp = "v=0\r\n"
@@ -395,7 +487,7 @@ async def test_online_camera_sends_ice_after_peer_offer_before_answer(monkeypatc
     ]
 
 
-async def test_webrtc_signal_flushes_trickled_ha_candidates_after_offer():
+async def test_webrtc_signal_flushes_trickled_ha_candidates_after_answer():
     fake_ws = FakeWebSocket()
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(),
@@ -427,9 +519,9 @@ async def test_webrtc_signal_flushes_trickled_ha_candidates_after_offer():
     await session._send_offer()
 
     assert not session._answer.done()
-    assert len(session._pending_remote_candidates) == 0
+    assert len(session._pending_remote_candidates) == 1
     assert [message["messageType"] for message in fake_ws.messages] == [
-        "SDP_OFFER", "ICE_CANDIDATE",
+        "SDP_OFFER",
     ]
 
     session._answer.set_result("v=0\r\nanswer")
@@ -451,7 +543,7 @@ async def test_webrtc_signal_flushes_trickled_ha_candidates_after_offer():
 
 
 @pytest.mark.parametrize("before_offer", [True, False])
-async def test_webrtc_signal_sends_ha_candidates_after_offer_without_answer(before_offer):
+async def test_webrtc_signal_retains_trickled_candidates_until_answer(before_offer):
     fake_ws = FakeWebSocket()
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(),
@@ -482,8 +574,11 @@ async def test_webrtc_signal_sends_ha_candidates_after_offer_without_answer(befo
     if not before_offer:
         await session.add_candidate(candidate)
 
-    assert len(session._pending_remote_candidates) == 0
+    assert len(session._pending_remote_candidates) == 1
     assert not session._answer.done()
+    assert [message["messageType"] for message in fake_ws.messages] == ["SDP_OFFER"]
+    session._answer.set_result("v=0\r\n")
+    await session._flush_pending_remote_candidates()
     assert [message["messageType"] for message in fake_ws.messages] == [
         "SDP_OFFER",
         "ICE_CANDIDATE",
@@ -498,7 +593,7 @@ async def test_webrtc_signal_sends_ha_candidates_after_offer_without_answer(befo
     }
 
 
-async def test_webrtc_reoffer_resends_trickled_candidates_before_answer():
+async def test_webrtc_reoffer_preserves_queued_candidates_until_answer():
     ws = FakeWebSocket()
     session = webrtc_signal.XSenseWebRTCSignalSession(
         session=object(), ticket=ticket(), offer_sdp="v=0\r\n",
@@ -512,12 +607,17 @@ async def test_webrtc_reoffer_resends_trickled_candidates_before_answer():
         ))
     assert not ws.messages
     await session._handle_signal_event("PEER_IN", "SSC0ATEST")
-    assert session._sent_candidate_count == 12
-    assert not session._pending_remote_candidates
+    assert session._sent_candidate_count == 0
+    assert len(session._pending_remote_candidates) == 12
     await session._handle_signal_event("PEER_OUT", "SSC0ATEST")
     await session._handle_signal_event("PEER_IN", "SSC0ATEST")
-    assert session._sent_candidate_count == 12
+    assert session._sent_candidate_count == 0
+    assert len(session._pending_remote_candidates) == 12
     assert not session._answer.done()
+    assert [item["messageType"] for item in ws.messages] == ["SDP_OFFER"] * 2
+    session._answer.set_result("v=0\r\n")
+    await session._flush_pending_remote_candidates()
     assert [item["messageType"] for item in ws.messages] == (
-        ["SDP_OFFER"] + ["ICE_CANDIDATE"] * 12
-    ) * 2
+        ["SDP_OFFER"] * 2 + ["ICE_CANDIDATE"] * 12
+    )
+    assert session._sent_candidate_count == 12

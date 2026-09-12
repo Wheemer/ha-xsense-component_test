@@ -395,6 +395,12 @@ class XSenseWebRTCCameraEntity(XSenseCameraEntity):
         except asyncio.CancelledError:
             if self._webrtc_sessions.get(session_id) is session:
                 self._webrtc_sessions.pop(session_id, None)
+            LOGGER.debug(
+                "X-Sense camera WebRTC startup cancelled: %s",
+                _camera_debug_context(
+                    entity, session_id, close_reason="offer_task_cancelled"
+                ),
+            )
             await session.close()
             raise
         except Exception as err:  # noqa: BLE001 - HA frontend needs a clean error
@@ -407,13 +413,21 @@ class XSenseWebRTCCameraEntity(XSenseCameraEntity):
             LOGGER.debug(
                 "X-Sense camera WebRTC signal relay failed: %s",
                 _camera_debug_context(
-                    entity, session_id, error=_error_debug_context(err)
+                    entity, session_id,
+                    error=_error_debug_context(err),
+                    close_reason="startup_failed",
                 ),
             )
             send_message(WebRTCError("xsense_webrtc_start_failed", str(err)))
             return
 
         if self._webrtc_sessions.get(session_id) is not session:
+            LOGGER.debug(
+                "X-Sense camera WebRTC discarded superseded answer: %s",
+                _camera_debug_context(
+                    entity, session_id, close_reason="superseded_answer"
+                ),
+            )
             await session.close()
             return
 
@@ -445,7 +459,11 @@ class XSenseWebRTCCameraEntity(XSenseCameraEntity):
             return
         LOGGER.debug(
             "X-Sense camera closing previous WebRTC signal sessions before new offer: %s",
-            {"count": len(sessions)},
+            {
+                "count": len(sessions),
+                "close_reason": "replacement_offer",
+                "replacement_session": _short_id(preserve_pending_session_id),
+            },
         )
         self._webrtc_sessions.clear()
         for session in sessions:
@@ -459,11 +477,12 @@ class XSenseWebRTCCameraEntity(XSenseCameraEntity):
         if not candidates:
             return
         LOGGER.debug(
-            "X-Sense camera WebRTC forwarding queued HA ICE candidates: %s",
+            "X-Sense camera WebRTC handing queued HA ICE candidates to signal helper: %s",
             _camera_debug_context(
                 entity,
                 session_id,
                 queued_candidate_count=len(candidates),
+                candidate_stage="adapter_to_helper",
             ),
         )
         for candidate in candidates:
@@ -499,12 +518,14 @@ class XSenseWebRTCCameraEntity(XSenseCameraEntity):
                 session_id,
                 had_session=session is not None,
                 remaining_sessions=len(self._webrtc_sessions),
+                close_reason="ha_subscription_cleanup",
             )
             if entity is not None
             else {
                 "session": _short_id(session_id),
                 "had_session": session is not None,
                 "remaining_sessions": len(self._webrtc_sessions),
+                "close_reason": "ha_subscription_cleanup",
             },
         )
         if session is not None:
@@ -527,6 +548,10 @@ class XSenseWebRTCCameraEntity(XSenseCameraEntity):
     async def async_will_remove_from_hass(self) -> None:
         """Stop any WebRTC live view session when Home Assistant removes the entity."""
         sessions = list(self._webrtc_sessions.values())
+        LOGGER.debug(
+            "X-Sense camera WebRTC entity cleanup: %s",
+            {"session_count": len(sessions), "close_reason": "entity_removed"},
+        )
         self._webrtc_sessions.clear()
         self._pending_webrtc_candidates.clear()
         for session in sessions:

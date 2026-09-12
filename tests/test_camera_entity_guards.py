@@ -6512,8 +6512,9 @@ async def test_webrtc_candidate_is_forwarded_to_matching_signal_session():
 
 
 async def test_early_webrtc_candidate_is_queued_until_signal_session_exists(
-    monkeypatch,
+    monkeypatch, caplog,
 ):
+    caplog.set_level("DEBUG", logger="custom_components.xsense")
     from homeassistant.components.camera.webrtc import WebRTCAnswer
     from custom_components.xsense import camera as camera_module
     from custom_components.xsense.camera import (
@@ -6613,6 +6614,9 @@ async def test_early_webrtc_candidate_is_queued_until_signal_session_exists(
     assert created_sessions[0].candidates == [candidate]
     assert camera._pending_webrtc_candidates == {}
     assert isinstance(messages[0], WebRTCAnswer)
+    assert "handing queued HA ICE candidates to signal helper" in caplog.text
+    assert "adapter_to_helper" in caplog.text
+    assert "forwarding queued HA ICE candidates" not in caplog.text
 
 
 async def test_new_webrtc_offer_closes_previous_signal_session(monkeypatch):
@@ -6714,7 +6718,8 @@ async def test_new_webrtc_offer_closes_previous_signal_session(monkeypatch):
     assert messages[0].answer == "v=0\r\nanswer"
 
 
-async def test_frontend_webrtc_close_closes_signal_session():
+async def test_frontend_webrtc_close_closes_signal_session(caplog):
+    caplog.set_level("DEBUG", logger="custom_components.xsense")
     from custom_components.xsense.camera import (
         CAMERA_DESCRIPTION,
         XSenseWebRTCCameraEntity,
@@ -6763,6 +6768,7 @@ async def test_frontend_webrtc_close_closes_signal_session():
     camera.close_webrtc_session("session-1")
     await tasks[0]
 
+    assert "ha_subscription_cleanup" in caplog.text
     assert session.closed is True
     assert camera_entity.data["cameraWebrtcTicket"] == {"id": "ticket-id"}
     assert camera._webrtc_sessions == {}
