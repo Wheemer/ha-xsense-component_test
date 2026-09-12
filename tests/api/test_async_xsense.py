@@ -5398,8 +5398,7 @@ async def test_camera_library_history_tries_apk_identity_alias_after_empty_resul
     ]
     assert updates == [
         {
-            "addxAccessSerialNumber": "camera-access-id",
-            "addxSerialNumber": "camera-access-id",
+            "cameraLibrarySerialNumber": "camera-access-id",
         }
     ]
 
@@ -5617,8 +5616,7 @@ async def test_camera_event_record_history_for_cameras_uses_exact_home_and_ident
     ]
     assert identity_updates == [
         {
-            "addxAccessSerialNumber": "camera-access-id",
-            "addxSerialNumber": "camera-access-id",
+            "cameraEventHistorySerialNumber": "camera-access-id",
         }
     ]
 
@@ -6279,7 +6277,7 @@ async def test_camera_webrtc_ticket_retries_ipc_id_after_rejected_cached_addx_se
         for endpoint, kwargs in calls
         if endpoint == "/device/getWebrtcTicket"
     ] == ["wrong-cached-id", "right-addx-camera-id"]
-    assert camera.data["addxSerialNumber"] == "right-addx-camera-id"
+    assert camera.data["addxSerialNumber"] == "wrong-cached-id"
     assert camera.data["addxAccessSerialNumber"] == "right-addx-camera-id"
     assert camera.data["cameraWebrtcTicket"]["serialNumber"] == "right-addx-camera-id"
 
